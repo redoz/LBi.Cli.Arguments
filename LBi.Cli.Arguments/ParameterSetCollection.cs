@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using LBi.Cli.Arguments.Parsing;
 
@@ -66,11 +67,56 @@ namespace LBi.Cli.Arguments
             ParsedArgument[] positionalArgs = arguments.TakeWhile(a => a.ParameterName == null).ToArray();
             ParsedArgument[] namedArguments = arguments.Skip(positionalArgs.Length).ToArray();
 
+            Dictionary<ParameterSet, Dictionary<Parameter, List<ResolveError>>> allErrors = new Dictionary<ParameterSet, Dictionary<Parameter, List<ResolveError>>>();
+
+            if (positionalArgs.Length > 0)
+            {
+                foreach (ParameterSet paramSet in this._sets)
+                {
+                    var positionalParams = paramSet.PositionalParameters.ToArray();
+
+                    Dictionary<Parameter, List<ResolveError>> paramSetErrors = new Dictionary<Parameter, List<ResolveError>>();
+                    allErrors.Add(paramSet, paramSetErrors);
+                    
+                    for (int argNum = 0; argNum < positionalArgs.Length && argNum < positionalParams.Length; argNum++)
+                    {
+                        if (CanCoerece(positionalArgs[argNum], positionalParams[argNum]))
+                        {
+                            
+                        } else
+                        {
+                            List<ResolveError> paramErrors;
+                            if (!paramSetErrors.TryGetValue(positionalParams[argNum], out paramErrors))
+                                paramSetErrors.Add(positionalParams[argNum], paramErrors = new List<ResolveError>());
+
+                            paramErrors.Add(new ResolveError {Type = ErrorType.IncompatibleType});
+                        }
+                    }
+
+                }
+            }
 
             // TODO FIX THIS
             set = null;
             errors = null;
             return false;
+        }
+
+
+        protected virtual bool CanCoerece(ParsedArgument sourceArg, Parameter targetParam)
+        {
+            return false;
+            //bool success = true;
+            //var converter = TypeDescriptor.GetConverter(targetType);
+            //// this try/catch isn't very nice, but it will do for now
+            //// TODO add cache for input+targetType => success
+            //try
+            //{
+            //    converter.ConvertFromInvariantString(input);
+            //} catch (NotSupportedException)
+            //{
+            //    success = false;
+            //}
         }
     }
 
@@ -81,7 +127,9 @@ namespace LBi.Cli.Arguments
 
     public enum ErrorType
     {
-        Ambigous,
-        MissingRequired,
+        IncompatibleType,
+        MissingRequiredParameter,
+        ArgumentNameMismatch,
+        ArgumentPositionMismatch
     }
 }
