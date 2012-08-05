@@ -118,10 +118,13 @@ namespace LBi.Cli.Arguments
 
         public int Count { get { return this.Parameters.Length; } }
 
+        /// <summary>
+        /// Returns an ordered list of positional parameters.
+        /// </summary>
         public IEnumerable<Parameter> PositionalParameters
         {
             get {
-                return this.Parameters.Where(p => p.Position.HasValue);
+                return this.Parameters.Where(p => p.Position.HasValue).OrderBy(p => p.Position.Value);
             }
         }
 
@@ -133,6 +136,28 @@ namespace LBi.Cli.Arguments
                     throw new ArgumentOutOfRangeException("index");
 
                 return this.Parameters[index];
+            }
+        }
+
+        public Parameter this[string name]
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(name))
+                    throw new ArgumentNullException("name");
+
+                Parameter ret = null;
+                for (int paramNum = 0; paramNum < this.Parameters.Length; paramNum++)
+                {
+                    Parameter curParam = this.Parameters[paramNum];
+                    string namePrefix = curParam.Name.Substring(0, Math.Min(name.Length, curParam.Name.Length));
+                    if (StringComparer.InvariantCultureIgnoreCase.Equals(name, namePrefix))
+                        if (ret == null)
+                            ret = curParam;
+                        else 
+                            throw new AmbiguousMatchException("More than one match.");
+                }
+                return ret;
             }
         }
 

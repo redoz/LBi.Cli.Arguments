@@ -35,11 +35,18 @@ namespace LBi.Cli.Arguments.Parsing
         }
 
         public Token Token { get; protected set; }
-
     }
+
     public class Parser
     {
-        public virtual IEnumerable<ParsedArgument> Parse(IEnumerable<Token> tokens)
+        public virtual ArgumentCollection Parse(string args)
+        {
+            Tokenizer tokenizer = new Tokenizer();
+            IEnumerable<Token> tokens = tokenizer.Tokenize(args);
+            return new ArgumentCollection(args, this.Parse(tokens));
+        }
+
+        protected virtual IEnumerable<ParsedArgument> Parse(IEnumerable<Token> tokens)
         {
             bool foundNamed = false;
             using (var enu = tokens.GetEnumerator())
@@ -57,12 +64,10 @@ namespace LBi.Cli.Arguments.Parsing
                         if (!enu.MoveNext())
                             throw new Exception("Unexpected end of token stream.");
 
-                        yield return new ParsedArgument
-                                         {
-                                             ParameterName = paramName,
-                                             ArgumentPosition = argPos,
-                                             Value = this.GetAstNode(enu)
-                                         };
+                        yield return new ParsedArgument(paramName,
+                                                        argPos,
+                                                        this.GetAstNode(enu));
+                    
 
                     } else
                     {
@@ -70,12 +75,9 @@ namespace LBi.Cli.Arguments.Parsing
                             throw new ParseException(enu.Current, "Expected named argument, all positional arguments have to be specified before any named arguments.");
                         
                         // positional only
-                        yield return new ParsedArgument
-                                         {
-                                             ParameterName = enu.Current.Value,
-                                             ArgumentPosition = argPos,
-                                             Value = this.GetAstNode(enu)
-                                         };
+                        yield return new ParsedArgument(enu.Current.Value,
+                                                        argPos,
+                                                        this.GetAstNode(enu));
                     }
 
                     argPos++;

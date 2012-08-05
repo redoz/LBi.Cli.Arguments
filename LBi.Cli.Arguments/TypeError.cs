@@ -14,30 +14,22 @@
  * limitations under the License. 
  */
 
+using System;
 using LBi.Cli.Arguments.Parsing.Ast;
 
-namespace LBi.Cli.Arguments.Parsing
+namespace LBi.Cli.Arguments
 {
-    public class ParsedArgument
+    public class TypeError
     {
-        public ParsedArgument(string name, int position, AstNode value)
+        public TypeError(Type targetType, object value, AstNode astNode)
         {
-            this.Name = name;
-            this.ArgumentPosition = position;
+            this.TargetType = targetType;
             this.Value = value;
+            this.AstNode = astNode;
         }
 
-        // name is optional
-        public string Name { get; protected set; }
-        
-        public int ArgumentPosition { get; protected set; }
-
-        // the AST representing the value
-        public AstNode Value { get; protected set; }
-
-        public override string ToString()
-        {
-            return string.Format("{{Name: '{0}', Position: {1}, Value: {2}}}", this.Name, this.ArgumentPosition, this.Value);
-        }
+        public Type TargetType { get; protected set; }
+        public object Value { get; protected set; }
+        public AstNode AstNode { get; protected set; }
     }
 }

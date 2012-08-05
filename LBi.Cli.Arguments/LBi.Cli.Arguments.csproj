@@ -43,12 +43,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AliasAttribute.cs" />
+    <Compile Include="ErrorType.cs" />
     <Compile Include="Globalization\IResourceProvider.cs" />
     <Compile Include="Parameter.cs" />
     <Compile Include="ParameterDefinitionException.cs" />
     <Compile Include="ParameterSet.cs" />
     <Compile Include="ParameterSetCollection.cs" />
     <Compile Include="ParameterSetDefinitionException.cs" />
+    <Compile Include="ParameterSetResult.cs" />
+    <Compile Include="Parsing\ArgumentCollection.cs" />
     <Compile Include="Parsing\Ast\AssociativeArray.cs" />
     <Compile Include="Parsing\Ast\IAstVisitor.cs" />
     <Compile Include="Parsing\Ast\AstNode.cs" />
@@ -67,8 +70,22 @@
     <Compile Include="Parsing\TokenType.cs" />
     <Compile Include="Parsing\TokenWriter.cs" />
     <Compile Include="Globalization\ResourceProvider.cs" />
+    <Compile Include="ResolveError.cs" />
+    <Compile Include="ResolveResult.cs" />
+    <Compile Include="Resources\ErrorMessages.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ErrorMessages.resx</DependentUpon>
+    </Compile>
+    <Compile Include="TypeError.cs" />
+    <Compile Include="ValueBuilder.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\ErrorMessages.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ErrorMessages.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
