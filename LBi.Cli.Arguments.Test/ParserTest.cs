@@ -64,10 +64,10 @@ namespace LBi.CLI.Arguments.Test
 
         private IEnumerable<ParsedArgument> Parse(params string[] arg)
         {
-            Tokenizer tok = new Tokenizer();
-            Token[] tokens = tok.Tokenize(arg).ToArray();
+            //Tokenizer tok = new Tokenizer();
+            //Token[] tokens = tok.Tokenize(arg).ToArray();
             Parser parser = new Parser();
-            return parser.Parse(tokens);
+            return parser.Parse(string.Join(" ", arg));
         }
     }
 }

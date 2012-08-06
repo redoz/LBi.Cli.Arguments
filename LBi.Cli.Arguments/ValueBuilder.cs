@@ -52,27 +52,35 @@ namespace LBi.Cli.Arguments
 
         private bool TryConvertType(Type targetType, object input, out object output)
         {
-            var targetConverter = TypeDescriptor.GetConverter(targetType);
-            var sourceConverter = TypeDescriptor.GetConverter(input);
-            if (targetConverter.CanConvertFrom(input.GetType()))
+            bool ret = true;
+            if (targetType.IsInstanceOfType(input))
             {
-                output = targetConverter.ConvertFrom(input);
-            }
-            else if (sourceConverter.CanConvertTo(targetType))
-            {
-                output = sourceConverter.ConvertTo(input, targetType);
-            }
-            else if (targetConverter.CanConvertFrom(typeof(string)))
-            {
-                output = targetConverter.ConvertFromInvariantString(input.ToString());
+                output = input;
             }
             else
             {
-                output = null;
-                return false;
+                var targetConverter = TypeDescriptor.GetConverter(targetType);
+                var sourceConverter = TypeDescriptor.GetConverter(input);
+                if (targetConverter.CanConvertFrom(input.GetType()))
+                {
+                    output = targetConverter.ConvertFrom(input);
+                }
+                else if (sourceConverter.CanConvertTo(targetType))
+                {
+                    output = sourceConverter.ConvertTo(input, targetType);
+                }
+                else if (targetConverter.CanConvertFrom(typeof(string)))
+                {
+                    output = targetConverter.ConvertFromInvariantString(input.ToString());
+                }
+                else
+                {
+                    output = null;
+                    ret = false;
+                }
             }
 
-            return true;
+            return ret;
         }
 
 
@@ -83,8 +91,76 @@ namespace LBi.Cli.Arguments
             switch (literalValue.Type)
             {
                 case LiteralValueType.Numeric:
-                    // TODO fixthis
-                    
+                    // this looks pretty evil
+                    sbyte signedByte;
+                    if (sbyte.TryParse(literalValue.Value, out signedByte))
+                        this._value = signedByte;
+                    else
+                    {
+                        byte usignedByte;
+                        if (byte.TryParse(literalValue.Value, out usignedByte))
+                            this._value = usignedByte;
+                        else
+                        {
+                            short signedShort;
+                            if (short.TryParse(literalValue.Value, out signedShort))
+                                this._value = signedShort;
+                            else
+                            {
+                                ushort unsignedShort;
+                                if (ushort.TryParse(literalValue.Value, out unsignedShort))
+                                    this._value = unsignedShort;
+                                else
+                                {
+                                    int signedInt;
+                                    if (int.TryParse(literalValue.Value, out signedInt))
+                                        this._value = signedInt;
+                                    else
+                                    {
+                                        uint unsignedInt;
+                                        if (uint.TryParse(literalValue.Value, out unsignedInt))
+                                            this._value = unsignedInt;
+                                        else
+                                        {
+                                            long signedLong;
+                                            if (long.TryParse(literalValue.Value, out signedLong))
+                                                this._value = signedLong;
+                                            else
+                                            {
+                                                ulong unsignedLong;
+                                                if (ulong.TryParse(literalValue.Value, out unsignedLong))
+                                                    this._value = unsignedLong;
+                                                else
+                                                {
+                                                    Single single;
+                                                    if (Single.TryParse(literalValue.Value, out single))
+                                                        this._value = single;
+                                                    else
+                                                    {
+                                                        Double dble;
+                                                        if (Double.TryParse(literalValue.Value, out dble))
+                                                            this._value = dble;
+                                                        else
+                                                        {
+                                                            Decimal dec;
+                                                            if (Decimal.TryParse(literalValue.Value, out dec))
+                                                                this._value = dec;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (!this.TryConvertType(this.TargetType.Peek(), this.Value, out this._value))
+                    {
+                        this._errors.Add(new TypeError(this.TargetType.Peek(), this.Value, literalValue));
+                    }
+
                     break;
                 case LiteralValueType.String:
                     this._value = literalValue.Value;

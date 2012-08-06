@@ -32,10 +32,9 @@ namespace LBi.Cli.Arguments.Parsing
 
         public ParsedArgument[] Arguments { get; protected set; }
 
-        public string GetArgumentString(ParsedArgument argument)
+        public string GetArgumentString(ISourceInfo sourceInfo)
         {
-            return this.Input.Substring(argument.Value.SourceInfo.Position,
-                                        argument.Value.SourceInfo.Length);
+            return this.Input.Substring(sourceInfo.Position, sourceInfo.Length);
         }
 
         #region Implementation of IEnumerable

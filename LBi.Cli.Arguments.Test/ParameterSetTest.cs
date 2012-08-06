@@ -66,20 +66,54 @@ namespace LBi.CLI.Arguments.Test
         public void ResolveParameterSet()
         {
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
-            IEnumerable<ParsedArgument> args = this.Parse("-Action Execute -Name 'a b c'");
-            IEnumerable<ResolveError> errors;
-            ParameterSet set;
-            Assert.True(sets.TryResolve(args, out set, out errors));
-            Assert.Empty(errors);
-            Assert.NotNull(set);
+            ArgumentCollection args = this.Parse("-Action Execute -Name 'a b c'");
+            ResolveResult result = sets.Resolve(args);
+            
+            var selectedSet = result.Single(r => r.Errors.Length == 0);
+            ExecuteCommandUsingName cmd = selectedSet.Object as ExecuteCommandUsingName;
+            Assert.NotNull(cmd);
+            Assert.Equal("a b c", cmd.Name);
+            Assert.Equal("Execute", cmd.Action);
+
+            var failedSet = result.Single(r => r.Errors.Length > 0);
+            ExecuteCommandUsingPath pathCmd = failedSet.Object as ExecuteCommandUsingPath;
+            Assert.NotNull(pathCmd);
+            Assert.Equal("Execute", pathCmd.Action);
         }
 
-        private IEnumerable<ParsedArgument> Parse(params string[] arg)
+        [Fact]
+        public void ResolveParameterSet_IntToString()
         {
-            Tokenizer tok = new Tokenizer();
-            Token[] tokens = tok.Tokenize(arg).ToArray();
+            ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
+            ArgumentCollection args = this.Parse("-Action Execute -Name 50");
+            ResolveResult result = sets.Resolve(args);
+
+            var selectedSet = result.Single(r => r.Errors.Length == 0);
+            ExecuteCommandUsingName cmd = selectedSet.Object as ExecuteCommandUsingName;
+            Assert.NotNull(cmd);
+            Assert.Equal("50", cmd.Name);
+            Assert.Equal("Execute", cmd.Action);
+        }
+
+        [Fact]
+        public void ResolveParameterSet_BoolToString()
+        {
+            ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
+            ArgumentCollection args = this.Parse("-Action Execute -Name $true");
+            ResolveResult result = sets.Resolve(args);
+
+            var selectedSet = result.Single(r => r.Errors.Length == 0);
+            ExecuteCommandUsingName cmd = selectedSet.Object as ExecuteCommandUsingName;
+            Assert.NotNull(cmd);
+            Assert.Equal("True", cmd.Name);
+            Assert.Equal("Execute", cmd.Action);
+        }
+
+
+        private ArgumentCollection Parse(params string[] arg)
+        {
             Parser parser = new Parser();
-            return parser.Parse(tokens);
+            return parser.Parse(string.Join(" ", arg));
         }
     }
 }

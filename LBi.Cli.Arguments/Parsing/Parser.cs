@@ -20,23 +20,6 @@ using LBi.Cli.Arguments.Parsing.Ast;
 
 namespace LBi.Cli.Arguments.Parsing
 {
-    public class ParseException : Exception
-    {
-        public ParseException(Token token, string message)
-            : base(WrapMessage(token, message))
-        {
-            this.Token = token;
-        }
-
-        private static string WrapMessage(Token token, string message)
-        {
-            // TODO fix this
-            return message;
-        }
-
-        public Token Token { get; protected set; }
-    }
-
     public class Parser
     {
         public virtual ArgumentCollection Parse(string args)
@@ -46,9 +29,10 @@ namespace LBi.Cli.Arguments.Parsing
             return new ArgumentCollection(args, this.Parse(tokens));
         }
 
+
+
         protected virtual IEnumerable<ParsedArgument> Parse(IEnumerable<Token> tokens)
         {
-            bool foundNamed = false;
             using (var enu = tokens.GetEnumerator())
             {
                 int argPos = 0;
@@ -56,8 +40,6 @@ namespace LBi.Cli.Arguments.Parsing
                 {
                     if (enu.Current.Type == TokenType.ParameterName)
                     {
-                        foundNamed = true;
-
                         // with real name
                         string paramName = enu.Current.Value;
                         
@@ -70,11 +52,9 @@ namespace LBi.Cli.Arguments.Parsing
                     
 
                     } else
-                    {
-                        if (foundNamed)
-                            throw new ParseException(enu.Current, "Expected named argument, all positional arguments have to be specified before any named arguments.");
-                        
-                        // positional only
+                    {                      
+                        // positional only 
+                        // TODO Firstparam shoud be null?
                         yield return new ParsedArgument(enu.Current.Value,
                                                         argPos,
                                                         this.GetAstNode(enu));

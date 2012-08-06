@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Reflection;
 using LBi.Cli.Arguments.Parsing;
 
 namespace LBi.Cli.Arguments
@@ -62,15 +63,15 @@ namespace LBi.Cli.Arguments
         }
 
 
-        public ILookup<ParameterSet, ResolveError> Resolve(ArgumentCollection args)
+        public ResolveResult Resolve(ArgumentCollection args)
         {
             ParsedArgument[] positionalArgs = args.Arguments.Where(a => a.Name == null).ToArray();
             ParsedArgument[] namedArguments = args.Arguments.Where(a => a.Name != null).ToArray();
 
-            Dictionary<ParameterSet, List<ResolveError>> allErrors = new Dictionary<ParameterSet, List<ResolveError>>();
+            //Dictionary<ParameterSet, List<ResolveError>> allErrors = new Dictionary<ParameterSet, List<ResolveError>>();
             object[] instances = new object[this._sets.Count];
 
-
+            List<ParameterSetResult> setResults = new List<ParameterSetResult>();
             for (int setNum = 0; setNum < this._sets.Count; setNum++)
             {
                 ParameterSet paramSet = this._sets[setNum];
@@ -82,7 +83,7 @@ namespace LBi.Cli.Arguments
                 var positionalParams = paramSet.PositionalParameters.ToArray();
 
                 List<ResolveError> paramSetErrors = new List<ResolveError>();
-                allErrors.Add(paramSet, paramSetErrors);
+                //allErrors.Add(paramSet, paramSetErrors);
 
                 // check named arguments
                 for (int argNum = 0; argNum < namedArguments.Length; argNum++)
@@ -96,7 +97,7 @@ namespace LBi.Cli.Arguments
                     {
                         paramSetErrors.Add(
                             new ResolveError(ErrorType.ArgumentNameMismatch,
-                                             null,
+                                             Enumerable.Empty<Parameter>(),
                                              namedArguments[argNum],
                                              string.Format(Resources.ErrorMessages.ArgumentNameMismatch,
                                                            namedArguments[argNum].Name)));
@@ -113,18 +114,26 @@ namespace LBi.Cli.Arguments
                     }
                     else
                     {
-                        // TODO assign value
-                        if (!this.TryAssignValue(instances[setNum], matchingParams[0], namedArguments[argNum]))
+                        ValueBuilder builder = new ValueBuilder();
+                        PropertyInfo paramProp = matchingParams[0].Property;
+                        if (builder.Build(paramProp.PropertyType, namedArguments[argNum].Value))
                         {
-                            paramSetErrors.Add(
-                                new ResolveError(ErrorType.IncompatibleType,
-                                                 matchingParams,
-                                                 namedArguments[argNum],
-                                                 String.Format(Resources.ErrorMessages.IncompatibleType,
-                                                               args.GetArgumentString(namedArguments[argNum]),
-                                                               matchingParams[0].Name)));
+                            paramProp.SetValue(instances[setNum], builder.Value, null);
+                        } else
+                        {
+                            foreach (TypeError typeError in builder.Errors)
+                            {
+                                paramSetErrors.Add(
+                                    new ResolveError(ErrorType.IncompatibleType,
+                                                     matchingParams,
+                                                     namedArguments[argNum],
+                                                     String.Format(Resources.ErrorMessages.IncompatibleType,
+                                                                   args.GetArgumentString(typeError.AstNode.SourceInfo),
+                                                                   matchingParams[0].Name)));
+
+                            }
                         }
-                        
+
                         potentialParams.Remove(matchingParams[0]);
                     }
                 }
@@ -132,18 +141,25 @@ namespace LBi.Cli.Arguments
                 // check positional arguments against positional parameters
                 for (int argNum = 0; argNum < positionalArgs.Length && argNum < positionalParams.Length; argNum++)
                 {
-                    if (!CanCoerece(positionalArgs[argNum], positionalParams[argNum]))
+                    ValueBuilder builder = new ValueBuilder();
+                    PropertyInfo paramProp = positionalParams[argNum].Property;
+                    if (builder.Build(paramProp.PropertyType, namedArguments[argNum].Value))
                     {
-                        paramSetErrors.Add(new ResolveError(ErrorType.IncompatibleType,
-                                                            positionalParams[argNum],
-                                                            positionalArgs[argNum],
-                                                            String.Format(Resources.ErrorMessages.IncompatibleType,
-                                                                          positionalParams[argNum].Name)));
+                        paramProp.SetValue(instances[setNum], builder.Value, null);
                     }
                     else
                     {
-                        // remove from potential matches
-                        potentialParams.Remove(positionalParams[argNum]);
+                        foreach (TypeError typeError in builder.Errors)
+                        {
+                            paramSetErrors.Add(
+                                new ResolveError(ErrorType.IncompatibleType,
+                                                 new[] {positionalParams[argNum]},
+                                                 namedArguments[argNum],
+                                                 String.Format(Resources.ErrorMessages.IncompatibleType,
+                                                               args.GetArgumentString(typeError.AstNode.SourceInfo),
+                                                               positionalParams[argNum].Name)));
+
+                        }
                     }
                 }
 
@@ -151,7 +167,7 @@ namespace LBi.Cli.Arguments
                 for (int argNum = positionalParams.Length; argNum < positionalArgs.Length; argNum++)
                 {
                     paramSetErrors.Add(new ResolveError(ErrorType.ArgumentPositionMismatch,
-                                                        null,
+                                                        Enumerable.Empty<Parameter>(),
                                                         positionalArgs[argNum],
                                                         string.Format(Resources.ErrorMessages.ArgumentPositionMismatch)));
                 }
@@ -172,55 +188,11 @@ namespace LBi.Cli.Arguments
                     }
                 }
 
-                for (int paramNum = 0; paramNum < paramSet.Count; paramNum++)
-                {
-                    foreach (var validator in paramSet[paramNum].Validators)
-                    {
-                        object paramValue = paramSet[paramNum].Property.GetValue(instances[setNum], null);
-                        var res = validator.GetValidationResult(paramValue,
-                                                      validationContext);
-
-                        if (!validator.IsValid(null))
-                        {
-                            paramSetErrors.Add(new ResolveError(ErrorType.Validation,
-                                                                paramSet[paramNum],
-                                                                null,
-                                                                res.ErrorMessage));
-                        }
-                    }
-                }
+                setResults.Add(new ParameterSetResult(paramSet, instances[setNum], paramSetErrors));
             }
 
-
-            return
-                allErrors.SelectMany(
-                    kvp => kvp.Value.Select(v => new KeyValuePair<ParameterSet, ResolveError>(kvp.Key, v)))
-                    .ToLookup(kvp => kvp.Key, kvp => kvp.Value);
-
-        }
-
-        private bool TryAssignValue(object instance, Parameter parameter, ParsedArgument argument)
-        {
-            ValueBuilder builder = new ValueBuilder();
-            object value = builder.Build(parameter.Property.PropertyType, argument.Value);
-            parameter.Property.SetValue(instance, value, null);
-        }
-
-
-        protected virtual bool CanCoerece(ParsedArgument sourceArg, Parameter targetParam)
-        {
-            return false;
-            //bool success = true;
-            //var converter = TypeDescriptor.GetConverter(targetType);
-            //// this try/catch isn't very nice, but it will do for now
-            //// TODO add cache for input+targetType => success
-            //try
-            //{
-            //    converter.ConvertFromInvariantString(input);
-            //} catch (NotSupportedException)
-            //{
-            //    success = false;
-            //}
+            
+            return new ResolveResult(setResults);
         }
     }
 }

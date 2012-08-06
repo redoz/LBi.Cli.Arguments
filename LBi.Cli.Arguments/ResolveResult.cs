@@ -29,11 +29,44 @@ namespace LBi.Cli.Arguments
             this._results = results.ToArray();
         }
 
+        public ParameterSetResult this[int index]
+        {
+            get
+            {
+                return this._results[index];
+            }
+        }
+
+        public int Count
+        {
+            get
+            {
+                return this._results.Length;
+            }
+        }
+
+        public bool IsMatch
+        {
+            get { return this._results.Count(psr => psr.Errors.Length == 0) == 1; }
+        }
+
+        public ParameterSetResult Match
+        {
+            get
+            {
+                var succeeded = this._results.Where(r => r.Errors.Length == 0).ToArray();
+                if (succeeded.Length == 1)
+                    return succeeded[0];
+
+                return null;
+            }
+        }
+
         #region Implementation of IEnumerable
 
         public IEnumerator<ParameterSetResult> GetEnumerator()
         {
-            return ((IEnumerable<ParameterSetResult>) this._results).GetEnumerator();
+            return ((IEnumerable<ParameterSetResult>)this._results).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
