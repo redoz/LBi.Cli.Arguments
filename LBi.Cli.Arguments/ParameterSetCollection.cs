@@ -20,6 +20,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
+using LBi.Cli.Arguments.Binding;
 using LBi.Cli.Arguments.Parsing;
 
 namespace LBi.Cli.Arguments

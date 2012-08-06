@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AliasAttribute.cs" />
+    <Compile Include="Binding\CustomBooleanConverter.cs" />
     <Compile Include="ErrorType.cs" />
     <Compile Include="Globalization\IResourceProvider.cs" />
     <Compile Include="Parameter.cs" />
@@ -78,7 +79,7 @@
       <DependentUpon>ErrorMessages.resx</DependentUpon>
     </Compile>
     <Compile Include="TypeError.cs" />
-    <Compile Include="ValueBuilder.cs" />
+    <Compile Include="Binding\ValueBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\ErrorMessages.resx">

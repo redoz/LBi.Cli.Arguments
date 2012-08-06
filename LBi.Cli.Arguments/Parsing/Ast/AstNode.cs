@@ -14,12 +14,17 @@
  * limitations under the License. 
  */
 
+using System;
+
 namespace LBi.Cli.Arguments.Parsing.Ast
 {
     public abstract class AstNode
     {
         protected AstNode(ISourceInfo sourceInfo)
         {
+            if (sourceInfo == null)
+                throw new ArgumentNullException("sourceInfo");
+
             this.SourceInfo = new SourceInfoImpl(sourceInfo);
         }
 
@@ -33,6 +38,9 @@ namespace LBi.Cli.Arguments.Parsing.Ast
         {
             public SourceInfoImpl(ISourceInfo cloneFrom)
             {
+                if (cloneFrom == null)
+                    throw new ArgumentNullException("cloneFrom");
+
                 this.Position = cloneFrom.Position;
                 this.Length = cloneFrom.Length;
             }
