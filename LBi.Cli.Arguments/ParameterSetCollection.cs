@@ -115,23 +115,27 @@ namespace LBi.Cli.Arguments
                     }
                     else
                     {
-                        ValueBuilder builder = new ValueBuilder();
-                        PropertyInfo paramProp = matchingParams[0].Property;
-                        if (builder.Build(paramProp.PropertyType, namedArguments[argNum].Value))
+                        using (ValueBuilder builder = new ValueBuilder())
                         {
-                            paramProp.SetValue(instances[setNum], builder.Value, null);
-                        } else
-                        {
-                            foreach (TypeError typeError in builder.Errors)
+                            PropertyInfo paramProp = matchingParams[0].Property;
+                            if (builder.Build(paramProp.PropertyType, namedArguments[argNum].Value))
                             {
-                                paramSetErrors.Add(
-                                    new ResolveError(ErrorType.IncompatibleType,
-                                                     matchingParams,
-                                                     namedArguments[argNum],
-                                                     String.Format(Resources.ErrorMessages.IncompatibleType,
-                                                                   args.GetArgumentString(typeError.AstNode.SourceInfo),
-                                                                   matchingParams[0].Name)));
+                                paramProp.SetValue(instances[setNum], builder.Value, null);
+                            }
+                            else
+                            {
+                                foreach (TypeError typeError in builder.Errors)
+                                {
+                                    paramSetErrors.Add(
+                                        new ResolveError(ErrorType.IncompatibleType,
+                                                         matchingParams,
+                                                         namedArguments[argNum],
+                                                         String.Format(Resources.ErrorMessages.IncompatibleType,
+                                                                       args.GetArgumentString(
+                                                                           typeError.AstNode.SourceInfo),
+                                                                       matchingParams[0].Name)));
 
+                                }
                             }
                         }
 
@@ -142,24 +146,26 @@ namespace LBi.Cli.Arguments
                 // check positional arguments against positional parameters
                 for (int argNum = 0; argNum < positionalArgs.Length && argNum < positionalParams.Length; argNum++)
                 {
-                    ValueBuilder builder = new ValueBuilder();
-                    PropertyInfo paramProp = positionalParams[argNum].Property;
-                    if (builder.Build(paramProp.PropertyType, namedArguments[argNum].Value))
+                    using (ValueBuilder builder = new ValueBuilder())
                     {
-                        paramProp.SetValue(instances[setNum], builder.Value, null);
-                    }
-                    else
-                    {
-                        foreach (TypeError typeError in builder.Errors)
+                        PropertyInfo paramProp = positionalParams[argNum].Property;
+                        if (builder.Build(paramProp.PropertyType, namedArguments[argNum].Value))
                         {
-                            paramSetErrors.Add(
-                                new ResolveError(ErrorType.IncompatibleType,
-                                                 new[] {positionalParams[argNum]},
-                                                 namedArguments[argNum],
-                                                 String.Format(Resources.ErrorMessages.IncompatibleType,
-                                                               args.GetArgumentString(typeError.AstNode.SourceInfo),
-                                                               positionalParams[argNum].Name)));
+                            paramProp.SetValue(instances[setNum], builder.Value, null);
+                        }
+                        else
+                        {
+                            foreach (TypeError typeError in builder.Errors)
+                            {
+                                paramSetErrors.Add(
+                                    new ResolveError(ErrorType.IncompatibleType,
+                                                     new[] {positionalParams[argNum]},
+                                                     namedArguments[argNum],
+                                                     String.Format(Resources.ErrorMessages.IncompatibleType,
+                                                                   args.GetArgumentString(typeError.AstNode.SourceInfo),
+                                                                   positionalParams[argNum].Name)));
 
+                            }
                         }
                     }
                 }

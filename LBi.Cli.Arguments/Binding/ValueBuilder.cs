@@ -18,28 +18,29 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using LBi.Cli.Arguments.Parsing.Ast;
 
 namespace LBi.Cli.Arguments.Binding
 {
-    public class ValueBuilder : IAstVisitor
+    public class ValueBuilder : IAstVisitor, IDisposable
     {
-        static ValueBuilder()
-        {
-            TypeConverterAttribute vConv = new TypeConverterAttribute(typeof(CustomBooleanConverter));
-            TypeDescriptor.AddAttributes(typeof(Boolean), vConv);
-        }
 
         private readonly Stack<Type> _targetType;
         private readonly List<TypeError> _errors;
         private readonly CultureInfo _culture;
         private object _value;
+        private static TypeDescriptionProvider _typeDescriptorProvider;
 
         public ValueBuilder()
             : this(CultureInfo.InvariantCulture)
         {
+            // register custom BooleanTypeConverter
+            TypeConverterAttribute converterAttribute = new TypeConverterAttribute(typeof(CustomBooleanConverter));
+            _typeDescriptorProvider = TypeDescriptor.AddAttributes(typeof(Boolean), converterAttribute);
         }
 
         public ValueBuilder(CultureInfo cultureInfo)
@@ -112,7 +113,7 @@ namespace LBi.Cli.Arguments.Binding
 
                     if (!ret)
                     {
-                        // re-parse the string as fallback
+                        // attempt round-trip to string
                         if (targetConverter.CanConvertFrom(typeof(string)))
                         {
                             string tmp;
@@ -244,57 +245,155 @@ namespace LBi.Cli.Arguments.Binding
             Type targetType = this._targetType.Peek();
             Type elementType;
 
-            // TODO fix this
-            // 1. check if array
-            // 2. check if has "Add" method
-            // 2. check if IEnumerable<T>
-            // 3. check if IEnumerable
-            
+            Action<int, object> elementHandler;
+            object nextValue;
 
             if (targetType.IsArray)
+            {
                 elementType = targetType.GetElementType();
-            else if (targetType.IsInterface && targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
-                elementType = targetType.GetGenericArguments()[0];
-            else if (targetType.IsInterface && targetType == typeof(IEnumerable))
-                elementType = typeof(object);
+                nextValue = Array.CreateInstance(elementType, sequence.Elements.Length);
+                Array newArray = (Array)nextValue;
+                elementHandler = (i, o) => newArray.SetValue(o, i);
+            }
             else
             {
-                var interfaces = targetType.GetInterfaces();
-
-                // check for IEnumerable<T>
-                Type enumType =
-                    interfaces.SingleOrDefault(
-                        t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>));
-                if (enumType != null)
-                    elementType = enumType.GetGenericArguments()[0];
-                else
+                if (targetType.IsInterface)
                 {
-                    // and lastly IEnumerable
-                    enumType = interfaces.SingleOrDefault(t => t == typeof (IEnumerable));
-                    if (enumType != null)
-                        elementType = typeof (object);
+                    if (targetType.IsInterface && targetType == typeof(IEnumerable))
+                    {
+                        elementType = typeof(object);
+                    }
+                    else if (targetType.IsInterface &&
+                             targetType.IsGenericType &&
+                             targetType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                    {
+                        elementType = targetType.GetGenericArguments()[0];
+                    }
                     else
                     {
-                        elementType = null;
+                        // TODO fix this
+                        throw new Exception("Unsupported");
                     }
+
+                    nextValue = Activator.CreateInstance(typeof(List<>).MakeGenericType(elementType));
+                    MethodInfo addMethod = nextValue.GetType().GetMethod("Add", new[] { elementType });
+                    Debug.Assert(addMethod != null, "addMethod is null. Add some error checking here.");
+                    elementHandler = (i, o) => addMethod.Invoke(nextValue, new[] { o });
+                }
+                else
+                {
+                    MethodInfo addMethod =
+                        targetType.GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                            .Where(m => StringComparer.InvariantCultureIgnoreCase.Equals("Add", m.Name))
+                            .Single(m => m.GetParameters().Length == 1);
+                    elementType = addMethod.GetParameters()[0].ParameterType;
+                    nextValue = Activator.CreateInstance(targetType);
+                    elementHandler = (i, o) => addMethod.Invoke(nextValue, new[] { o });
                 }
             }
 
-
-            List<object> values = new List<object>();
             this._targetType.Push(elementType);
-            foreach (AstNode element in sequence.Elements)
+            for (int elemNum = 0; elemNum < sequence.Elements.Length; elemNum++)
             {
+                AstNode element = sequence.Elements[elemNum];
                 element.Visit(this);
-                values.Add(this.Value);
+                elementHandler(elemNum, this.Value);
             }
             this._targetType.Pop();
-            this._value = values;
+            this._value = nextValue;
         }
 
         void IAstVisitor.Visit(AssociativeArray array)
         {
-            throw new NotImplementedException();
+            Type targetType = this._targetType.Peek();
+            if (targetType.IsInterface)
+            {
+                if (targetType.IsGenericType)
+                {
+                    Type genericTypeDef = targetType.GetGenericTypeDefinition();
+                    if (genericTypeDef == typeof(IEnumerable<>))
+                    {
+                        Type genericTypeArg = targetType.GetGenericArguments()[0];
+
+                        if (genericTypeArg.IsGenericType)
+                        {
+                            if (genericTypeArg == typeof(KeyValuePair<,>))
+                            {
+                                
+                            } else if (genericTypeArg == typeof(Tuple<,>))
+                            {
+                                
+                            } else
+                            {
+                                throw new NotSupportedException("Unknown type: " + genericTypeArg.FullName);
+                            }
+                        } else
+                        {
+                            
+                        }
+                    }
+                }
+            } else
+            {
+                MethodInfo addMethod = targetType.GetMethods(BindingFlags.Instance | BindingFlags.Public)
+                    .FirstOrDefault(
+                        m => StringComparer.OrdinalIgnoreCase.Equals("Add", m.Name) &&
+                             m.GetParameters().Length == 2);
+
+                if (addMethod == null)
+                {
+                    // TODO add error
+                }
+
+                Type keyType = null;
+                Type valueType = null;
+
+                for (int elemNum = 0; elemNum < array.Elements.Length; elemNum++)
+                {
+                    array.Elements[elemNum].Key.Visit(this);
+                    object keyValue = this._value;
+                    if (!keyType.IsAssignableFrom(keyValue.GetType()))
+                    {
+                        if (!this.TryConvertType(keyType, keyValue, out keyValue))
+                        {
+                            // error
+                        }
+                    }
+                    array.Elements[elemNum].Value.Visit(this);
+                    object valueValue = this._value;
+                    if (!keyType.IsAssignableFrom(valueType.GetType()))
+                    {
+                        if (!this.TryConvertType(valueType, keyValue, out keyValue))
+                        {
+                            // error
+                        }
+                    }
+                }
+            }
+        }
+
+        #endregion
+
+        #region Implementation of IDisposable
+
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~ValueBuilder()
+        {
+            this.Dispose(false);
+        }
+
+        protected virtual void Dispose(bool isDisposing)
+        {
+            if (isDisposing)
+            {
+                TypeDescriptor.RemoveProvider(_typeDescriptorProvider, typeof(Boolean));
+                TypeDescriptor.Refresh(typeof(Boolean));
+            }
         }
 
         #endregion
