@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="AliasAttribute.cs" />
     <Compile Include="Binding\CustomBooleanConverter.cs" />
+    <Compile Include="Binding\Reflection.cs" />
     <Compile Include="ErrorType.cs" />
     <Compile Include="Globalization\IResourceProvider.cs" />
     <Compile Include="Parameter.cs" />
@@ -78,6 +79,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ErrorMessages.resx</DependentUpon>
     </Compile>
+    <Compile Include="Resources\Exceptions.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Exceptions.resx</DependentUpon>
+    </Compile>
     <Compile Include="TypeError.cs" />
     <Compile Include="Binding\ValueBuilder.cs" />
   </ItemGroup>
@@ -85,6 +91,10 @@
     <EmbeddedResource Include="Resources\ErrorMessages.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>ErrorMessages.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Exceptions.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Exceptions.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
