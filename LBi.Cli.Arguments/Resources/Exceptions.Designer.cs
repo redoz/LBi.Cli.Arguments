@@ -63,9 +63,9 @@ namespace LBi.Cli.Arguments.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Unsupported array type: {0}. Associative arrays can only be assigned to arrays of KeyValuePair&lt;TKey, TValue&gt; or Tuple&lt;TKey, TValue&gt;..
         /// </summary>
-        internal static string UnsupportedParameterArrayType {
+        internal static string UnsupportedAssocParameterArrayType {
             get {
-                return ResourceManager.GetString("UnsupportedParameterArrayType", resourceCulture);
+                return ResourceManager.GetString("UnsupportedAssocParameterArrayType", resourceCulture);
             }
         }
         

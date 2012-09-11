@@ -52,6 +52,17 @@ namespace LBi.CLI.Arguments.Test
             }
         }
 
+        [Fact]
+        public void StringAlpha_ToByte()
+        {
+            using (ValueBuilder builder = new ValueBuilder())
+            {
+                Assert.False(builder.Build(typeof (byte),
+                                           new LiteralValue(SourceInfo.Empty, LiteralValueType.String, "abc")));
+                Assert.NotEmpty(builder.Errors);
+            }
+        }
+
 
         [Fact]
         public void String_ToDecimal()

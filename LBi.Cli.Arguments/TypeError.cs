@@ -21,13 +21,14 @@ namespace LBi.Cli.Arguments
 {
     public class TypeError
     {
-        public TypeError(Type targetType, object value, AstNode astNode)
+        public TypeError(Type targetType, object value, AstNode astNode, string message)
         {
             this.TargetType = targetType;
             this.Value = value;
             this.AstNode = astNode;
+            this.Message = message;
         }
-
+        protected string Message { get; set; }
         public Type TargetType { get; protected set; }
         public object Value { get; protected set; }
         public AstNode AstNode { get; protected set; }

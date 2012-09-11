@@ -67,9 +67,11 @@ namespace LBi.Cli.Arguments.Binding
             get { return _value; }
         }
 
-        private bool TryConvertType(Type targetType, ref object value)
+        // TODO take another look at how this method deals with error handling at some point
+        private bool TryConvertType(Type targetType, ref object value, out string errorMessage)
         {
             bool success = false;
+            errorMessage = null;
             object ret = value;
             if (targetType.IsInstanceOfType(value))
                 success = true;
@@ -79,8 +81,19 @@ namespace LBi.Cli.Arguments.Binding
                 var sourceConverter = TypeDescriptor.GetConverter(value);
                 if (targetConverter.CanConvertFrom(value.GetType()))
                 {
-                    ret = targetConverter.ConvertFrom(null, this._culture, value);
-                    success = true;
+                    try
+                    {
+                        ret = targetConverter.ConvertFrom(null, this._culture, value);
+                        success = true;
+                    }
+                    catch (NotSupportedException ex)
+                    {
+                        errorMessage = ex.Message;
+                    }
+                    catch (Exception ex)
+                    {
+                        errorMessage = ex.Message;
+                    }
                 }
                 else if (sourceConverter.CanConvertTo(targetType))
                 {
@@ -89,23 +102,26 @@ namespace LBi.Cli.Arguments.Binding
                 }
                 else
                 {
-                    // TODO do something about this try/catch/catch...
                     try
                     {
                         ret = Convert.ChangeType(value, targetType, this._culture);
                         success = true;
                     }
-                    catch (InvalidCastException)
+                    catch (InvalidCastException ex)
                     {
+                        errorMessage = ex.Message;
                     }
-                    catch (FormatException)
+                    catch (FormatException ex)
                     {
+                        errorMessage = ex.Message;
                     }
-                    catch (OverflowException)
+                    catch (OverflowException ex)
                     {
+                        errorMessage = ex.Message;
                     }
-                    catch (ArgumentNullException)
+                    catch (ArgumentNullException ex)
                     {
+                        errorMessage = ex.Message;
                     }
 
                     if (!success)
@@ -113,14 +129,20 @@ namespace LBi.Cli.Arguments.Binding
                         // attempt round-trip to string
                         if (targetConverter.CanConvertFrom(typeof(string)))
                         {
-                            string tmp;
-                            if (sourceConverter.CanConvertTo(typeof(string)))
-                                tmp = sourceConverter.ConvertToString(null, this._culture, value);
-                            else
-                                tmp = value.ToString();
+                            try
+                            {
+                                string tmp;
+                                if (sourceConverter.CanConvertTo(typeof (string)))
+                                    tmp = sourceConverter.ConvertToString(null, this._culture, value);
+                                else
+                                    tmp = value.ToString();
 
-                            ret = targetConverter.ConvertFromString(null, this._culture, tmp);
-                            success = true;
+                                ret = targetConverter.ConvertFromString(null, this._culture, tmp);
+                                success = true;
+                            } catch (Exception ex)
+                            {
+                                errorMessage = ex.Message;
+                            }
                         }
                     }
                 }
@@ -173,10 +195,13 @@ namespace LBi.Cli.Arguments.Binding
                         else if (Decimal.TryParse(literalValue.Value, NumberStyles.Any, _culture, out dec))
                             this._value = dec;
                     }
-
-                    if (!this.TryConvertType(this._targetType.Peek(), ref this._value))
                     {
-                        this._errors.Add(new TypeError(this._targetType.Peek(), this.Value, literalValue));
+                        string errorMessage;
+                        if (!this.TryConvertType(this._targetType.Peek(), ref this._value, out errorMessage))
+                        {
+                            this._errors.Add(new TypeError(this._targetType.Peek(), this.Value, literalValue,
+                                                           errorMessage));
+                        }
                     }
 
                     break;
@@ -184,9 +209,10 @@ namespace LBi.Cli.Arguments.Binding
                     this._value = literalValue.Value;
                     if (this._targetType.Peek() != typeof(string))
                     {
-                        if (!this.TryConvertType(this._targetType.Peek(), ref this._value))
+                        string errorMessage;
+                        if (!this.TryConvertType(this._targetType.Peek(), ref this._value, out errorMessage))
                         {
-                            this._errors.Add(new TypeError(this._targetType.Peek(), literalValue.Value, literalValue));
+                            this._errors.Add(new TypeError(this._targetType.Peek(), literalValue.Value, literalValue, errorMessage));
                         }
                     }
                     break;
@@ -197,9 +223,10 @@ namespace LBi.Cli.Arguments.Binding
                     this._value = StringComparer.InvariantCultureIgnoreCase.Equals(literalValue.Value, "$true");
                     if (this._targetType.Peek() != typeof(bool))
                     {
-                        if (!this.TryConvertType(this._targetType.Peek(), ref this._value))
+                        string errorMessage;
+                        if (!this.TryConvertType(this._targetType.Peek(), ref this._value, out errorMessage))
                         {
-                            this._errors.Add(new TypeError(this._targetType.Peek(), this.Value, literalValue));
+                            this._errors.Add(new TypeError(this._targetType.Peek(), this.Value, literalValue, errorMessage));
                         }
                     }
                     break;
@@ -303,26 +330,63 @@ namespace LBi.Cli.Arguments.Binding
                         }
                         else
                         {
-
+                            throw new NotSupportedException(
+                                string.Format(Resources.Exceptions.UnsupportedParameterType,
+                                              targetType.FullName));
                         }
                     }
+                    else if (genericTypeDef == typeof(ILookup<,>))
+                    {
+                        // TODO impl
+                        throw new NotImplementedException();
+                    }
+                    else if (genericTypeDef == typeof(IDictionary<,>))
+                    {
+                        // TODO impl
+                        throw new NotImplementedException();
+                    }
+                    else
+                    {
+                        throw new NotSupportedException(
+                            string.Format(Resources.Exceptions.UnsupportedParameterType,
+                                          targetType.FullName));
+                    }
                 }
-            } else if (targetType.IsArray)
+                else if (targetType == typeof(IDictionary))
+                {
+                    // TODO impl
+                    throw new NotImplementedException();
+                }
+                else if (targetType == typeof(IList))
+                {
+                    // TODO impl
+                    throw new NotImplementedException();
+                }
+                else
+                {
+                    throw new NotSupportedException(
+                        string.Format(Resources.Exceptions.UnsupportedParameterType,
+                                      targetType.FullName));
+                }
+            }
+            else if (targetType.IsArray)
             {
                 Type elementType = targetType.GetElementType();
-                
+
                 Type[] kvpTypes;
                 if (elementType.IsOfGenericType(typeof(KeyValuePair<,>), out kvpTypes))
                 {
-                    
-                } else if (elementType.IsOfGenericType(typeof(Tuple<,>), out kvpTypes))
+
+                }
+                else if (elementType.IsOfGenericType(typeof(Tuple<,>), out kvpTypes))
                 {
-                    
-                } else
+
+                }
+                else
                 {
                     // TODO maybe anything with a ctor with 2 params should be good enough?
                     throw new NotSupportedException(
-                        string.Format(Resources.Exceptions.UnsupportedParameterArrayType,
+                        string.Format(Resources.Exceptions.UnsupportedAssocParameterArrayType,
                                       elementType.FullName));
                 }
 
@@ -334,15 +398,16 @@ namespace LBi.Cli.Arguments.Binding
                 {
                     Action<int, object, object> handleKeyValuePair =
                         (index, key, value) =>
-                            {
-                                object newValue = elementTypeCtor.Invoke(new[] {key, value});
-                                newArray.SetValue(newValue, index);
-                            };
+                        {
+                            object newValue = elementTypeCtor.Invoke(new[] { key, value });
+                            newArray.SetValue(newValue, index);
+                        };
 
                     FillAssocArray(array, kvpTypes[0], kvpTypes[1], handleKeyValuePair);
-                } else
+                }
+                else
                 {
-                    // error
+                    // TODO error
                 }
 
             }
@@ -367,7 +432,7 @@ namespace LBi.Cli.Arguments.Binding
                         Type valueType = addParams[1].ParameterType;
                         Action<int, object, object> handleKeyValuePair =
                             (index, key, value) =>
-                            addMethod.Invoke(newObject, new[] {key, value});
+                            addMethod.Invoke(newObject, new[] { key, value });
 
                         FillAssocArray(array, keyType, valueType, handleKeyValuePair);
 
@@ -401,11 +466,14 @@ namespace LBi.Cli.Arguments.Binding
                 object keyValue = this._value;
                 if (!keyType.IsInstanceOfType(keyValue))
                 {
-                    if (!this.TryConvertType(keyType, ref keyValue))
+                    // TODO is this really neccessery, wont this have already happned in the Visit()?
+                    string errorMessage;
+                    if (!this.TryConvertType(keyType, ref keyValue, out errorMessage))
                     {
                         this._errors.Add(new TypeError(keyType,
                                                        keyValue,
-                                                       array.Elements[elemNum].Key));
+                                                       array.Elements[elemNum].Key,
+                                                       errorMessage));
                         success = false;
                     }
                 }
@@ -414,11 +482,13 @@ namespace LBi.Cli.Arguments.Binding
                 object valueValue = this._value;
                 if (!valueType.IsInstanceOfType(valueValue))
                 {
-                    if (!this.TryConvertType(valueType, ref valueValue))
+                    string errorMessage;
+                    if (!this.TryConvertType(valueType, ref valueValue, out errorMessage))
                     {
                         this._errors.Add(new TypeError(valueType,
                                                        valueValue,
-                                                       array.Elements[elemNum].Value));
+                                                       array.Elements[elemNum].Value,
+                                                       errorMessage));
                         success = false;
                     }
                 }

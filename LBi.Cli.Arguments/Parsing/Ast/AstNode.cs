@@ -25,6 +25,7 @@ namespace LBi.Cli.Arguments.Parsing.Ast
             if (sourceInfo == null)
                 throw new ArgumentNullException("sourceInfo");
 
+            // Can't really remember why this is cloned here... I'm sure there is a good reason
             this.SourceInfo = new SourceInfoImpl(sourceInfo);
         }
 
