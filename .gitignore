@@ -51,7 +51,10 @@ ipch/
 *.vsp
 
 # ReSharper is a .NET coding add-in
-_ReSharper*
+_ReSharper.*
+
+# TeamCity is a BuildServer + IDE Addons
+_TeamCity.*
 
 # Others
 [Bb]in

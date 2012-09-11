@@ -138,69 +138,40 @@ namespace LBi.Cli.Arguments.Binding
             switch (literalValue.Type)
             {
                 case LiteralValueType.Numeric:
-                    // this looks pretty evil
-                    sbyte signedByte;
-                    if (sbyte.TryParse(literalValue.Value, NumberStyles.Any, _culture, out signedByte))
-                        this._value = signedByte;
-                    else
                     {
+                        sbyte signedByte;
                         byte usignedByte;
-                        if (byte.TryParse(literalValue.Value, NumberStyles.Any, _culture, out usignedByte))
+                        short signedShort;
+                        ushort unsignedShort;
+                        int signedInt;
+                        uint unsignedInt;
+                        long signedLong;
+                        ulong unsignedLong;
+                        Single single;
+                        Double dble;
+                        Decimal dec;
+                        if (sbyte.TryParse(literalValue.Value, NumberStyles.Any, _culture, out signedByte))
+                            this._value = signedByte;
+                        else if (byte.TryParse(literalValue.Value, NumberStyles.Any, _culture, out usignedByte))
                             this._value = usignedByte;
-                        else
-                        {
-                            short signedShort;
-                            if (short.TryParse(literalValue.Value, NumberStyles.Any, _culture, out signedShort))
-                                this._value = signedShort;
-                            else
-                            {
-                                ushort unsignedShort;
-                                if (ushort.TryParse(literalValue.Value, NumberStyles.Any, _culture, out unsignedShort))
-                                    this._value = unsignedShort;
-                                else
-                                {
-                                    int signedInt;
-                                    if (int.TryParse(literalValue.Value, NumberStyles.Any, _culture, out signedInt))
-                                        this._value = signedInt;
-                                    else
-                                    {
-                                        uint unsignedInt;
-                                        if (uint.TryParse(literalValue.Value, NumberStyles.Any, _culture, out unsignedInt))
-                                            this._value = unsignedInt;
-                                        else
-                                        {
-                                            long signedLong;
-                                            if (long.TryParse(literalValue.Value, NumberStyles.Any, _culture, out signedLong))
-                                                this._value = signedLong;
-                                            else
-                                            {
-                                                ulong unsignedLong;
-                                                if (ulong.TryParse(literalValue.Value, NumberStyles.Any, _culture, out unsignedLong))
-                                                    this._value = unsignedLong;
-                                                else
-                                                {
-                                                    Single single;
-                                                    if (Single.TryParse(literalValue.Value, NumberStyles.Any, _culture, out single))
-                                                        this._value = single;
-                                                    else
-                                                    {
-                                                        Double dble;
-                                                        if (Double.TryParse(literalValue.Value, NumberStyles.Any, _culture, out dble))
-                                                            this._value = dble;
-                                                        else
-                                                        {
-                                                            Decimal dec;
-                                                            if (Decimal.TryParse(literalValue.Value, NumberStyles.Any, _culture, out dec))
-                                                                this._value = dec;
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        else if (short.TryParse(literalValue.Value, NumberStyles.Any, _culture, out signedShort))
+                            this._value = signedShort;
+                        else if (ushort.TryParse(literalValue.Value, NumberStyles.Any, _culture, out unsignedShort))
+                            this._value = unsignedShort;
+                        else if (int.TryParse(literalValue.Value, NumberStyles.Any, _culture, out signedInt))
+                            this._value = signedInt;
+                        else if (uint.TryParse(literalValue.Value, NumberStyles.Any, _culture, out unsignedInt))
+                            this._value = unsignedInt;
+                        else if (long.TryParse(literalValue.Value, NumberStyles.Any, _culture, out signedLong))
+                            this._value = signedLong;
+                        else if (ulong.TryParse(literalValue.Value, NumberStyles.Any, _culture, out unsignedLong))
+                            this._value = unsignedLong;
+                        else if (Single.TryParse(literalValue.Value, NumberStyles.Any, _culture, out single))
+                            this._value = single;
+                        else if (Double.TryParse(literalValue.Value, NumberStyles.Any, _culture, out dble))
+                            this._value = dble;
+                        else if (Decimal.TryParse(literalValue.Value, NumberStyles.Any, _culture, out dec))
+                            this._value = dec;
                     }
 
                     if (!this.TryConvertType(this._targetType.Peek(), ref this._value))
@@ -213,10 +184,10 @@ namespace LBi.Cli.Arguments.Binding
                     this._value = literalValue.Value;
                     if (this._targetType.Peek() != typeof(string))
                     {
-                        if (this.TryConvertType(this._targetType.Peek(), ref this._value))
-                            this._value = literalValue.Value;
-                        else
+                        if (!this.TryConvertType(this._targetType.Peek(), ref this._value))
+                        {
                             this._errors.Add(new TypeError(this._targetType.Peek(), literalValue.Value, literalValue));
+                        }
                     }
                     break;
                 case LiteralValueType.Null:
