@@ -28,12 +28,11 @@ namespace LBi.Cli.Arguments.Binding
 {
     public class ValueBuilder : IAstVisitor, IDisposable
     {
-
-        private readonly Stack<Type> _targetType;
-        private readonly List<TypeError> _errors;
-        private readonly CultureInfo _culture;
-        private object _value;
         private static TypeDescriptionProvider _typeDescriptorProvider;
+        private readonly CultureInfo _culture;
+        private readonly List<TypeError> _errors;
+        private readonly Stack<Type> _targetType;
+        private object _value;
 
         public ValueBuilder()
             : this(CultureInfo.InvariantCulture)
@@ -50,21 +49,23 @@ namespace LBi.Cli.Arguments.Binding
             this._targetType = new Stack<Type>();
         }
 
+        public IEnumerable<TypeError> Errors
+        {
+            get { return this._errors; }
+        }
+
+        public object Value
+        {
+            get { return this._value; }
+        }
+
         public bool Build(Type propertyType, AstNode astNode)
         {
             this._targetType.Push(propertyType);
 
             astNode.Visit(this);
 
-
             return this._errors.Count == 0;
-        }
-
-        public IEnumerable<TypeError> Errors { get { return this._errors; } }
-
-        public object Value
-        {
-            get { return _value; }
         }
 
         // TODO take another look at how this method deals with error handling at some point
@@ -79,6 +80,7 @@ namespace LBi.Cli.Arguments.Binding
             {
                 var targetConverter = TypeDescriptor.GetConverter(targetType);
                 var sourceConverter = TypeDescriptor.GetConverter(value);
+
                 if (targetConverter.CanConvertFrom(value.GetType()))
                 {
                     try
@@ -132,14 +134,15 @@ namespace LBi.Cli.Arguments.Binding
                             try
                             {
                                 string tmp;
-                                if (sourceConverter.CanConvertTo(typeof (string)))
+                                if (sourceConverter.CanConvertTo(typeof(string)))
                                     tmp = sourceConverter.ConvertToString(null, this._culture, value);
                                 else
                                     tmp = value.ToString();
 
                                 ret = targetConverter.ConvertFromString(null, this._culture, tmp);
                                 success = true;
-                            } catch (Exception ex)
+                            }
+                            catch (Exception ex)
                             {
                                 errorMessage = ex.Message;
                             }
@@ -151,7 +154,6 @@ namespace LBi.Cli.Arguments.Binding
             value = ret;
             return success;
         }
-
 
         #region Implementation of IAstVisitor
 
@@ -172,30 +174,34 @@ namespace LBi.Cli.Arguments.Binding
                         Single single;
                         Double dble;
                         Decimal dec;
-                        if (sbyte.TryParse(literalValue.Value, NumberStyles.Any, _culture, out signedByte))
+                        if (sbyte.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out signedByte))
                             this._value = signedByte;
-                        else if (byte.TryParse(literalValue.Value, NumberStyles.Any, _culture, out usignedByte))
+                        else if (byte.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out usignedByte))
                             this._value = usignedByte;
-                        else if (short.TryParse(literalValue.Value, NumberStyles.Any, _culture, out signedShort))
+                        else if (short.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out signedShort))
                             this._value = signedShort;
-                        else if (ushort.TryParse(literalValue.Value, NumberStyles.Any, _culture, out unsignedShort))
+                        else if (ushort.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out unsignedShort))
                             this._value = unsignedShort;
-                        else if (int.TryParse(literalValue.Value, NumberStyles.Any, _culture, out signedInt))
+                        else if (int.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out signedInt))
                             this._value = signedInt;
-                        else if (uint.TryParse(literalValue.Value, NumberStyles.Any, _culture, out unsignedInt))
+                        else if (uint.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out unsignedInt))
                             this._value = unsignedInt;
-                        else if (long.TryParse(literalValue.Value, NumberStyles.Any, _culture, out signedLong))
+                        else if (long.TryParse(literalValue.Value, NumberStyles.Any, this._culture,
+                                               out signedLong))
                             this._value = signedLong;
-                        else if (ulong.TryParse(literalValue.Value, NumberStyles.Any, _culture, out unsignedLong))
+                        else if (ulong.TryParse(literalValue.Value, NumberStyles.Any, this._culture,
+                                                out unsignedLong))
                             this._value = unsignedLong;
-                        else if (Single.TryParse(literalValue.Value, NumberStyles.Any, _culture, out single))
+                        else if (Single.TryParse(literalValue.Value, NumberStyles.Any, this._culture,
+                                                 out single))
                             this._value = single;
-                        else if (Double.TryParse(literalValue.Value, NumberStyles.Any, _culture, out dble))
+                        else if (Double.TryParse(literalValue.Value, NumberStyles.Any, this._culture,
+                                                 out dble))
                             this._value = dble;
-                        else if (Decimal.TryParse(literalValue.Value, NumberStyles.Any, _culture, out dec))
+                        else if (Decimal.TryParse(literalValue.Value, NumberStyles.Any,
+                                                  this._culture, out dec))
                             this._value = dec;
-                    }
-                    {
+
                         string errorMessage;
                         if (!this.TryConvertType(this._targetType.Peek(), ref this._value, out errorMessage))
                         {
@@ -212,7 +218,8 @@ namespace LBi.Cli.Arguments.Binding
                         string errorMessage;
                         if (!this.TryConvertType(this._targetType.Peek(), ref this._value, out errorMessage))
                         {
-                            this._errors.Add(new TypeError(this._targetType.Peek(), literalValue.Value, literalValue, errorMessage));
+                            this._errors.Add(new TypeError(this._targetType.Peek(), literalValue.Value, literalValue,
+                                                           errorMessage));
                         }
                     }
                     break;
@@ -226,7 +233,8 @@ namespace LBi.Cli.Arguments.Binding
                         string errorMessage;
                         if (!this.TryConvertType(this._targetType.Peek(), ref this._value, out errorMessage))
                         {
-                            this._errors.Add(new TypeError(this._targetType.Peek(), this.Value, literalValue, errorMessage));
+                            this._errors.Add(new TypeError(this._targetType.Peek(), this.Value, literalValue,
+                                                           errorMessage));
                         }
                     }
                     break;
@@ -248,22 +256,22 @@ namespace LBi.Cli.Arguments.Binding
             {
                 elementType = targetType.GetElementType();
                 nextValue = Array.CreateInstance(elementType, sequence.Elements.Length);
-                Array newArray = (Array)nextValue;
+                Array newArray = (Array) nextValue;
                 elementHandler = (i, o) => newArray.SetValue(o, i);
             }
             else
             {
                 if (targetType.IsInterface)
                 {
+                    Type[] genArgs;
+
                     if (targetType.IsInterface && targetType == typeof(IEnumerable))
                     {
                         elementType = typeof(object);
                     }
-                    else if (targetType.IsInterface &&
-                             targetType.IsGenericType &&
-                             targetType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                    else if (targetType.IsOfGenericType(typeof(IEnumerable<>), out genArgs))
                     {
-                        elementType = targetType.GetGenericArguments()[0];
+                        elementType = genArgs[0];
                     }
                     else
                     {
@@ -272,9 +280,9 @@ namespace LBi.Cli.Arguments.Binding
                     }
 
                     nextValue = Activator.CreateInstance(typeof(List<>).MakeGenericType(elementType));
-                    MethodInfo addMethod = nextValue.GetType().GetMethod("Add", new[] { elementType });
+                    MethodInfo addMethod = nextValue.GetType().GetMethod("Add", new[] {elementType});
                     Debug.Assert(addMethod != null, "addMethod is null. Add some error checking here.");
-                    elementHandler = (i, o) => addMethod.Invoke(nextValue, new[] { o });
+                    elementHandler = (i, o) => addMethod.Invoke(nextValue, new[] {o});
                 }
                 else
                 {
@@ -284,7 +292,7 @@ namespace LBi.Cli.Arguments.Binding
                             .Single(m => m.GetParameters().Length == 1);
                     elementType = addMethod.GetParameters()[0].ParameterType;
                     nextValue = Activator.CreateInstance(targetType);
-                    elementHandler = (i, o) => addMethod.Invoke(nextValue, new[] { o });
+                    elementHandler = (i, o) => addMethod.Invoke(nextValue, new[] {o});
                 }
             }
 
@@ -303,30 +311,73 @@ namespace LBi.Cli.Arguments.Binding
         {
             Type targetType = this._targetType.Peek();
             if (targetType.IsInterface)
+                this.HandleInterfaceBasedAssocArray(array, targetType);
+            else if (targetType.IsArray)
+                this.HandleArrayBasedAssocArray(array, targetType);
+            else
+                this.HandleMethodBasedAssocArray(array, targetType);
+        }
+
+        #region AssociativeArray Handling
+
+        private void HandleMethodBasedAssocArray(AssociativeArray array, Type targetType)
+        {
+            MethodInfo addMethod = targetType.GetMethods(BindingFlags.Instance | BindingFlags.Public)
+                .FirstOrDefault(
+                    m => StringComparer.OrdinalIgnoreCase.Equals("Add", m.Name) &&
+                         m.GetParameters().Length == 2);
+
+            if (addMethod != null)
             {
-                if (targetType.IsGenericType)
+                ConstructorInfo defaultCtor = targetType.GetConstructor(Type.EmptyTypes);
+
+                if (defaultCtor != null)
                 {
-                    Type genericTypeDef = targetType.GetGenericTypeDefinition();
-                    if (genericTypeDef == typeof(IEnumerable<>))
+                    object newObject = defaultCtor.Invoke(null);
+
+                    var addParams = addMethod.GetParameters();
+
+                    Type keyType = addParams[0].ParameterType;
+                    Type valueType = addParams[1].ParameterType;
+                    Action<int, object, object> handleKeyValuePair =
+                        (index, key, value) =>
+                        addMethod.Invoke(newObject, new[] {key, value});
+
+                    this.FillAssocArray(array, keyType, valueType, handleKeyValuePair);
+
+                    this._value = newObject;
+                }
+                else
+                {
+                    throw new NotSupportedException(
+                        string.Format(Resources.Exceptions.UnsupportedParameterTypeNoDefaultConstructor,
+                                      targetType.FullName));
+                }
+            }
+            else
+            {
+                throw new NotSupportedException(
+                    string.Format(Resources.Exceptions.UnsupportedParameterTypeNoAddMethod,
+                                  targetType.FullName));
+            }
+        }
+
+        private void HandleInterfaceBasedAssocArray(AssociativeArray array, Type targetType)
+        {
+            if (targetType.IsGenericType)
+            {
+                Type genericTypeDef = targetType.GetGenericTypeDefinition();
+                if (genericTypeDef == typeof(IEnumerable<>))
+                {
+                    Type genericTypeArg = targetType.GetGenericArguments()[0];
+
+                    if (genericTypeArg.IsGenericType)
                     {
-                        Type genericTypeArg = targetType.GetGenericArguments()[0];
-
-                        if (genericTypeArg.IsGenericType)
+                        if (genericTypeArg == typeof(KeyValuePair<,>))
                         {
-                            if (genericTypeArg == typeof(KeyValuePair<,>))
-                            {
-
-                            }
-                            else if (genericTypeArg == typeof(Tuple<,>))
-                            {
-
-                            }
-                            else
-                            {
-                                throw new NotSupportedException(
-                                    string.Format(Resources.Exceptions.UnsupportedParameterType,
-                                                  targetType.FullName));
-                            }
+                        }
+                        else if (genericTypeArg == typeof(Tuple<,>))
+                        {
                         }
                         else
                         {
@@ -335,16 +386,6 @@ namespace LBi.Cli.Arguments.Binding
                                               targetType.FullName));
                         }
                     }
-                    else if (genericTypeDef == typeof(ILookup<,>))
-                    {
-                        // TODO impl
-                        throw new NotImplementedException();
-                    }
-                    else if (genericTypeDef == typeof(IDictionary<,>))
-                    {
-                        // TODO impl
-                        throw new NotImplementedException();
-                    }
                     else
                     {
                         throw new NotSupportedException(
@@ -352,12 +393,12 @@ namespace LBi.Cli.Arguments.Binding
                                           targetType.FullName));
                     }
                 }
-                else if (targetType == typeof(IDictionary))
+                else if (genericTypeDef == typeof(ILookup<,>))
                 {
                     // TODO impl
                     throw new NotImplementedException();
                 }
-                else if (targetType == typeof(IList))
+                else if (genericTypeDef == typeof(IDictionary<,>))
                 {
                     // TODO impl
                     throw new NotImplementedException();
@@ -369,88 +410,61 @@ namespace LBi.Cli.Arguments.Binding
                                       targetType.FullName));
                 }
             }
-            else if (targetType.IsArray)
+            else if (targetType == typeof(IDictionary))
             {
-                Type elementType = targetType.GetElementType();
-
-                Type[] kvpTypes;
-                if (elementType.IsOfGenericType(typeof(KeyValuePair<,>), out kvpTypes))
-                {
-
-                }
-                else if (elementType.IsOfGenericType(typeof(Tuple<,>), out kvpTypes))
-                {
-
-                }
-                else
-                {
-                    // TODO maybe anything with a ctor with 2 params should be good enough?
-                    throw new NotSupportedException(
-                        string.Format(Resources.Exceptions.UnsupportedAssocParameterArrayType,
-                                      elementType.FullName));
-                }
-
-                Array newArray = Array.CreateInstance(elementType, array.Elements.Length);
-
-                ConstructorInfo elementTypeCtor = elementType.GetConstructor(kvpTypes);
-
-                if (elementTypeCtor != null)
-                {
-                    Action<int, object, object> handleKeyValuePair =
-                        (index, key, value) =>
-                        {
-                            object newValue = elementTypeCtor.Invoke(new[] { key, value });
-                            newArray.SetValue(newValue, index);
-                        };
-
-                    FillAssocArray(array, kvpTypes[0], kvpTypes[1], handleKeyValuePair);
-                }
-                else
-                {
-                    // TODO error
-                }
-
+                // TODO impl
+                throw new NotImplementedException();
+            }
+            else if (targetType == typeof(IList))
+            {
+                // TODO impl
+                throw new NotImplementedException();
             }
             else
             {
-                MethodInfo addMethod = targetType.GetMethods(BindingFlags.Instance | BindingFlags.Public)
-                    .FirstOrDefault(
-                        m => StringComparer.OrdinalIgnoreCase.Equals("Add", m.Name) &&
-                             m.GetParameters().Length == 2);
+                throw new NotSupportedException(
+                    string.Format(Resources.Exceptions.UnsupportedParameterType,
+                                  targetType.FullName));
+            }
+        }
 
-                if (addMethod != null)
-                {
-                    ConstructorInfo defaultCtor = targetType.GetConstructor(Type.EmptyTypes);
+        private void HandleArrayBasedAssocArray(AssociativeArray array, Type arrayType)
+        {
+            Type elementType = arrayType.GetElementType();
 
-                    if (defaultCtor != null)
-                    {
-                        object newObject = defaultCtor.Invoke(null);
+            ConstructorInfo[] ctors = elementType.GetConstructors(BindingFlags.Public);
 
-                        var addParams = addMethod.GetParameters();
+            ConstructorInfo[] matches = ctors.Where(ct => ct.GetParameters().Length == 2).ToArray();
 
-                        Type keyType = addParams[0].ParameterType;
-                        Type valueType = addParams[1].ParameterType;
-                        Action<int, object, object> handleKeyValuePair =
-                            (index, key, value) =>
-                            addMethod.Invoke(newObject, new[] { key, value });
+            if (matches.Length == 1)
+            {
+                Array newArray = Array.CreateInstance(elementType, array.Elements.Length);
+                Action<int, object, object> handleKeyValuePair =
+                    (index, key, value) =>
+                        {
+                            object newValue = matches[0].Invoke(new[] {key, value});
+                            newArray.SetValue(newValue, index);
+                        };
 
-                        FillAssocArray(array, keyType, valueType, handleKeyValuePair);
+                // this is slightly wasteful as we already asked for the parameters once, but it's a one-off operation.
+                ParameterInfo[] parameters = matches[0].GetParameters();
 
-                        this._value = newObject;
-                    }
-                    else
-                    {
-                        throw new NotSupportedException(
-                            string.Format(Resources.Exceptions.UnsupportedParameterTypeNoDefaultConstructor,
-                                          targetType.FullName));
-                    }
-                }
-                else
-                {
-                    throw new NotSupportedException(
-                        string.Format(Resources.Exceptions.UnsupportedParameterTypeNoAddMethod,
-                                      targetType.FullName));
-                }
+                this.FillAssocArray(array, parameters[0].ParameterType, parameters[1].ParameterType, handleKeyValuePair);
+
+                // set return value
+                this._value = newArray;
+            }
+            else if (matches.Length == 0)
+            {
+                throw new NotSupportedException(
+                    string.Format(Resources.Exceptions.UnsupportedAssocParameterArrayTypeNoConstructor,
+                                  elementType.FullName));
+            }
+            else
+            {
+                throw new NotSupportedException(
+                    string.Format(Resources.Exceptions.UnsupportedAssocParameterArrayTypeAmbiguousConstructor,
+                                  elementType.FullName));
             }
         }
 
@@ -461,44 +475,22 @@ namespace LBi.Cli.Arguments.Binding
         {
             for (int elemNum = 0; elemNum < array.Elements.Length; elemNum++)
             {
-                bool success = true;
-                array.Elements[elemNum].Key.Visit(this);
+                this._targetType.Push(keyType);
+                KeyValuePair<AstNode, AstNode> element = array.Elements[elemNum];
+                element.Key.Visit(this);
+                this._targetType.Pop();
                 object keyValue = this._value;
-                if (!keyType.IsInstanceOfType(keyValue))
-                {
-                    // TODO is this really neccessery, wont this have already happned in the Visit()?
-                    string errorMessage;
-                    if (!this.TryConvertType(keyType, ref keyValue, out errorMessage))
-                    {
-                        this._errors.Add(new TypeError(keyType,
-                                                       keyValue,
-                                                       array.Elements[elemNum].Key,
-                                                       errorMessage));
-                        success = false;
-                    }
-                }
 
-                array.Elements[elemNum].Value.Visit(this);
+                this._targetType.Push(valueType);
+                element.Value.Visit(this);
+                this._targetType.Pop();
                 object valueValue = this._value;
-                if (!valueType.IsInstanceOfType(valueValue))
-                {
-                    string errorMessage;
-                    if (!this.TryConvertType(valueType, ref valueValue, out errorMessage))
-                    {
-                        this._errors.Add(new TypeError(valueType,
-                                                       valueValue,
-                                                       array.Elements[elemNum].Value,
-                                                       errorMessage));
-                        success = false;
-                    }
-                }
 
-                if (success)
-                {
-                    handleKeyValuePair(elemNum, keyValue, valueValue);
-                }
+                handleKeyValuePair(elemNum, keyValue, valueValue);
             }
         }
+
+        #endregion
 
         #endregion
 

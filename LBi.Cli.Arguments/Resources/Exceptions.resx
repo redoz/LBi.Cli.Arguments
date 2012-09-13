@@ -120,6 +120,12 @@
   <data name="UnsupportedAssocParameterArrayType" xml:space="preserve">
     <value>Unsupported array type: {0}. Associative arrays can only be assigned to arrays of KeyValuePair&lt;TKey, TValue&gt; or Tuple&lt;TKey, TValue&gt;.</value>
   </data>
+  <data name="UnsupportedAssocParameterArrayTypeAmbiguousConstructor" xml:space="preserve">
+    <value>Unsupported array type: {0}. More than one public constructor taking two parameters found.</value>
+  </data>
+  <data name="UnsupportedAssocParameterArrayTypeNoConstructor" xml:space="preserve">
+    <value>Unsupported array type: {0}. No public constructor taking two parameters found.</value>
+  </data>
   <data name="UnsupportedParameterType" xml:space="preserve">
     <value>Unsupported parameter type {0}.</value>
     <comment>Property type.</comment>

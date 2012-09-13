@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using LBi.Cli.Arguments;
@@ -60,6 +61,22 @@ namespace LBi.CLI.Arguments.Test
                 Assert.False(builder.Build(typeof (byte),
                                            new LiteralValue(SourceInfo.Empty, LiteralValueType.String, "abc")));
                 Assert.NotEmpty(builder.Errors);
+            }
+        }
+
+        [Fact]
+        public void StringHex_ToByte()
+        {
+            using (ValueBuilder builder = new ValueBuilder())
+            {
+                Assert.True(builder.Build(typeof(byte),
+                                           new LiteralValue(SourceInfo.Empty, LiteralValueType.String, "0xA")));
+                foreach (TypeError error in builder.Errors)
+                {
+                    Debug.WriteLine(error.Message);
+                }
+                Assert.Empty(builder.Errors);
+                Assert.Equal((byte)builder.Value, 0xA);
             }
         }
 

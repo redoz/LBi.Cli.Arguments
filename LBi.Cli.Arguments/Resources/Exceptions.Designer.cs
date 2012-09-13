@@ -70,6 +70,24 @@ namespace LBi.Cli.Arguments.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unsupported array type: {0}. More than one public constructor taking two parameters found..
+        /// </summary>
+        internal static string UnsupportedAssocParameterArrayTypeAmbiguousConstructor {
+            get {
+                return ResourceManager.GetString("UnsupportedAssocParameterArrayTypeAmbiguousConstructor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unsupported array type: {0}. No public constructor taking two parameters found..
+        /// </summary>
+        internal static string UnsupportedAssocParameterArrayTypeNoConstructor {
+            get {
+                return ResourceManager.GetString("UnsupportedAssocParameterArrayTypeNoConstructor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unsupported parameter type {0}..
         /// </summary>
         internal static string UnsupportedParameterType {

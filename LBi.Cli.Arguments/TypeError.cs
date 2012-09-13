@@ -28,7 +28,7 @@ namespace LBi.Cli.Arguments
             this.AstNode = astNode;
             this.Message = message;
         }
-        protected string Message { get; set; }
+        public string Message { get; set; }
         public Type TargetType { get; protected set; }
         public object Value { get; protected set; }
         public AstNode AstNode { get; protected set; }
