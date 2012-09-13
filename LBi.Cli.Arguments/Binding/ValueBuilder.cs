@@ -341,7 +341,7 @@ namespace LBi.Cli.Arguments.Binding
                     Type valueType = addParams[1].ParameterType;
                     Action<int, object, object> handleKeyValuePair =
                         (index, key, value) =>
-                        addMethod.Invoke(newObject, new[] {key, value});
+                        addMethod.Invoke(newObject, new[] { key, value });
 
                     this.FillAssocArray(array, keyType, valueType, handleKeyValuePair);
 
@@ -356,9 +356,36 @@ namespace LBi.Cli.Arguments.Binding
             }
             else
             {
-                throw new NotSupportedException(
-                    string.Format(Resources.Exceptions.UnsupportedParameterTypeNoAddMethod,
-                                  targetType.FullName));
+                addMethod = targetType.GetMethods(BindingFlags.Instance | BindingFlags.Public)
+                    .FirstOrDefault(
+                        m => StringComparer.OrdinalIgnoreCase.Equals("Add", m.Name) &&
+                             m.GetParameters().Length == 1);
+
+                if (addMethod != null)
+                {
+                    var addParams = addMethod.GetParameters();
+
+                    var parameterType = addParams[0].ParameterType;
+
+                    var paramTypeCtors = parameterType.GetConstructors(BindingFlags.Instance | BindingFlags.Public);
+
+                    var matches = paramTypeCtors.Where(ct => ct.GetParameters().Length == 2).ToArray();
+
+                    if (matches.Length == 1)
+                    {
+                        // tODO fix this
+                    } else if (matches.Length == 0)
+                    {
+                        // and this
+                    } else
+                    {
+                        // and this   
+                    }
+
+                    throw new NotSupportedException(
+                        string.Format(Resources.Exceptions.UnsupportedParameterTypeNoAddMethod,
+                                      targetType.FullName));
+                }
             }
         }
 
@@ -432,7 +459,7 @@ namespace LBi.Cli.Arguments.Binding
         {
             Type elementType = arrayType.GetElementType();
 
-            ConstructorInfo[] ctors = elementType.GetConstructors(BindingFlags.Public);
+            ConstructorInfo[] ctors = elementType.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
 
             ConstructorInfo[] matches = ctors.Where(ct => ct.GetParameters().Length == 2).ToArray();
 

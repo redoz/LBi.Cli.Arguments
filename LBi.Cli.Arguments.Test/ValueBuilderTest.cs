@@ -285,6 +285,85 @@ namespace LBi.CLI.Arguments.Test
             }
         }
 
+        [Fact]
+        public void AssocArray_To_Array_of_KeyValuePair_of_String_String()
+        {
+            using (ValueBuilder builder = new ValueBuilder())
+            {
+                Assert.True(builder.Build(typeof (KeyValuePair<string, string>[]),
+                                          new AssociativeArray(SourceInfo.Empty,
+                                                               new[]
+                                                                   {
+                                                                       new KeyValuePair<AstNode, AstNode>(
+                                                                           new LiteralValue(SourceInfo.Empty,
+                                                                                            LiteralValueType.Numeric,
+                                                                                            "1"),
+                                                                           new LiteralValue(SourceInfo.Empty,
+                                                                                            LiteralValueType.String, "2"))
+
+                                                                   })));
+
+                Assert.Equal(new[] {new KeyValuePair<string, string>("1", "2"),},
+                             (KeyValuePair<string, string>[]) builder.Value);
+
+                Assert.Empty(builder.Errors);
+            }
+        }
+
+        [Fact]
+        public void AssocArray_To_Array_of_Tuple_of_String_String()
+        {
+            using (ValueBuilder builder = new ValueBuilder())
+            {
+                Assert.True(builder.Build(typeof(Tuple<string, string>[]),
+                                          new AssociativeArray(SourceInfo.Empty,
+                                                               new[]
+                                                                   {
+                                                                       new KeyValuePair<AstNode, AstNode>(
+                                                                           new LiteralValue(SourceInfo.Empty,
+                                                                                            LiteralValueType.Numeric,
+                                                                                            "1"),
+                                                                           new LiteralValue(SourceInfo.Empty,
+                                                                                            LiteralValueType.String, "2"))
+
+                                                                   })));
+
+                Assert.Equal(new[] { new Tuple<string, string>("1", "2"), },
+                             (Tuple<string, string>[])builder.Value);
+
+                Assert.Empty(builder.Errors);
+            }
+        }
+
+        [Fact]
+        public void AssocArray_To_List_of_Tuple_of_String_String()
+        {
+            using (ValueBuilder builder = new ValueBuilder())
+            {
+                Assert.True(builder.Build(typeof (List<Tuple<string, string>>),
+                                          new AssociativeArray(SourceInfo.Empty,
+                                                               new[]
+                                                                   {
+                                                                       new KeyValuePair<AstNode, AstNode>(
+                                                                           new LiteralValue(SourceInfo.Empty,
+                                                                                            LiteralValueType.Numeric,
+                                                                                            "1"),
+                                                                           new LiteralValue(SourceInfo.Empty,
+                                                                                            LiteralValueType.String, "2"))
+
+                                                                   })));
+
+                Assert.Equal(new List<Tuple<string, string>>(
+                                 new[]
+                                     {
+                                         new Tuple<string, string>("1", "2")
+                                     }
+                                 ),
+                             (List<Tuple<string, string>>) builder.Value);
+
+                Assert.Empty(builder.Errors);
+            }
+        }
 
 
     }
