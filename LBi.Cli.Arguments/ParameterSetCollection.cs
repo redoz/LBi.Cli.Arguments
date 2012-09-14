@@ -118,9 +118,10 @@ namespace LBi.Cli.Arguments
                         using (ValueBuilder builder = new ValueBuilder())
                         {
                             PropertyInfo paramProp = matchingParams[0].Property;
-                            if (builder.Build(paramProp.PropertyType, namedArguments[argNum].Value))
+                            object value;
+                            if (builder.Build(paramProp.PropertyType, namedArguments[argNum].Value, out value))
                             {
-                                paramProp.SetValue(instances[setNum], builder.Value, null);
+                                paramProp.SetValue(instances[setNum], value, null);
                             }
                             else
                             {
@@ -149,9 +150,10 @@ namespace LBi.Cli.Arguments
                     using (ValueBuilder builder = new ValueBuilder())
                     {
                         PropertyInfo paramProp = positionalParams[argNum].Property;
-                        if (builder.Build(paramProp.PropertyType, namedArguments[argNum].Value))
+                        object value;
+                        if (builder.Build(paramProp.PropertyType, namedArguments[argNum].Value, out value))
                         {
-                            paramProp.SetValue(instances[setNum], builder.Value, null);
+                            paramProp.SetValue(instances[setNum], value, null);
                         }
                         else
                         {

@@ -21,6 +21,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Numerics;
 using System.Reflection;
 using LBi.Cli.Arguments.Parsing.Ast;
 
@@ -32,7 +33,6 @@ namespace LBi.Cli.Arguments.Binding
         private readonly CultureInfo _culture;
         private readonly List<TypeError> _errors;
         private readonly Stack<Type> _targetType;
-        private object _value;
 
         public ValueBuilder()
             : this(CultureInfo.InvariantCulture)
@@ -54,16 +54,11 @@ namespace LBi.Cli.Arguments.Binding
             get { return this._errors; }
         }
 
-        public object Value
-        {
-            get { return this._value; }
-        }
-
-        public bool Build(Type propertyType, AstNode astNode)
+        public bool Build(Type propertyType, AstNode astNode, out object value)
         {
             this._targetType.Push(propertyType);
 
-            astNode.Visit(this);
+            value = astNode.Visit(this);
 
             return this._errors.Count == 0;
         }
@@ -157,8 +152,9 @@ namespace LBi.Cli.Arguments.Binding
 
         #region Implementation of IAstVisitor
 
-        void IAstVisitor.Visit(LiteralValue literalValue)
+        object IAstVisitor.Visit(LiteralValue literalValue)
         {
+            object ret;
             switch (literalValue.Type)
             {
                 case LiteralValueType.Numeric:
@@ -174,49 +170,54 @@ namespace LBi.Cli.Arguments.Binding
                         Single single;
                         Double dble;
                         Decimal dec;
+                        BigInteger bigInt;
                         if (sbyte.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out signedByte))
-                            this._value = signedByte;
+                            ret = signedByte;
                         else if (byte.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out usignedByte))
-                            this._value = usignedByte;
+                            ret = usignedByte;
                         else if (short.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out signedShort))
-                            this._value = signedShort;
+                            ret = signedShort;
                         else if (ushort.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out unsignedShort))
-                            this._value = unsignedShort;
+                            ret = unsignedShort;
                         else if (int.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out signedInt))
-                            this._value = signedInt;
+                            ret = signedInt;
                         else if (uint.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out unsignedInt))
-                            this._value = unsignedInt;
+                            ret = unsignedInt;
                         else if (long.TryParse(literalValue.Value, NumberStyles.Any, this._culture,
                                                out signedLong))
-                            this._value = signedLong;
+                            ret = signedLong;
                         else if (ulong.TryParse(literalValue.Value, NumberStyles.Any, this._culture,
                                                 out unsignedLong))
-                            this._value = unsignedLong;
+                            ret = unsignedLong;
                         else if (Single.TryParse(literalValue.Value, NumberStyles.Any, this._culture,
                                                  out single))
-                            this._value = single;
+                            ret = single;
                         else if (Double.TryParse(literalValue.Value, NumberStyles.Any, this._culture,
                                                  out dble))
-                            this._value = dble;
+                            ret = dble;
                         else if (Decimal.TryParse(literalValue.Value, NumberStyles.Any,
                                                   this._culture, out dec))
-                            this._value = dec;
+                            ret = dec;
+                        else if (BigInteger.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out bigInt))
+                            ret = bigInt;
+                        else
+                            ret = literalValue.Value;
 
                         string errorMessage;
-                        if (!this.TryConvertType(this._targetType.Peek(), ref this._value, out errorMessage))
+                        if (!this.TryConvertType(this._targetType.Peek(), ref ret, out errorMessage))
                         {
-                            this._errors.Add(new TypeError(this._targetType.Peek(), this.Value, literalValue,
+                            this._errors.Add(new TypeError(this._targetType.Peek(), ret, literalValue,
                                                            errorMessage));
                         }
                     }
 
                     break;
                 case LiteralValueType.String:
-                    this._value = literalValue.Value;
+                    ret = literalValue.Value;
                     if (this._targetType.Peek() != typeof(string))
                     {
                         string errorMessage;
-                        if (!this.TryConvertType(this._targetType.Peek(), ref this._value, out errorMessage))
+                        if (!this.TryConvertType(this._targetType.Peek(), ref ret, out errorMessage))
                         {
                             this._errors.Add(new TypeError(this._targetType.Peek(), literalValue.Value, literalValue,
                                                            errorMessage));
@@ -224,16 +225,16 @@ namespace LBi.Cli.Arguments.Binding
                     }
                     break;
                 case LiteralValueType.Null:
-                    this._value = null;
+                    ret = null;
                     break;
                 case LiteralValueType.Boolean:
-                    this._value = StringComparer.InvariantCultureIgnoreCase.Equals(literalValue.Value, "$true");
+                    ret = StringComparer.InvariantCultureIgnoreCase.Equals(literalValue.Value, "$true");
                     if (this._targetType.Peek() != typeof(bool))
                     {
                         string errorMessage;
-                        if (!this.TryConvertType(this._targetType.Peek(), ref this._value, out errorMessage))
+                        if (!this.TryConvertType(this._targetType.Peek(), ref ret, out errorMessage))
                         {
-                            this._errors.Add(new TypeError(this._targetType.Peek(), this.Value, literalValue,
+                            this._errors.Add(new TypeError(this._targetType.Peek(), ret, literalValue,
                                                            errorMessage));
                         }
                     }
@@ -241,22 +242,24 @@ namespace LBi.Cli.Arguments.Binding
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+
+            return ret;
         }
 
 
-        void IAstVisitor.Visit(Sequence sequence)
+        object IAstVisitor.Visit(Sequence sequence)
         {
             Type targetType = this._targetType.Peek();
             Type elementType;
 
             Action<int, object> elementHandler;
-            object nextValue;
+            object ret;
 
             if (targetType.IsArray)
             {
                 elementType = targetType.GetElementType();
-                nextValue = Array.CreateInstance(elementType, sequence.Elements.Length);
-                Array newArray = (Array) nextValue;
+                ret = Array.CreateInstance(elementType, sequence.Elements.Length);
+                Array newArray = (Array)ret;
                 elementHandler = (i, o) => newArray.SetValue(o, i);
             }
             else
@@ -279,10 +282,10 @@ namespace LBi.Cli.Arguments.Binding
                         throw new Exception("Unsupported");
                     }
 
-                    nextValue = Activator.CreateInstance(typeof(List<>).MakeGenericType(elementType));
-                    MethodInfo addMethod = nextValue.GetType().GetMethod("Add", new[] {elementType});
+                    ret = Activator.CreateInstance(typeof(List<>).MakeGenericType(elementType));
+                    MethodInfo addMethod = ret.GetType().GetMethod("Add", new[] { elementType });
                     Debug.Assert(addMethod != null, "addMethod is null. Add some error checking here.");
-                    elementHandler = (i, o) => addMethod.Invoke(nextValue, new[] {o});
+                    elementHandler = (i, o) => addMethod.Invoke(ret, new[] { o });
                 }
                 else
                 {
@@ -291,8 +294,8 @@ namespace LBi.Cli.Arguments.Binding
                             .Where(m => StringComparer.InvariantCultureIgnoreCase.Equals("Add", m.Name))
                             .Single(m => m.GetParameters().Length == 1);
                     elementType = addMethod.GetParameters()[0].ParameterType;
-                    nextValue = Activator.CreateInstance(targetType);
-                    elementHandler = (i, o) => addMethod.Invoke(nextValue, new[] {o});
+                    ret = Activator.CreateInstance(targetType);
+                    elementHandler = (i, o) => addMethod.Invoke(ret, new[] { o });
                 }
             }
 
@@ -300,28 +303,29 @@ namespace LBi.Cli.Arguments.Binding
             for (int elemNum = 0; elemNum < sequence.Elements.Length; elemNum++)
             {
                 AstNode element = sequence.Elements[elemNum];
-                element.Visit(this);
-                elementHandler(elemNum, this.Value);
+                object value = element.Visit(this);
+                elementHandler(elemNum, value);
             }
             this._targetType.Pop();
-            this._value = nextValue;
+            return ret;
         }
 
-        void IAstVisitor.Visit(AssociativeArray array)
+        object IAstVisitor.Visit(AssociativeArray array)
         {
             Type targetType = this._targetType.Peek();
             if (targetType.IsInterface)
-                this.HandleInterfaceBasedAssocArray(array, targetType);
+                return this.HandleInterfaceBasedAssocArray(array, targetType);
             else if (targetType.IsArray)
-                this.HandleArrayBasedAssocArray(array, targetType);
+                return this.HandleArrayBasedAssocArray(array, targetType);
             else
-                this.HandleMethodBasedAssocArray(array, targetType);
+                return this.HandleMethodBasedAssocArray(array, targetType);
         }
 
         #region AssociativeArray Handling
 
-        private void HandleMethodBasedAssocArray(AssociativeArray array, Type targetType)
+        private object HandleMethodBasedAssocArray(AssociativeArray array, Type targetType)
         {
+            object ret;
             MethodInfo addMethod = targetType.GetMethods(BindingFlags.Instance | BindingFlags.Public)
                 .FirstOrDefault(
                     m => StringComparer.OrdinalIgnoreCase.Equals("Add", m.Name) &&
@@ -333,7 +337,7 @@ namespace LBi.Cli.Arguments.Binding
 
                 if (defaultCtor != null)
                 {
-                    object newObject = defaultCtor.Invoke(null);
+                    ret = defaultCtor.Invoke(null);
 
                     var addParams = addMethod.GetParameters();
 
@@ -341,11 +345,9 @@ namespace LBi.Cli.Arguments.Binding
                     Type valueType = addParams[1].ParameterType;
                     Action<int, object, object> handleKeyValuePair =
                         (index, key, value) =>
-                        addMethod.Invoke(newObject, new[] { key, value });
+                        addMethod.Invoke(ret, new[] { key, value });
 
                     this.FillAssocArray(array, keyType, valueType, handleKeyValuePair);
-
-                    this._value = newObject;
                 }
                 else
                 {
@@ -374,10 +376,12 @@ namespace LBi.Cli.Arguments.Binding
                     if (matches.Length == 1)
                     {
                         // tODO fix this
-                    } else if (matches.Length == 0)
+                    }
+                    else if (matches.Length == 0)
                     {
                         // and this
-                    } else
+                    }
+                    else
                     {
                         // and this   
                     }
@@ -385,11 +389,16 @@ namespace LBi.Cli.Arguments.Binding
                     throw new NotSupportedException(
                         string.Format(Resources.Exceptions.UnsupportedParameterTypeNoAddMethod,
                                       targetType.FullName));
+                } else
+                {
+                    // TODO Fix this
+                    ret = null;
                 }
             }
+            return ret;
         }
 
-        private void HandleInterfaceBasedAssocArray(AssociativeArray array, Type targetType)
+        private object HandleInterfaceBasedAssocArray(AssociativeArray array, Type targetType)
         {
             if (targetType.IsGenericType)
             {
@@ -436,6 +445,7 @@ namespace LBi.Cli.Arguments.Binding
                         string.Format(Resources.Exceptions.UnsupportedParameterType,
                                       targetType.FullName));
                 }
+                return null;
             }
             else if (targetType == typeof(IDictionary))
             {
@@ -455,8 +465,9 @@ namespace LBi.Cli.Arguments.Binding
             }
         }
 
-        private void HandleArrayBasedAssocArray(AssociativeArray array, Type arrayType)
+        private object HandleArrayBasedAssocArray(AssociativeArray array, Type arrayType)
         {
+            object ret;
             Type elementType = arrayType.GetElementType();
 
             ConstructorInfo[] ctors = elementType.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
@@ -468,10 +479,10 @@ namespace LBi.Cli.Arguments.Binding
                 Array newArray = Array.CreateInstance(elementType, array.Elements.Length);
                 Action<int, object, object> handleKeyValuePair =
                     (index, key, value) =>
-                        {
-                            object newValue = matches[0].Invoke(new[] {key, value});
-                            newArray.SetValue(newValue, index);
-                        };
+                    {
+                        object newValue = matches[0].Invoke(new[] { key, value });
+                        newArray.SetValue(newValue, index);
+                    };
 
                 // this is slightly wasteful as we already asked for the parameters once, but it's a one-off operation.
                 ParameterInfo[] parameters = matches[0].GetParameters();
@@ -479,7 +490,7 @@ namespace LBi.Cli.Arguments.Binding
                 this.FillAssocArray(array, parameters[0].ParameterType, parameters[1].ParameterType, handleKeyValuePair);
 
                 // set return value
-                this._value = newArray;
+                ret = newArray;
             }
             else if (matches.Length == 0)
             {
@@ -493,6 +504,8 @@ namespace LBi.Cli.Arguments.Binding
                     string.Format(Resources.Exceptions.UnsupportedAssocParameterArrayTypeAmbiguousConstructor,
                                   elementType.FullName));
             }
+
+            return ret;
         }
 
         private void FillAssocArray(AssociativeArray array,
@@ -504,14 +517,14 @@ namespace LBi.Cli.Arguments.Binding
             {
                 this._targetType.Push(keyType);
                 KeyValuePair<AstNode, AstNode> element = array.Elements[elemNum];
-                element.Key.Visit(this);
+
+                object keyValue = element.Key.Visit(this);
                 this._targetType.Pop();
-                object keyValue = this._value;
 
                 this._targetType.Push(valueType);
-                element.Value.Visit(this);
+
+                object valueValue = element.Value.Visit(this);
                 this._targetType.Pop();
-                object valueValue = this._value;
 
                 handleKeyValuePair(elemNum, keyValue, valueValue);
             }

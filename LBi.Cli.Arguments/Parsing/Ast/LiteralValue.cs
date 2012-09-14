@@ -29,9 +29,9 @@ namespace LBi.Cli.Arguments.Parsing.Ast
 
         public string Value { get; protected set; }
 
-        public override void Visit(IAstVisitor visitor)
+        public override object Visit(IAstVisitor visitor)
         {
-            visitor.Visit(this);
+            return visitor.Visit(this);
         }
     }
 }

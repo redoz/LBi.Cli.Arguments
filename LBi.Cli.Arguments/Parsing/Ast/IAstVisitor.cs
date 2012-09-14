@@ -20,10 +20,10 @@ namespace LBi.Cli.Arguments.Parsing.Ast
 {
     public interface IAstVisitor
     {
-        void Visit(LiteralValue literalValue);
+        object Visit(LiteralValue literalValue);
 
-        void Visit(Sequence sequence);
+        object Visit(Sequence sequence);
 
-        void Visit(AssociativeArray array);
+        object Visit(AssociativeArray array);
     }
 }

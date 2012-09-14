@@ -31,7 +31,7 @@ namespace LBi.Cli.Arguments.Parsing.Ast
 
         public ISourceInfo SourceInfo { get; protected set; }
 
-        public abstract void Visit(IAstVisitor visitor);
+        public abstract object Visit(IAstVisitor visitor);
 
         #region Nested type: SourceInfoImpl
 
