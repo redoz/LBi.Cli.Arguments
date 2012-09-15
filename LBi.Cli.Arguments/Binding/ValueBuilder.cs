@@ -312,13 +312,16 @@ namespace LBi.Cli.Arguments.Binding
 
         object IAstVisitor.Visit(AssociativeArray array)
         {
+            object ret;
             Type targetType = this._targetType.Peek();
             if (targetType.IsInterface)
-                return this.HandleInterfaceBasedAssocArray(array, targetType);
+                ret = this.HandleInterfaceBasedAssocArray(array, targetType);
             else if (targetType.IsArray)
-                return this.HandleArrayBasedAssocArray(array, targetType);
+                ret = this.HandleArrayBasedAssocArray(array, targetType);
             else
-                return this.HandleMethodBasedAssocArray(array, targetType);
+                ret = this.HandleMethodBasedAssocArray(array, targetType);
+
+            return ret;
         }
 
         #region AssociativeArray Handling
