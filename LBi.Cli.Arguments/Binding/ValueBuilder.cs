@@ -31,7 +31,7 @@ namespace LBi.Cli.Arguments.Binding
     {
         private static TypeDescriptionProvider _typeDescriptorProvider;
         private readonly CultureInfo _culture;
-        private readonly List<TypeError> _errors;
+        private readonly List<ValueError> _errors;
         private readonly Stack<Type> _targetType;
 
         public ValueBuilder()
@@ -45,11 +45,11 @@ namespace LBi.Cli.Arguments.Binding
         public ValueBuilder(CultureInfo cultureInfo)
         {
             this._culture = cultureInfo;
-            this._errors = new List<TypeError>();
+            this._errors = new List<ValueError>();
             this._targetType = new Stack<Type>();
         }
 
-        public IEnumerable<TypeError> Errors
+        public IEnumerable<ValueError> Errors
         {
             get { return this._errors; }
         }
@@ -329,75 +329,151 @@ namespace LBi.Cli.Arguments.Binding
         private object HandleMethodBasedAssocArray(AssociativeArray array, Type targetType)
         {
             object ret;
-            MethodInfo addMethod = targetType.GetMethods(BindingFlags.Instance | BindingFlags.Public)
-                .FirstOrDefault(
-                    m => StringComparer.OrdinalIgnoreCase.Equals("Add", m.Name) &&
-                         m.GetParameters().Length == 2);
 
-            if (addMethod != null)
+            try
             {
-                ConstructorInfo defaultCtor = targetType.GetConstructor(Type.EmptyTypes);
+                ret = Activator.CreateInstance(targetType);
+            }
+            catch (MissingMethodException)
+            {
+                throw new NotSupportedException(
+                    string.Format(Resources.Exceptions.UnsupportedParameterTypeNoDefaultConstructor,
+                                  targetType.FullName));
+            }
+            catch (MissingMemberException)
+            {
+                // portable class library
+                throw new NotSupportedException(
+                    string.Format(Resources.Exceptions.UnsupportedParameterTypeNoDefaultConstructor,
+                                  targetType.FullName));
+            }
 
-                if (defaultCtor != null)
+
+            MethodInfo[] addMethods = targetType.GetMethods(BindingFlags.Instance | BindingFlags.Public);
+
+            var addWithTwoArgs = addMethods.Where(m => m.GetParameters().Length == 2).ToArray();
+            var addWithOneArgs = addMethods.Where(m => m.GetParameters().Length == 1).ToArray();
+
+            for (int elementNum = 0; elementNum < array.Elements.Length; elementNum++)
+            {
+                KeyValuePair<AstNode, AstNode> elem = array.Elements[elementNum];
+                bool success = false;
+                for (int addNum = 0; addNum < addWithTwoArgs.Length; addNum++)
                 {
-                    ret = defaultCtor.Invoke(null);
+                    ParameterInfo[] addParameters = addWithTwoArgs[addNum].GetParameters();
 
-                    var addParams = addMethod.GetParameters();
+                    var keyType = addParameters[0].ParameterType;
+                    var keyNode = elem.Key;
+                    this._targetType.Push(keyType);
+                    var keyValue = keyNode.Visit(this);
+                    this._targetType.Pop();
+                    success = keyType.IsInstanceOfType(keyValue);
 
-                    Type keyType = addParams[0].ParameterType;
-                    Type valueType = addParams[1].ParameterType;
-                    Action<int, object, object> handleKeyValuePair =
-                        (index, key, value) =>
-                        addMethod.Invoke(ret, new[] { key, value });
+                    if (success)
+                    {
+                        var valueType = addParameters[1].ParameterType;
+                        var valueNode = elem.Value;
+                        this._targetType.Push(valueType);
+                        var valueValue = valueNode.Visit(this);
+                        this._targetType.Pop();
 
-                    this.FillAssocArray(array, keyType, valueType, handleKeyValuePair);
+                        success = valueType.IsInstanceOfType(valueValue);
+
+                        if (success)
+                        {
+                            try
+                            {
+                                addWithTwoArgs[addNum].Invoke(ret, new[] { keyValue, valueValue });
+                                break;
+                            }
+                            catch (Exception ex)
+                            {
+                                this._errors.Add(new InvokeError(addWithTwoArgs[addNum],
+                                                                 new[] {keyValue, valueValue},
+                                                                 new[] {keyNode, valueNode},
+                                                                 ex.Message));
+                            }
+                        }
+                    }
                 }
-                else
+
+                if (!success)
                 {
-                    throw new NotSupportedException(
-                        string.Format(Resources.Exceptions.UnsupportedParameterTypeNoDefaultConstructor,
-                                      targetType.FullName));
+                    for (int addNum = 0; addNum < addWithOneArgs.Length; addNum++)
+                    {
+                        ParameterInfo[] addParameters = addWithOneArgs[addNum].GetParameters();
+
+                        var addParam = addParameters[0];
+                        var addParamtype = addParam.ParameterType;
+
+                        var paramTypeCtors =
+                            addParamtype.GetConstructors()
+                                        .Where(ct => ct.GetParameters().Length == 2)
+                                        .ToArray();
+
+                        for (int ctorNum = 0; ctorNum < paramTypeCtors.Length; ctorNum++)
+                        {
+                            var ctorParameters = paramTypeCtors[ctorNum].GetParameters();
+
+                            var keyType = ctorParameters[0].ParameterType;
+                            var keyNode = elem.Key;
+                            this._targetType.Push(keyType);
+                            var keyValue = keyNode.Visit(this);
+                            this._targetType.Pop();
+
+                            success = keyType.IsInstanceOfType(keyValue);
+
+                            if (success)
+                            {
+                                var valueType = ctorParameters[1].ParameterType;
+                                var valueNode = elem.Value;
+                                this._targetType.Push(valueType);
+                                var valueValue = valueNode.Visit(this);
+                                this._targetType.Pop();
+
+                                success = valueType.IsInstanceOfType(valueValue);
+
+                                if (success)
+                                {
+                                    success = false;
+                                    try
+                                    {
+                                        object elementObj = paramTypeCtors[ctorNum].Invoke(new[] { keyValue, valueValue });
+
+                                        try
+                                        {
+                                            addWithOneArgs[addNum].Invoke(ret, new[] { elementObj });
+                                            success = true;
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            this._errors.Add(new InvokeError(addWithOneArgs[addNum],
+                                                                             new[] {elementObj},
+                                                                             new[] {keyNode, valueNode},
+                                                                             ex.Message));
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        this._errors.Add(new InvokeError(addWithTwoArgs[addNum],
+                                                                         new[] {keyValue, valueValue},
+                                                                         new[] {keyNode, valueNode},
+                                                                         ex.Message));
+                                    }
+
+                                    if (success)
+                                        break;
+
+                                }
+                            }
+                        }
+
+                        if (success)
+                            break;
+                    }
                 }
             }
-            else
-            {
-                addMethod = targetType.GetMethods(BindingFlags.Instance | BindingFlags.Public)
-                    .FirstOrDefault(
-                        m => StringComparer.OrdinalIgnoreCase.Equals("Add", m.Name) &&
-                             m.GetParameters().Length == 1);
 
-                if (addMethod != null)
-                {
-                    var addParams = addMethod.GetParameters();
-
-                    var parameterType = addParams[0].ParameterType;
-
-                    var paramTypeCtors = parameterType.GetConstructors(BindingFlags.Instance | BindingFlags.Public);
-
-                    var matches = paramTypeCtors.Where(ct => ct.GetParameters().Length == 2).ToArray();
-
-                    if (matches.Length == 1)
-                    {
-                        // tODO fix this
-                    }
-                    else if (matches.Length == 0)
-                    {
-                        // and this
-                    }
-                    else
-                    {
-                        // and this   
-                    }
-
-                    throw new NotSupportedException(
-                        string.Format(Resources.Exceptions.UnsupportedParameterTypeNoAddMethod,
-                                      targetType.FullName));
-                } else
-                {
-                    // TODO Fix this
-                    ret = null;
-                }
-            }
             return ret;
         }
 

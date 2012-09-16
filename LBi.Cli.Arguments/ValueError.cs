@@ -14,23 +14,9 @@
  * limitations under the License. 
  */
 
-using System;
-using LBi.Cli.Arguments.Parsing.Ast;
-
 namespace LBi.Cli.Arguments
 {
-    public class TypeError : ValueError
+    public class ValueError
     {
-        public TypeError(Type targetType, object value, AstNode astNode, string message)
-        {
-            this.TargetType = targetType;
-            this.Value = value;
-            this.AstNode = astNode;
-            this.Message = message;
-        }
-        public string Message { get; set; }
-        public Type TargetType { get; protected set; }
-        public object Value { get; protected set; }
-        public AstNode AstNode { get; protected set; }
     }
 }
