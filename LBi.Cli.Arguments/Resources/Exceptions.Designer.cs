@@ -61,6 +61,15 @@ namespace LBi.Cli.Arguments.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No implementation for interface found: {0}.
+        /// </summary>
+        internal static string FailedToResolveInterfaceType {
+            get {
+                return ResourceManager.GetString("FailedToResolveInterfaceType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unsupported array type: {0}. Associative arrays can only be assigned to arrays of KeyValuePair&lt;TKey, TValue&gt; or Tuple&lt;TKey, TValue&gt;..
         /// </summary>
         internal static string UnsupportedAssocParameterArrayType {

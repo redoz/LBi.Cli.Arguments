@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="FailedToResolveInterfaceType" xml:space="preserve">
+    <value>No implementation for interface found: {0}</value>
+  </data>
   <data name="UnsupportedAssocParameterArrayType" xml:space="preserve">
     <value>Unsupported array type: {0}. Associative arrays can only be assigned to arrays of KeyValuePair&lt;TKey, TValue&gt; or Tuple&lt;TKey, TValue&gt;.</value>
   </data>

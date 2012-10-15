@@ -48,8 +48,13 @@
   <ItemGroup>
     <Compile Include="AliasAttribute.cs" />
     <Compile Include="Binding\CustomBooleanConverter.cs" />
+    <Compile Include="Binding\ErrorCollector.cs" />
+    <Compile Include="Binding\ErrorEventArg.cs" />
+    <Compile Include="Binding\InterfaceResolutionException.cs" />
     <Compile Include="Binding\InvokeError.cs" />
+    <Compile Include="Binding\Lookup.cs" />
     <Compile Include="Binding\Reflection.cs" />
+    <Compile Include="Binding\ResolveTypeArgs.cs" />
     <Compile Include="ErrorType.cs" />
     <Compile Include="Globalization\IResourceProvider.cs" />
     <Compile Include="Parameter.cs" />
