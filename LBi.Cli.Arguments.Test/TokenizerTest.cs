@@ -29,12 +29,13 @@ namespace LBi.CLI.Arguments.Test
         {
             Tokenizer tokenizer = new Tokenizer();
             var tokens = tokenizer.Tokenize("-myparam test").ToArray();
-            Assert.Equal(2, tokens.Length);
+            Assert.Equal(3, tokens.Length);
             Assert.Equal(tokens.Select(t => t.Type),
                          new[]
                              {
                                  TokenType.ParameterName,
                                  TokenType.StringValue,
+                                 TokenType.EndOfString, 
                              });
         }
 
@@ -43,7 +44,7 @@ namespace LBi.CLI.Arguments.Test
         {
             Tokenizer tokenizer = new Tokenizer();
             var tokens = tokenizer.Tokenize("-myparam test -my2ndparam $true -dictp @{} -arrayp @()").ToArray();
-            Assert.Equal(10, tokens.Length);
+            Assert.Equal(11, tokens.Length);
             Assert.Equal(tokens.Select(t => t.Type),
                          new[]
                              {
@@ -56,7 +57,8 @@ namespace LBi.CLI.Arguments.Test
                                  TokenType.DictionaryEnd,
                                  TokenType.ParameterName,
                                  TokenType.ListStart,
-                                 TokenType.ListEnd
+                                 TokenType.ListEnd,
+                                 TokenType.EndOfString
                              });
         }
 
@@ -73,7 +75,8 @@ namespace LBi.CLI.Arguments.Test
                                  TokenType.DictionaryStart,
                                  TokenType.DictionaryEnd, 
                                  TokenType.ListStart,
-                                 TokenType.ListEnd
+                                 TokenType.ListEnd,
+                                 TokenType.EndOfString, 
                              });
         }
 
@@ -82,11 +85,12 @@ namespace LBi.CLI.Arguments.Test
         {
             Tokenizer tokenizer = new Tokenizer();
             var tokens = tokenizer.Tokenize("test").ToArray();
-            Assert.Equal(1, tokens.Length);
+            Assert.Equal(2, tokens.Length);
             Assert.Equal(4, tokens[0].Length);
             Assert.Equal(0, tokens[0].Position);
             Assert.Equal("test", tokens[0].Value);
             Assert.Equal(TokenType.StringValue, tokens[0].Type);
+            Assert.Equal(TokenType.EndOfString, tokens[1].Type);
         }
 
         [Fact]
@@ -94,11 +98,12 @@ namespace LBi.CLI.Arguments.Test
         {
             Tokenizer tokenizer = new Tokenizer();
             var tokens = tokenizer.Tokenize("'te\"`'st'").ToArray();
-            Assert.Equal(1, tokens.Length);
+            Assert.Equal(2, tokens.Length);
             Assert.Equal(9, tokens[0].Length);
             Assert.Equal(0, tokens[0].Position);
             Assert.Equal("te\"'st", tokens[0].Value);
             Assert.Equal(TokenType.StringValue, tokens[0].Type);
+            Assert.Equal(TokenType.EndOfString, tokens[1].Type);
         }
 
         [Fact]
@@ -106,11 +111,12 @@ namespace LBi.CLI.Arguments.Test
         {
             Tokenizer tokenizer = new Tokenizer();
             var tokens = tokenizer.Tokenize("\"te'`\"st\"").ToArray();
-            Assert.Equal(1, tokens.Length);
+            Assert.Equal(2, tokens.Length);
             Assert.Equal(9, tokens[0].Length);
             Assert.Equal(0, tokens[0].Position);
             Assert.Equal("te'\"st", tokens[0].Value);
             Assert.Equal(TokenType.StringValue, tokens[0].Type);
+            Assert.Equal(TokenType.EndOfString, tokens[1].Type);
         }
 
         [Fact]
@@ -118,11 +124,12 @@ namespace LBi.CLI.Arguments.Test
         {
             Tokenizer tokenizer = new Tokenizer();
             var tokens = tokenizer.Tokenize("$null").ToArray();
-            Assert.Equal(1, tokens.Length);
+            Assert.Equal(2, tokens.Length);
             Assert.Equal(5, tokens[0].Length);
             Assert.Equal(0, tokens[0].Position);
             Assert.Equal("$null", tokens[0].Value);
             Assert.Equal(TokenType.NullValue, tokens[0].Type);
+            Assert.Equal(TokenType.EndOfString, tokens[1].Type);
         }
 
         [Fact]
@@ -130,11 +137,12 @@ namespace LBi.CLI.Arguments.Test
         {
             Tokenizer tokenizer = new Tokenizer();
             var tokens = tokenizer.Tokenize("$true").ToArray();
-            Assert.Equal(1, tokens.Length);
+            Assert.Equal(2, tokens.Length);
             Assert.Equal(5, tokens[0].Length);
             Assert.Equal(0, tokens[0].Position);
             Assert.Equal("$true", tokens[0].Value);
             Assert.Equal(TokenType.BoolValue, tokens[0].Type);
+            Assert.Equal(TokenType.EndOfString, tokens[1].Type);
         }
 
         [Fact]
@@ -142,11 +150,12 @@ namespace LBi.CLI.Arguments.Test
         {
             Tokenizer tokenizer = new Tokenizer();
             var tokens = tokenizer.Tokenize("$false").ToArray();
-            Assert.Equal(1, tokens.Length);
+            Assert.Equal(2, tokens.Length);
             Assert.Equal(6, tokens[0].Length);
             Assert.Equal(0, tokens[0].Position);
             Assert.Equal("$false", tokens[0].Value);
             Assert.Equal(TokenType.BoolValue, tokens[0].Type);
+            Assert.Equal(TokenType.EndOfString, tokens[1].Type);
         }
 
         [Fact]
@@ -154,11 +163,12 @@ namespace LBi.CLI.Arguments.Test
         {
             Tokenizer tokenizer = new Tokenizer();
             var tokens = tokenizer.Tokenize("1234").ToArray();
-            Assert.Equal(1, tokens.Length);
+            Assert.Equal(2, tokens.Length);
             Assert.Equal(4, tokens[0].Length);
             Assert.Equal(0, tokens[0].Position);
             Assert.Equal("1234", tokens[0].Value);
             Assert.Equal(TokenType.NumericValue, tokens[0].Type);
+            Assert.Equal(TokenType.EndOfString, tokens[1].Type);
         }
 
         [Fact]
@@ -166,11 +176,12 @@ namespace LBi.CLI.Arguments.Test
         {
             Tokenizer tokenizer = new Tokenizer();
             var tokens = tokenizer.Tokenize("12.34").ToArray();
-            Assert.Equal(1, tokens.Length);
+            Assert.Equal(2, tokens.Length);
             Assert.Equal(5, tokens[0].Length);
             Assert.Equal(0, tokens[0].Position);
             Assert.Equal("12.34", tokens[0].Value);
             Assert.Equal(TokenType.NumericValue, tokens[0].Type);
+            Assert.Equal(TokenType.EndOfString, tokens[1].Type);
         }
 
         [Fact]
@@ -178,11 +189,12 @@ namespace LBi.CLI.Arguments.Test
         {
             Tokenizer tokenizer = new Tokenizer();
             var tokens = tokenizer.Tokenize("12.3.4").ToArray();
-            Assert.Equal(1, tokens.Length);
+            Assert.Equal(2, tokens.Length);
             Assert.Equal(6, tokens[0].Length);
             Assert.Equal(0, tokens[0].Position);
             Assert.Equal("12.3.4", tokens[0].Value);
             Assert.Equal(TokenType.StringValue, tokens[0].Type);
+            Assert.Equal(TokenType.EndOfString, tokens[1].Type);
         }
 
 
@@ -191,7 +203,7 @@ namespace LBi.CLI.Arguments.Test
         {
             Tokenizer tokenizer = new Tokenizer();
             var tokens = tokenizer.Tokenize("@()").ToArray();
-            Assert.Equal(2, tokens.Length);
+            Assert.Equal(3, tokens.Length);
 
             Assert.Equal(2, tokens[0].Length);
             Assert.Equal(0, tokens[0].Position);
@@ -202,6 +214,8 @@ namespace LBi.CLI.Arguments.Test
             Assert.Equal(2, tokens[1].Position);
             Assert.Equal(")", tokens[1].Value);
             Assert.Equal(TokenType.ListEnd, tokens[1].Type);
+
+            Assert.Equal(TokenType.EndOfString, tokens[2].Type);
         }
 
         [Fact]
@@ -209,7 +223,7 @@ namespace LBi.CLI.Arguments.Test
         {
             Tokenizer tokenizer = new Tokenizer();
             var tokens = tokenizer.Tokenize("@($true)").ToArray();
-            Assert.Equal(3, tokens.Length);
+            Assert.Equal(4, tokens.Length);
 
             Assert.Equal(2, tokens[0].Length);
             Assert.Equal(0, tokens[0].Position);
@@ -225,6 +239,8 @@ namespace LBi.CLI.Arguments.Test
             Assert.Equal(7, tokens[2].Position);
             Assert.Equal(")", tokens[2].Value);
             Assert.Equal(TokenType.ListEnd, tokens[2].Type);
+
+            Assert.Equal(TokenType.EndOfString, tokens[3].Type);
         }
 
         [Fact]
@@ -232,7 +248,7 @@ namespace LBi.CLI.Arguments.Test
         {
             Tokenizer tokenizer = new Tokenizer();
             var tokens = tokenizer.Tokenize("@(true)").ToArray();
-            Assert.Equal(3, tokens.Length);
+            Assert.Equal(4, tokens.Length);
 
             Assert.Equal(2, tokens[0].Length);
             Assert.Equal(0, tokens[0].Position);
@@ -248,6 +264,8 @@ namespace LBi.CLI.Arguments.Test
             Assert.Equal(6, tokens[2].Position);
             Assert.Equal(")", tokens[2].Value);
             Assert.Equal(TokenType.ListEnd, tokens[2].Type);
+
+            Assert.Equal(TokenType.EndOfString, tokens[3].Type);
         }
 
         [Fact]
@@ -255,7 +273,7 @@ namespace LBi.CLI.Arguments.Test
         {
             Tokenizer tokenizer = new Tokenizer();
             var tokens = tokenizer.Tokenize("@(1234)").ToArray();
-            Assert.Equal(3, tokens.Length);
+            Assert.Equal(4, tokens.Length);
 
             Assert.Equal(2, tokens[0].Length);
             Assert.Equal(0, tokens[0].Position);
@@ -271,6 +289,8 @@ namespace LBi.CLI.Arguments.Test
             Assert.Equal(6, tokens[2].Position);
             Assert.Equal(")", tokens[2].Value);
             Assert.Equal(TokenType.ListEnd, tokens[2].Type);
+
+            Assert.Equal(TokenType.EndOfString, tokens[3].Type);
         }
 
         [Fact]
@@ -292,6 +312,7 @@ namespace LBi.CLI.Arguments.Test
                                  //TokenType.ListValueSeperator,
                                  TokenType.NumericValue,
                                  TokenType.ListEnd,
+                                 TokenType.EndOfString, 
                              });
         }
 
@@ -318,7 +339,8 @@ namespace LBi.CLI.Arguments.Test
                                  TokenType.StringValue,
                                  TokenType.ListEnd,
                                  TokenType.ListEnd,
-                                 TokenType.ListEnd
+                                 TokenType.ListEnd,
+                                 TokenType.EndOfString, 
                              });
 
 
@@ -332,7 +354,7 @@ namespace LBi.CLI.Arguments.Test
         {
             Tokenizer tokenizer = new Tokenizer();
             var tokens = tokenizer.Tokenize("@{}").ToArray();
-            Assert.Equal(2, tokens.Length);
+            Assert.Equal(3, tokens.Length);
 
             Assert.Equal(2, tokens[0].Length);
             Assert.Equal(0, tokens[0].Position);
@@ -343,6 +365,8 @@ namespace LBi.CLI.Arguments.Test
             Assert.Equal(2, tokens[1].Position);
             Assert.Equal("}", tokens[1].Value);
             Assert.Equal(TokenType.DictionaryEnd, tokens[1].Type);
+
+            Assert.Equal(TokenType.EndOfString, tokens[2].Type);
         }
 
         [Fact]
@@ -359,6 +383,7 @@ namespace LBi.CLI.Arguments.Test
                                  //TokenType.DictionaryValueSeperator,
                                  TokenType.StringValue,
                                  TokenType.DictionaryEnd,
+                                 TokenType.EndOfString, 
                              });
 
         }
@@ -389,7 +414,8 @@ namespace LBi.CLI.Arguments.Test
                                  TokenType.DictionaryEnd,
                                  //TokenType.DictionaryValueSeperator, 
                                  TokenType.StringValue, 
-                                 TokenType.DictionaryEnd
+                                 TokenType.DictionaryEnd,
+                                 TokenType.EndOfString, 
                              });
         }
     }

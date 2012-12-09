@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace LBi.Cli.Arguments.Binding
 {
-    public class ErrorCollector : IEnumerable<ValueError>, IDisposable
+    internal class ErrorCollector : IEnumerable<ValueError>, IDisposable
     {
         private readonly List<ValueError> _errors;
         private readonly ValueBuilder _valueBuilder;

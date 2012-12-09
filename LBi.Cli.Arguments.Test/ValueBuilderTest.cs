@@ -8,6 +8,7 @@ using LBi.Cli.Arguments.Binding;
 using LBi.Cli.Arguments.Parsing;
 using LBi.Cli.Arguments.Parsing.Ast;
 using Xunit;
+using Xunit.Extensions;
 
 namespace LBi.CLI.Arguments.Test
 {
@@ -34,10 +35,10 @@ namespace LBi.CLI.Arguments.Test
             using (ValueBuilder builder = new ValueBuilder())
             {
                 object value;
-                Assert.True(builder.Build(typeof (string),
+                Assert.True(builder.Build(typeof(string),
                                           new LiteralValue(SourceInfo.Empty, LiteralValueType.String, "test"),
                                           out value));
-                Assert.Equal("test", (string) value);
+                Assert.Equal("test", (string)value);
                 Assert.Empty(builder.Errors);
             }
         }
@@ -49,10 +50,10 @@ namespace LBi.CLI.Arguments.Test
             using (ValueBuilder builder = new ValueBuilder())
             {
                 object value;
-                Assert.True(builder.Build(typeof (byte),
-                                          new LiteralValue(SourceInfo.Empty, LiteralValueType.String, "255"), 
+                Assert.True(builder.Build(typeof(byte),
+                                          new LiteralValue(SourceInfo.Empty, LiteralValueType.String, "255"),
                                           out value));
-                Assert.Equal((byte) 255, (byte) value);
+                Assert.Equal((byte)255, (byte)value);
                 Assert.Empty(builder.Errors);
             }
         }
@@ -63,8 +64,8 @@ namespace LBi.CLI.Arguments.Test
             using (ValueBuilder builder = new ValueBuilder())
             {
                 object value;
-                Assert.False(builder.Build(typeof (byte),
-                                           new LiteralValue(SourceInfo.Empty, LiteralValueType.String, "abc"), 
+                Assert.False(builder.Build(typeof(byte),
+                                           new LiteralValue(SourceInfo.Empty, LiteralValueType.String, "abc"),
                                            out value));
                 Assert.NotEmpty(builder.Errors);
             }
@@ -76,15 +77,15 @@ namespace LBi.CLI.Arguments.Test
             using (ValueBuilder builder = new ValueBuilder())
             {
                 object value;
-                Assert.True(builder.Build(typeof (byte),
+                Assert.True(builder.Build(typeof(byte),
                                           new LiteralValue(SourceInfo.Empty, LiteralValueType.String, "0xA"),
                                           out value));
                 foreach (TypeError error in builder.Errors)
                 {
-                    Debug.WriteLine(error.Message);
+                    Debug.WriteLine(error.Exception.ToString());
                 }
                 Assert.Empty(builder.Errors);
-                Assert.Equal((byte) value, 0xA);
+                Assert.Equal((byte)value, 0xA);
             }
         }
 
@@ -95,10 +96,10 @@ namespace LBi.CLI.Arguments.Test
             using (ValueBuilder builder = new ValueBuilder())
             {
                 object value;
-                Assert.True(builder.Build(typeof (decimal),
-                                          new LiteralValue(SourceInfo.Empty, LiteralValueType.String, "2.55"), 
+                Assert.True(builder.Build(typeof(decimal),
+                                          new LiteralValue(SourceInfo.Empty, LiteralValueType.String, "2.55"),
                                           out value));
-                Assert.Equal((decimal) 2.55, (decimal) value);
+                Assert.Equal((decimal)2.55, (decimal)value);
                 Assert.Empty(builder.Errors);
             }
         }
@@ -109,11 +110,11 @@ namespace LBi.CLI.Arguments.Test
             using (ValueBuilder builder = new ValueBuilder())
             {
                 object value;
-                Assert.True(builder.Build(typeof (DateTime),
+                Assert.True(builder.Build(typeof(DateTime),
                                           new LiteralValue(SourceInfo.Empty, LiteralValueType.String,
-                                                           "2001-02-03 04:05:06"), 
+                                                           "2001-02-03 04:05:06"),
                                           out value));
-                Assert.Equal(new DateTime(2001, 02, 03, 04, 05, 06), (DateTime) value);
+                Assert.Equal(new DateTime(2001, 02, 03, 04, 05, 06), (DateTime)value);
                 Assert.Empty(builder.Errors);
             }
         }
@@ -124,10 +125,10 @@ namespace LBi.CLI.Arguments.Test
             using (ValueBuilder builder = new ValueBuilder())
             {
                 object value;
-                Assert.True(builder.Build(typeof (sbyte),
-                                          new LiteralValue(SourceInfo.Empty, LiteralValueType.Numeric, "50"), 
+                Assert.True(builder.Build(typeof(sbyte),
+                                          new LiteralValue(SourceInfo.Empty, LiteralValueType.Numeric, "50"),
                                           out value));
-                Assert.Equal((sbyte) 50, (sbyte) value);
+                Assert.Equal((sbyte)50, (sbyte)value);
                 Assert.Empty(builder.Errors);
             }
         }
@@ -139,10 +140,10 @@ namespace LBi.CLI.Arguments.Test
             using (ValueBuilder builder = new ValueBuilder())
             {
                 object value;
-                Assert.True(builder.Build(typeof (byte),
-                                          new LiteralValue(SourceInfo.Empty, LiteralValueType.Numeric, "50"), 
+                Assert.True(builder.Build(typeof(byte),
+                                          new LiteralValue(SourceInfo.Empty, LiteralValueType.Numeric, "50"),
                                           out value));
-                Assert.Equal((byte) 50, (byte) value);
+                Assert.Equal((byte)50, (byte)value);
                 Assert.Empty(builder.Errors);
             }
         }
@@ -153,10 +154,10 @@ namespace LBi.CLI.Arguments.Test
             using (ValueBuilder builder = new ValueBuilder())
             {
                 object value;
-                Assert.True(builder.Build(typeof (Single),
-                                          new LiteralValue(SourceInfo.Empty, LiteralValueType.Numeric, "2"), 
+                Assert.True(builder.Build(typeof(Single),
+                                          new LiteralValue(SourceInfo.Empty, LiteralValueType.Numeric, "2"),
                                           out value));
-                Assert.Equal(2f, (Single) value);
+                Assert.Equal(2f, (Single)value);
                 Assert.Empty(builder.Errors);
             }
         }
@@ -167,10 +168,10 @@ namespace LBi.CLI.Arguments.Test
             using (ValueBuilder builder = new ValueBuilder())
             {
                 object value;
-                Assert.True(builder.Build(typeof (double),
+                Assert.True(builder.Build(typeof(double),
                                           new LiteralValue(SourceInfo.Empty, LiteralValueType.Numeric, "2.55"),
                                           out value));
-                Assert.Equal(2.55, (double) value, 2);
+                Assert.Equal(2.55, (double)value, 2);
                 Assert.Empty(builder.Errors);
             }
         }
@@ -181,10 +182,10 @@ namespace LBi.CLI.Arguments.Test
             using (ValueBuilder builder = new ValueBuilder())
             {
                 object value;
-                Assert.True(builder.Build(typeof (decimal),
+                Assert.True(builder.Build(typeof(decimal),
                                           new LiteralValue(SourceInfo.Empty, LiteralValueType.Numeric, "2.55"),
                                           out value));
-                Assert.Equal((decimal) 2.55, (decimal) value);
+                Assert.Equal((decimal)2.55, (decimal)value);
                 Assert.Empty(builder.Errors);
             }
         }
@@ -195,10 +196,10 @@ namespace LBi.CLI.Arguments.Test
             using (ValueBuilder builder = new ValueBuilder())
             {
                 object value;
-                Assert.True(builder.Build(typeof (bool),
+                Assert.True(builder.Build(typeof(bool),
                                           new LiteralValue(SourceInfo.Empty, LiteralValueType.String, "False"),
                                           out value));
-                Assert.True((bool) value);
+                Assert.True((bool)value);
                 Assert.Empty(builder.Errors);
             }
         }
@@ -209,9 +210,9 @@ namespace LBi.CLI.Arguments.Test
             using (ValueBuilder builder = new ValueBuilder())
             {
                 object value;
-                Assert.True(builder.Build(typeof (bool), new LiteralValue(SourceInfo.Empty, LiteralValueType.String, ""),
+                Assert.True(builder.Build(typeof(bool), new LiteralValue(SourceInfo.Empty, LiteralValueType.String, ""),
                                           out value));
-                Assert.False((bool) value);
+                Assert.False((bool)value);
                 Assert.Empty(builder.Errors);
             }
         }
@@ -222,10 +223,10 @@ namespace LBi.CLI.Arguments.Test
             using (ValueBuilder builder = new ValueBuilder())
             {
                 object value;
-                Assert.True(builder.Build(typeof (int),
+                Assert.True(builder.Build(typeof(int),
                                           new LiteralValue(SourceInfo.Empty, LiteralValueType.Boolean, "$true"),
                                           out value));
-                Assert.Equal(1, (int) value);
+                Assert.Equal(1, (int)value);
                 Assert.Empty(builder.Errors);
             }
         }
@@ -236,10 +237,10 @@ namespace LBi.CLI.Arguments.Test
             using (ValueBuilder builder = new ValueBuilder())
             {
                 object value;
-                Assert.True(builder.Build(typeof (int),
+                Assert.True(builder.Build(typeof(int),
                                           new LiteralValue(SourceInfo.Empty, LiteralValueType.Boolean, "$false"),
                                           out value));
-                Assert.Equal(0, (int) value);
+                Assert.Equal(0, (int)value);
                 Assert.Empty(builder.Errors);
             }
         }
@@ -251,9 +252,9 @@ namespace LBi.CLI.Arguments.Test
             using (ValueBuilder builder = new ValueBuilder())
             {
                 object value;
-                Assert.True(builder.Build(typeof (IEnumerable<object>),
+                Assert.True(builder.Build(typeof(IEnumerable<object>),
                                           new Sequence(SourceInfo.Empty, Enumerable.Empty<AstNode>()), out value));
-                Assert.Empty((IEnumerable) value);
+                Assert.Empty((IEnumerable)value);
                 Assert.Empty(builder.Errors);
             }
         }
@@ -264,7 +265,7 @@ namespace LBi.CLI.Arguments.Test
             using (ValueBuilder builder = new ValueBuilder())
             {
                 object value;
-                Assert.True(builder.Build(typeof (IEnumerable<bool>),
+                Assert.True(builder.Build(typeof(IEnumerable<bool>),
                                           new Sequence(SourceInfo.Empty,
                                                        new[]
                                                            {
@@ -280,10 +281,10 @@ namespace LBi.CLI.Arguments.Test
                                                                                 LiteralValueType.String, "Any"),
                                                                new LiteralValue(SourceInfo.Empty,
                                                                                 LiteralValueType.String, "")
-                                                           }), 
+                                                           }),
                                           out value));
 
-                Assert.Equal(new[] {true, false, true, false, true, false}, ((IEnumerable<bool>) value).ToArray());
+                Assert.Equal(new[] { true, false, true, false, true, false }, ((IEnumerable<bool>)value).ToArray());
 
                 Assert.Empty(builder.Errors);
             }
@@ -296,7 +297,7 @@ namespace LBi.CLI.Arguments.Test
             using (ValueBuilder builder = new ValueBuilder())
             {
                 object value;
-                Assert.True(builder.Build(typeof (bool[]),
+                Assert.True(builder.Build(typeof(bool[]),
                                           new Sequence(SourceInfo.Empty,
                                                        new[]
                                                            {
@@ -315,7 +316,7 @@ namespace LBi.CLI.Arguments.Test
                                                            }),
                                           out value));
 
-                Assert.Equal(new[] {true, false, true, false, true, false}, (bool[]) value);
+                Assert.True(new[] { true, false, true, false, true, false }.SequenceEqual((IEnumerable<bool>)value));
 
                 Assert.Empty(builder.Errors);
             }
@@ -328,7 +329,7 @@ namespace LBi.CLI.Arguments.Test
             using (ValueBuilder builder = new ValueBuilder())
             {
                 object value;
-                Assert.True(builder.Build(typeof (decimal[]),
+                Assert.True(builder.Build(typeof(decimal[]),
                                           new Sequence(SourceInfo.Empty,
                                                        new[]
                                                            {
@@ -339,94 +340,167 @@ namespace LBi.CLI.Arguments.Test
                                                            }),
                                           out value));
 
-                Assert.Equal(new[] {1m, 2m}, (decimal[]) value);
+                Assert.Equal(new[] { 1m, 2m }, (decimal[])value);
 
                 Assert.Empty(builder.Errors);
             }
         }
 
-        [Fact]
-        public void AssocArray_To_Array_of_KeyValuePair_of_String_String()
+
+        [Theory]
+        [InlineData(typeof(IDictionary<string, string>), "Key", "Value")]
+        [InlineData(typeof(IDictionary<string, int>), "Key", "Value")]
+        [InlineData(typeof(IDictionary<int, string>), "Key", "Value")]
+        [InlineData(typeof(IDictionary<int, int>), "Key", "Value")]
+
+        [InlineData(typeof(Dictionary<string, string>), "Key", "Value")]
+        [InlineData(typeof(Dictionary<string, int>), "Key", "Value")]
+        [InlineData(typeof(Dictionary<int, string>), "Key", "Value")]
+        [InlineData(typeof(Dictionary<int, int>), "Key", "Value")]
+
+        [InlineData(typeof(KeyValuePair<string, string>[]), "Key", "Value")]
+        [InlineData(typeof(KeyValuePair<string, int>[]), "Key", "Value")]
+        [InlineData(typeof(KeyValuePair<int, string>[]), "Key", "Value")]
+        [InlineData(typeof(KeyValuePair<int, int>[]), "Key", "Value")]
+
+        [InlineData(typeof(List<KeyValuePair<string, string>>), "Key", "Value")]
+        [InlineData(typeof(List<KeyValuePair<string, int>>), "Key", "Value")]
+        [InlineData(typeof(List<KeyValuePair<int, string>>), "Key", "Value")]
+        [InlineData(typeof(List<KeyValuePair<int, int>>), "Key", "Value")]
+
+        [InlineData(typeof(IList<KeyValuePair<string, string>>), "Key", "Value")]
+        [InlineData(typeof(IList<KeyValuePair<string, int>>), "Key", "Value")]
+        [InlineData(typeof(IList<KeyValuePair<int, string>>), "Key", "Value")]
+        [InlineData(typeof(IList<KeyValuePair<int, int>>), "Key", "Value")]
+
+        [InlineData(typeof(Tuple<string, string>[]), "Item1", "Item2")]
+        [InlineData(typeof(Tuple<string, int>[]), "Item1", "Item2")]
+        [InlineData(typeof(Tuple<int, string>[]), "Item1", "Item2")]
+        [InlineData(typeof(Tuple<int, int>[]), "Item1", "Item2")]
+
+        [InlineData(typeof(List<Tuple<string, string>>), "Item1", "Item2")]
+        [InlineData(typeof(List<Tuple<string, int>>), "Item1", "Item2")]
+        [InlineData(typeof(List<Tuple<int, string>>), "Item1", "Item2")]
+        [InlineData(typeof(List<Tuple<int, int>>), "Item1", "Item2")]
+
+        [InlineData(typeof(IList<Tuple<string, string>>), "Item1", "Item2")]
+        [InlineData(typeof(IList<Tuple<string, int>>), "Item1", "Item2")]
+        [InlineData(typeof(IList<Tuple<int, string>>), "Item1", "Item2")]
+        [InlineData(typeof(IList<Tuple<int, int>>), "Item1", "Item2")]
+        public void AssocArray(Type targetType, string keyName, string valueName)
         {
             using (ValueBuilder builder = new ValueBuilder())
             {
                 object value;
-                Assert.True(builder.Build(typeof (KeyValuePair<string, string>[]),
-                                          new AssociativeArray(SourceInfo.Empty,
-                                                               new[]
-                                                                   {
-                                                                       new KeyValuePair<AstNode, AstNode>(
-                                                                           new LiteralValue(SourceInfo.Empty,
-                                                                                            LiteralValueType.Numeric,
-                                                                                            "1"),
-                                                                           new LiteralValue(SourceInfo.Empty,
-                                                                                            LiteralValueType.String, "2"))
-                                                                   }),
+                Assert.True(builder.Build(targetType,
+                                          new AssociativeArray(
+                                              SourceInfo.Empty,
+                                              new[]
+                                                  {
+                                                      new KeyValuePair<AstNode, AstNode>(
+                                                          new LiteralValue(SourceInfo.Empty,
+                                                                           LiteralValueType.Numeric,
+                                                                           "1"),
+                                                          new LiteralValue(SourceInfo.Empty,
+                                                                           LiteralValueType.String, 
+                                                                           "2")),
+                                                      new KeyValuePair<AstNode, AstNode>(
+                                                          new LiteralValue(SourceInfo.Empty,
+                                                                           LiteralValueType.Numeric,
+                                                                           "3"),
+                                                          new LiteralValue(SourceInfo.Empty,
+                                                                           LiteralValueType.String, 
+                                                                           "4"))
+                                                  }),
                                           out value));
 
-                Assert.Equal(new[] {new KeyValuePair<string, string>("1", "2")},
-                             (KeyValuePair<string, string>[]) value);
+                Assert.IsAssignableFrom(targetType, value);
+
+                Assert.IsAssignableFrom<IEnumerable>(value);
+
+                Assert.Equal(2, ((IEnumerable)value).Cast<object>().Count());
+
+                int i = 0;
+                foreach (object kvp in ((IEnumerable)value))
+                {
+                    object keyValue = kvp.GetType().GetProperty(keyName).GetValue(kvp);
+                    object valueValue = kvp.GetType().GetProperty(valueName).GetValue(kvp);
+
+                    switch (i)
+                    {
+                        case 0:
+                            Assert.Equal("1", keyValue.ToString());
+                            Assert.Equal("2", valueValue.ToString());
+                            break;
+                        case 1:
+                            Assert.Equal("3", keyValue.ToString());
+                            Assert.Equal("4", valueValue.ToString());
+                            break;
+                    }
+
+                    i++;
+                }
 
                 Assert.Empty(builder.Errors);
             }
         }
 
-        [Fact]
-        public void AssocArray_To_Array_of_Tuple_of_String_String()
+        [InlineData(typeof(ILookup<string, string>))]
+        [InlineData(typeof(ILookup<string, int>))]
+        [InlineData(typeof(ILookup<int, string>))]
+        [InlineData(typeof(ILookup<int, int>))]
+        [Theory]
+        public void AssocArray_To_ILookup(Type targetType)
         {
             using (ValueBuilder builder = new ValueBuilder())
             {
                 object value;
-                Assert.True(builder.Build(typeof (Tuple<string, string>[]),
-                                          new AssociativeArray(SourceInfo.Empty,
-                                                               new[]
-                                                                   {
-                                                                       new KeyValuePair<AstNode, AstNode>(
-                                                                           new LiteralValue(SourceInfo.Empty,
-                                                                                            LiteralValueType.Numeric,
-                                                                                            "1"),
-                                                                           new LiteralValue(SourceInfo.Empty,
-                                                                                            LiteralValueType.String, "2"))
-                                                                   }),
+                Assert.True(builder.Build(targetType,
+                                          new AssociativeArray(
+                                              SourceInfo.Empty,
+                                              new[]
+                                                  {
+                                                      new KeyValuePair<AstNode, AstNode>(
+                                                          new LiteralValue(SourceInfo.Empty,
+                                                                           LiteralValueType.Numeric,
+                                                                           "1"),
+                                                          new LiteralValue(SourceInfo.Empty,
+                                                                           LiteralValueType.String, 
+                                                                           "2")),
+                                                      new KeyValuePair<AstNode, AstNode>(
+                                                          new LiteralValue(SourceInfo.Empty,
+                                                                           LiteralValueType.Numeric,
+                                                                           "1"),
+                                                          new LiteralValue(SourceInfo.Empty,
+                                                                           LiteralValueType.String, 
+                                                                           "4"))
+                                                  }),
                                           out value));
 
-                Assert.Equal(new[] {new Tuple<string, string>("1", "2")},
-                             (Tuple<string, string>[]) value);
+                Assert.IsAssignableFrom(targetType, value);
+
+                Assert.IsAssignableFrom<IEnumerable>(value);
+
+                Assert.Equal(1, ((IEnumerable)value).Cast<object>().Count());
+
+                object group = ((IEnumerable) value).Cast<object>().Single();
+
+                Assert.Equal("1", group.GetType().GetProperty("Key").GetValue(group).ToString());
+
+                object[] values = ((IEnumerable) group).Cast<object>().ToArray();
+
+                Assert.Equal(2, values.Length);
+
+                Assert.Equal("2", values[0].ToString());
+
+                Assert.Equal("4", values[1].ToString());
 
                 Assert.Empty(builder.Errors);
             }
         }
 
-        [Fact]
-        public void AssocArray_To_List_of_Tuple_of_String_String()
-        {
-            using (ValueBuilder builder = new ValueBuilder())
-            {
-                object value;
-                Assert.True(builder.Build(typeof (List<Tuple<string, string>>),
-                                          new AssociativeArray(SourceInfo.Empty,
-                                                               new[]
-                                                                   {
-                                                                       new KeyValuePair<AstNode, AstNode>(
-                                                                           new LiteralValue(SourceInfo.Empty,
-                                                                                            LiteralValueType.Numeric,
-                                                                                            "1"),
-                                                                           new LiteralValue(SourceInfo.Empty,
-                                                                                            LiteralValueType.String, "2"))
-                                                                   }),
-                                          out value));
 
-                Assert.Equal(new List<Tuple<string, string>>(
-                                 new[]
-                                     {
-                                         new Tuple<string, string>("1", "2")
-                                     }
-                                 ),
-                             (List<Tuple<string, string>>) value);
 
-                Assert.Empty(builder.Errors);
-            }
-        }
     }
     // ReSharper restore InconsistentNaming
 }

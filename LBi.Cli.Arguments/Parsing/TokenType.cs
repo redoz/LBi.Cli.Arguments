@@ -30,6 +30,7 @@ namespace LBi.Cli.Arguments.Parsing
         //DictionaryKey,
         //DictionaryValueSeperator,
         //DictionaryKeySeperator,
-        DictionaryEnd
+        DictionaryEnd,
+        EndOfString
     }
 }

@@ -125,17 +125,53 @@ namespace LBi.Cli.Arguments
                             }
                             else
                             {
-                                foreach (TypeError typeError in builder.Errors)
+                                foreach (ValueError valueError in builder.Errors)
                                 {
-                                    paramSetErrors.Add(
-                                        new ResolveError(ErrorType.IncompatibleType,
-                                                         matchingParams,
-                                                         namedArguments[argNum],
-                                                         String.Format(Resources.ErrorMessages.IncompatibleType,
-                                                                       args.GetArgumentString(
-                                                                           typeError.AstNode.SourceInfo),
-                                                                       matchingParams[0].Name)));
+                                    TypeError typeError = valueError as TypeError;
+                                    if (typeError != null)
+                                    {
+                                        paramSetErrors.Add(
+                                            new ResolveError(ErrorType.IncompatibleType,
+                                                             matchingParams,
+                                                             namedArguments[argNum],
+                                                             String.Format(Resources.ErrorMessages.IncompatibleType,
+                                                                           args.GetArgumentString(
+                                                                               typeError.AstNode.SourceInfo),
+                                                                           matchingParams[0].Name)));
+                                    }
 
+                                    InvokeError invokeError = valueError as InvokeError;
+
+                                    if (invokeError != null)
+                                    {
+                                        if (invokeError.Method != null)
+                                        {
+                                            paramSetErrors.Add(
+                                                new ResolveError(ErrorType.IncompatibleType,
+                                                                 matchingParams,
+                                                                 namedArguments[argNum],
+                                                                 String.Format(Resources.ErrorMessages.MethodInvocationFailed,
+                                                                               args.GetArgumentString(invokeError.AstNodes.Select(ast => ast.SourceInfo)),
+                                                                               matchingParams[0].Name,
+                                                                               invokeError.Method.ReflectedType.Name,
+                                                                               invokeError.Method.Name,
+                                                                               invokeError.Exception.GetType().Name,
+                                                                               invokeError.Exception.Message)));
+                                        }
+                                        else
+                                        {
+                                            paramSetErrors.Add(
+                                                new ResolveError(ErrorType.IncompatibleType,
+                                                                 matchingParams,
+                                                                 namedArguments[argNum],
+                                                                 String.Format(Resources.ErrorMessages.ObjectInitializationFailed,
+                                                                               args.GetArgumentString(invokeError.AstNodes.Select(ast => ast.SourceInfo)),
+                                                                               matchingParams[0].Name,
+                                                                               invokeError.Constructor.ReflectedType.Name,
+                                                                               invokeError.Exception.GetType().Name,
+                                                                               invokeError.Exception.Message)));
+                                        }
+                                    }
                                 }
                             }
                         }

@@ -14,23 +14,29 @@
  * limitations under the License. 
  */
 
-using System;
-using LBi.Cli.Arguments.Parsing.Ast;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace LBi.Cli.Arguments
 {
-    public class TypeError : ValueError
+    public class AggregateError: ValueError, IEnumerable<ValueError>
     {
-        public TypeError(Type targetType, object value, AstNode astNode, Exception exception)
+        public AggregateError(IEnumerable<ValueError> errors)
         {
-            this.TargetType = targetType;
-            this.Value = value;
-            this.AstNode = astNode;
-            this.Exception =exception;
+            this.Errors = errors.ToArray();
         }
-        public Exception Exception { get; protected set; }
-        public Type TargetType { get; protected set; }
-        public object Value { get; protected set; }
-        public AstNode AstNode { get; protected set; }
+
+        public ValueError[] Errors { get; protected set; }
+        
+        public IEnumerator<ValueError> GetEnumerator()
+        {
+            return this.Errors.Cast<ValueError>().GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 }

@@ -47,6 +47,13 @@ namespace LBi.CLI.Arguments.Test
             public string Path { get; set; }
         }
 
+        [ParameterSet("Parameters", HelpMessage = "Executes command with parameters.")]
+        public class ExecuteCommandWithParameters : ExecuteCommandBase
+        {
+            [Parameter(HelpMessage = "Parameters"), Required]
+            public IDictionary<string, object> Parameters { get; set; }  
+        }
+
         [Fact]
         public void BuildParameterSet()
         {
@@ -107,6 +114,21 @@ namespace LBi.CLI.Arguments.Test
             Assert.NotNull(cmd);
             Assert.Equal("True", cmd.Name);
             Assert.Equal("Execute", cmd.Action);
+        }
+
+        [Fact]
+        public void ResolveParameterSet_WithParameters()
+        {
+            ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandWithParameters));
+            ArgumentCollection args = this.Parse("-Action Execute -Parameters @{foo = 'bar'; bar = 4}");
+            ResolveResult result = sets.Resolve(args);
+
+            var selectedSet = result.Single(r => r.Errors.Length == 0);
+            ExecuteCommandWithParameters cmd = selectedSet.Object as ExecuteCommandWithParameters;
+            Assert.NotNull(cmd);
+            Assert.Equal("Execute", cmd.Action);
+            Assert.Equal("bar", cmd.Parameters["foo"]);
+            Assert.Equal((byte)4, cmd.Parameters["bar"]);
         }
 
 

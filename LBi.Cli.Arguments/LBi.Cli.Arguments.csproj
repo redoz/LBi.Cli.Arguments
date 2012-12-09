@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AggregateError.cs" />
     <Compile Include="AliasAttribute.cs" />
     <Compile Include="Binding\CustomBooleanConverter.cs" />
     <Compile Include="Binding\ErrorCollector.cs" />

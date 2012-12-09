@@ -32,5 +32,10 @@ namespace LBi.Cli.Arguments.Parsing.Ast
         {
             return visitor.Visit(this);
         }
+
+        public override string ToString()
+        {
+            return "{" + string.Join(", ", Elements.Select(e => string.Format("{0}: {1}", e.Key, e.Value))) + "}";
+        }
     }
 }

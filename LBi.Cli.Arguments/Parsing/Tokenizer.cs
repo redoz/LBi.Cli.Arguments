@@ -68,6 +68,8 @@ namespace LBi.Cli.Arguments.Parsing
                 else
                     this.ParseValue(tokenWriter, reader);
             }
+
+            tokenWriter.Add(new Token(TokenType.EndOfString, null, reader.Position, 0));
         }
 
         protected virtual void ParseValue(TokenWriter tokenWriter, BasicReader reader)
@@ -134,7 +136,7 @@ namespace LBi.Cli.Arguments.Parsing
         protected virtual void ParseList(TokenWriter tokenWriter, BasicReader reader)
         {
             if (!reader.StartsWith(ListStart))
-                throw new InvalidOperationException(String.Format("Cannot parse paramer, expected {0}.", ParameterIndicator));
+                throw new InvalidOperationException(String.Format("Cannot parse list, expected {0}.", ListStart));
 
 
             tokenWriter.Add(new Token(TokenType.ListStart, ListStart, reader.Position, ListStart.Length));
@@ -193,18 +195,18 @@ namespace LBi.Cli.Arguments.Parsing
         protected virtual void ParseDictionary(TokenWriter tokenWriter, BasicReader reader)
         {
             if (!reader.StartsWith(DictionaryStart))
-                throw new InvalidOperationException(String.Format("Cannot parse paramer, expected {0}.", ParameterIndicator));
+                throw new InvalidOperationException(String.Format("Cannot parse dictionary, expected {0}.", DictionaryStart));
 
             tokenWriter.Add(new Token(TokenType.DictionaryStart, DictionaryStart, reader.Position, DictionaryStart.Length));                    
 
             // skip
             reader.Skip(DictionaryStart.Length);
 
-            // trim ws
-            reader.AdvanceWhitespace();
-
             while (!reader.StartsWith(DictionaryEnd) && !reader.Eof)
             {
+                // trim ws
+                reader.AdvanceWhitespace();
+
                 // parse dict-key
                 this.ParseValue(tokenWriter, reader);
 

@@ -32,6 +32,19 @@ namespace LBi.Cli.Arguments.Parsing
 
         public ParsedArgument[] Arguments { get; protected set; }
 
+        public string GetArgumentString(IEnumerable<ISourceInfo> sourceInfos)
+        {
+            var siArray = sourceInfos.OrderBy(si => si.Position)
+                                     .ToArray();
+
+            int position = siArray[0].Position;
+            int length = siArray[siArray.Length - 1].Position
+                         + siArray[siArray.Length - 1].Length
+                         - position;
+
+            return this.Input.Substring(position, length);
+        }
+
         public string GetArgumentString(ISourceInfo sourceInfo)
         {
             return this.Input.Substring(sourceInfo.Position, sourceInfo.Length);
