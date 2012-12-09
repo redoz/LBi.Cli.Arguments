@@ -1,9 +1,11 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LBi.Cli.Arguments", "LBi.Cli.Arguments\LBi.Cli.Arguments.csproj", "{2BE05D66-7F62-4F89-876F-9A415444F9AB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LBi.Cli.Arguments.Test", "LBi.Cli.Arguments.Test\LBi.Cli.Arguments.Test.csproj", "{C5C63268-2B77-4D4C-BBBE-7DBD67A6698B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LBi.CLi.Arguments.Sample", "LBi.CLi.Arguments.Sample\LBi.CLi.Arguments.Sample.csproj", "{66E0E7BD-6BA0-4209-9DCC-988CCBCBA76B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,6 +21,10 @@ Global
 		{C5C63268-2B77-4D4C-BBBE-7DBD67A6698B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C5C63268-2B77-4D4C-BBBE-7DBD67A6698B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C5C63268-2B77-4D4C-BBBE-7DBD67A6698B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66E0E7BD-6BA0-4209-9DCC-988CCBCBA76B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66E0E7BD-6BA0-4209-9DCC-988CCBCBA76B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66E0E7BD-6BA0-4209-9DCC-988CCBCBA76B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66E0E7BD-6BA0-4209-9DCC-988CCBCBA76B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -233,7 +233,7 @@ namespace LBi.Cli.Arguments
                     }
                 }
 
-                setResults.Add(new ParameterSetResult(paramSet, instances[setNum], paramSetErrors));
+                setResults.Add(new ParameterSetResult(args, paramSet, instances[setNum], paramSetErrors));
             }
 
             

@@ -37,14 +37,21 @@ ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCom
 
 // parse the command line arguments
 Parser parser = new Parser();
-ArgumentCollection args = parser.Parse("-Action Execute -Name 50");
+ArgumentCollection parsedArguments = parser.Parse(string.Join(" ", args));
 
 // resolve parameter set against the parsed arguments
-ResolveResult result = sets.Resolve(args);
+ResolveResult result = sets.Resolve(parsedArguments);
 if (result.IsMatch)
 {
-    ParameterSetResult matchingSet = result.Match;
-    ExecuteCommandUsingName cmdBase = matchingSet.Object as ExecuteCommandUsingName;
-    // ...
+    ParameterSetResult matchingSet = result.BestMatch;
+    ExecuteCommandBase command = (ExecuteCommandBase)matchingSet.Object;
+    command.Execute();
 }
-
+else
+{
+    ErrorWriter errorWriter = new ErrorWriter(Console.Error);
+    errorWriter.Write(result.BestMatch);
+    HelpWriter helpWriter = new HelpWriter(Console.Out);
+    helpWriter.Write(sets, HelpLevel.Parameters);
+}
+```

@@ -50,15 +50,12 @@ namespace LBi.Cli.Arguments
             get { return this._results.Count(psr => psr.Errors.Length == 0) == 1; }
         }
 
-        public ParameterSetResult Match
+        public ParameterSetResult BestMatch
         {
             get
             {
-                var succeeded = this._results.Where(r => r.Errors.Length == 0).ToArray();
-                if (succeeded.Length == 1)
-                    return succeeded[0];
-
-                return null;
+                return this._results.OrderBy(r => r.Errors.Length)
+                           .FirstOrDefault();
             }
         }
 

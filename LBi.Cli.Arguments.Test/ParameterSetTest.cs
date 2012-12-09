@@ -94,7 +94,7 @@ namespace LBi.CLI.Arguments.Test
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
             ArgumentCollection args = this.Parse("-Action Execute -Name 50");
             ResolveResult result = sets.Resolve(args);
-
+    
             var selectedSet = result.Single(r => r.Errors.Length == 0);
             ExecuteCommandUsingName cmd = selectedSet.Object as ExecuteCommandUsingName;
             Assert.NotNull(cmd);

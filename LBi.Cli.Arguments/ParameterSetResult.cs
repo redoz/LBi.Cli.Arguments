@@ -16,13 +16,15 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using LBi.Cli.Arguments.Parsing;
 
 namespace LBi.Cli.Arguments
 {
     public class ParameterSetResult
     {
-        public ParameterSetResult(ParameterSet parameterSet, object setInstance, IEnumerable<ResolveError> errors)
+        public ParameterSetResult(ArgumentCollection arguments, ParameterSet parameterSet, object setInstance, IEnumerable<ResolveError> errors)
         {
+            this.Arguments = arguments;
             this.ParameterSet = parameterSet;
             this.Object = setInstance;
             this.Errors = errors.ToArray();
@@ -33,5 +35,7 @@ namespace LBi.Cli.Arguments
         public object Object { get; protected set; }
 
         public ParameterSet ParameterSet { get; protected set; }
+
+        public ArgumentCollection Arguments { get; protected set; }
     }
 }

@@ -58,6 +58,8 @@
     <Compile Include="Binding\ResolveTypeArgs.cs" />
     <Compile Include="ErrorType.cs" />
     <Compile Include="Globalization\IResourceProvider.cs" />
+    <Compile Include="Output\ErrorWriter.cs" />
+    <Compile Include="Output\HelpWriter.cs" />
     <Compile Include="Parameter.cs" />
     <Compile Include="ParameterDefinitionException.cs" />
     <Compile Include="ParameterSet.cs" />
