@@ -29,7 +29,19 @@ public class ExecuteCommandUsingPath : ExecuteCommandBase
 }
 ```
 
-### 2. Parse and disambiguate between parameter sets.
+### 2a. Simple usage
+
+```csharp
+// set up argument parser
+ArgumentParser<ExecuteCommandBase> argParser = new ArgumentParser<ExecuteCommandBase>(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
+ExecuteCommandBase paramSet;
+if (argParser.TryParse(args, out paramSet))
+{
+    paramSet.Execute();
+}
+```
+
+### 2b. Advanced usage
 
 ```csharp
 // create parameter set collection from types
@@ -37,21 +49,22 @@ ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCom
 
 // parse the command line arguments
 Parser parser = new Parser();
-ArgumentCollection parsedArguments = parser.Parse(string.Join(" ", args));
+NodeSequence nodes = parser.Parse(string.Join(" ", args));
 
-// resolve parameter set against the parsed arguments
-ResolveResult result = sets.Resolve(parsedArguments);
+// resolve parameter set against the parsed node set
+ResolveResult result = sets.Resolve(nodes);
 if (result.IsMatch)
 {
-    ParameterSetResult matchingSet = result.BestMatch;
-    ExecuteCommandBase command = (ExecuteCommandBase)matchingSet.Object;
-    command.Execute();
+    paramSet = (ExecuteCommandBase)result.BestMatch.Object;
+    paramSet.Execute();
 }
 else
 {
     ErrorWriter errorWriter = new ErrorWriter(Console.Error);
     errorWriter.Write(result.BestMatch);
+
     HelpWriter helpWriter = new HelpWriter(Console.Out);
-    helpWriter.Write(sets, HelpLevel.Parameters);
+    helpWriter.Write(sets, HelpLevel.Full);
 }
+
 ```
