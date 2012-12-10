@@ -16,11 +16,12 @@
 
 using System;
 using System.Globalization;
+using LBi.Cli.Arguments.Globalization;
 
 namespace LBi.Cli.Arguments
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-    public class ParameterSetAttribute : Attribute
+    public class ParameterSetAttribute : Attribute, IHelpMessage
     {
         public ParameterSetAttribute(string parameterSet)
         {
@@ -33,5 +34,4 @@ namespace LBi.Cli.Arguments
         public string HelpMessageResourceName { get; set; }
         public Type HelpMessageResourceType { get; set; }
     }
-
 }

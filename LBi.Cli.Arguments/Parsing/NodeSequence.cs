@@ -17,22 +17,23 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using LBi.Cli.Arguments.Parsing.Ast;
 
 namespace LBi.Cli.Arguments.Parsing
 {
-    public class ArgumentCollection : IEnumerable<ParsedArgument>
+    public class NodeSequence : IEnumerable<AstNode>
     {
-        public ArgumentCollection(string input, IEnumerable<ParsedArgument> arguments)
+        public NodeSequence(string input, IEnumerable<AstNode> sequence)
         {
             this.Input = input;
-            this.Arguments = arguments.ToArray();
+            this.Sequence = sequence.ToArray();
         }
 
         public string Input { get; protected set; }
 
-        public ParsedArgument[] Arguments { get; protected set; }
+        public AstNode[] Sequence { get; protected set; }
 
-        public string GetArgumentString(IEnumerable<ISourceInfo> sourceInfos)
+        public string GetInputString(IEnumerable<ISourceInfo> sourceInfos)
         {
             var siArray = sourceInfos.OrderBy(si => si.Position)
                                      .ToArray();
@@ -45,16 +46,16 @@ namespace LBi.Cli.Arguments.Parsing
             return this.Input.Substring(position, length);
         }
 
-        public string GetArgumentString(ISourceInfo sourceInfo)
+        public string GetInputString(ISourceInfo sourceInfo)
         {
             return this.Input.Substring(sourceInfo.Position, sourceInfo.Length);
         }
 
         #region Implementation of IEnumerable
 
-        public IEnumerator<ParsedArgument> GetEnumerator()
+        public IEnumerator<AstNode> GetEnumerator()
         {
-            return this.Arguments.AsEnumerable().GetEnumerator();
+            return this.Sequence.AsEnumerable().GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

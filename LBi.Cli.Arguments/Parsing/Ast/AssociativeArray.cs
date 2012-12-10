@@ -21,7 +21,8 @@ namespace LBi.Cli.Arguments.Parsing.Ast
 {
     public class AssociativeArray : AstNode
     {
-        public AssociativeArray(ISourceInfo sourceInfo, IEnumerable<KeyValuePair<AstNode, AstNode>> elements) : base(sourceInfo)
+        public AssociativeArray(ISourceInfo sourceInfo, IEnumerable<KeyValuePair<AstNode, AstNode>> elements)
+            : base(NodeType.AssocArray, sourceInfo)
         {
             this.Elements = elements.ToArray();
         }

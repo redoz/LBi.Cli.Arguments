@@ -20,14 +20,18 @@ namespace LBi.Cli.Arguments.Parsing.Ast
 {
     public abstract class AstNode
     {
-        protected AstNode(ISourceInfo sourceInfo)
+        protected AstNode(NodeType nodeType, ISourceInfo sourceInfo)
         {
             if (sourceInfo == null)
                 throw new ArgumentNullException("sourceInfo");
+            
+            this.Type = nodeType;
 
-            // Can't really remember why this is cloned here... I'm sure there is a good reason
+            // this is cloned so that we don't end up holding on to the ISourceInfo instance
             this.SourceInfo = new SourceInfoImpl(sourceInfo);
         }
+
+        public NodeType Type { get; protected set; }
 
         public ISourceInfo SourceInfo { get; protected set; }
 

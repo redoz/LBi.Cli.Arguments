@@ -73,7 +73,7 @@ namespace LBi.CLI.Arguments.Test
         public void ResolveParameterSet()
         {
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
-            ArgumentCollection args = this.Parse("-Action Execute -Name 'a b c'");
+            NodeSequence args = this.Parse("-Action Execute -Name 'a b c'");
             ResolveResult result = sets.Resolve(args);
             
             var selectedSet = result.Single(r => r.Errors.Length == 0);
@@ -92,7 +92,7 @@ namespace LBi.CLI.Arguments.Test
         public void ResolveParameterSet_IntToString()
         {
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
-            ArgumentCollection args = this.Parse("-Action Execute -Name 50");
+            NodeSequence args = this.Parse("-Action Execute -Name 50");
             ResolveResult result = sets.Resolve(args);
     
             var selectedSet = result.Single(r => r.Errors.Length == 0);
@@ -106,7 +106,7 @@ namespace LBi.CLI.Arguments.Test
         public void ResolveParameterSet_BoolToString()
         {
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
-            ArgumentCollection args = this.Parse("-Action Execute -Name $true");
+            NodeSequence args = this.Parse("-Action Execute -Name $true");
             ResolveResult result = sets.Resolve(args);
 
             var selectedSet = result.Single(r => r.Errors.Length == 0);
@@ -120,7 +120,7 @@ namespace LBi.CLI.Arguments.Test
         public void ResolveParameterSet_WithParameters()
         {
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandWithParameters));
-            ArgumentCollection args = this.Parse("-Action Execute -Parameters @{foo = 'bar'; bar = 4}");
+            NodeSequence args = this.Parse("-Action Execute -Parameters @{foo = 'bar'; bar = 4}");
             ResolveResult result = sets.Resolve(args);
 
             var selectedSet = result.Single(r => r.Errors.Length == 0);
@@ -132,7 +132,7 @@ namespace LBi.CLI.Arguments.Test
         }
 
 
-        private ArgumentCollection Parse(params string[] arg)
+        private NodeSequence Parse(params string[] arg)
         {
             Parser parser = new Parser();
             return parser.Parse(string.Join(" ", arg));

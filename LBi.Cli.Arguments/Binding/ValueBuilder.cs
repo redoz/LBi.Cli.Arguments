@@ -489,6 +489,11 @@ namespace LBi.Cli.Arguments.Binding
             return ret;
         }
 
+        public object Visit(ParameterName parameterName)
+        {
+            throw new NotSupportedException();
+        }
+
         #region AssociativeArray Handling
 
         private object HandleMethodBasedAssocArray(AssociativeArray array, Type targetType)

@@ -23,49 +23,25 @@ namespace LBi.Cli.Arguments.Parsing
 {
     public class Parser
     {
-        public virtual ArgumentCollection Parse(string args)
+        public virtual NodeSequence Parse(string args)
         {
             Tokenizer tokenizer = new Tokenizer();
             IEnumerable<Token> tokens = tokenizer.Tokenize(args);
-            return new ArgumentCollection(args, this.Parse(tokens));
+            return new NodeSequence(args, this.Parse(tokens));
         }
 
 
 
-        protected virtual IEnumerable<ParsedArgument> Parse(IEnumerable<Token> tokens)
+        protected virtual IEnumerable<AstNode> Parse(IEnumerable<Token> tokens)
         {
             using (var enu = tokens.GetEnumerator())
             {
-                int argPos = 0;
                 if (!enu.MoveNext())
-                    yield break;
+                    throw new ArgumentException("Token stream must at the very least contain the terminator: EndOfStream", "tokens");
 
                 while (enu.Current.Type != TokenType.EndOfString)
                 {
-                    if (enu.Current.Type == TokenType.ParameterName)
-                    {
-                        // with real name
-                        string paramName = enu.Current.Value;
-
-                        if (!enu.MoveNext())
-                            throw new Exception("Unexpected end of token stream.");
-
-                        yield return new ParsedArgument(paramName,
-                                                        argPos,
-                                                        this.GetAstNode(enu));
-
-
-                    }
-                    else
-                    {
-                        // positional only 
-                        // TODO Firstparam shoud be null?
-                        yield return new ParsedArgument(enu.Current.Value,
-                                                        argPos,
-                                                        this.GetAstNode(enu));
-                    }
-
-                    argPos++;
+                    yield return this.GetAstNode(enu);
                 }
             }
         }
@@ -75,6 +51,11 @@ namespace LBi.Cli.Arguments.Parsing
             AstNode ret;
             switch (enumerator.Current.Type)
             {
+                case TokenType.ParameterName:
+                    ret = new ParameterName(enumerator.Current,
+                                            enumerator.Current.Value);
+                    enumerator.MoveNext();
+                    break;
                 case TokenType.NumericValue:
                     ret = new LiteralValue(
                                             enumerator.Current,

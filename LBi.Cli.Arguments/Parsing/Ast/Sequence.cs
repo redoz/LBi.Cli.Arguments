@@ -21,7 +21,7 @@ namespace LBi.Cli.Arguments.Parsing.Ast
 {
     public class Sequence : AstNode
     {
-        public Sequence(ISourceInfo sourceInfo, IEnumerable<AstNode> elements) : base(sourceInfo)
+        public Sequence(ISourceInfo sourceInfo, IEnumerable<AstNode> elements) : base(NodeType.Sequence, sourceInfo)
         {
             this.Elements = elements.ToArray();
         }

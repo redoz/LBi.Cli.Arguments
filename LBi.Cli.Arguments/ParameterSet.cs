@@ -31,44 +31,32 @@ namespace LBi.Cli.Arguments
     {
         public static ParameterSet FromType(Type type)
         {
+            ParameterSetAttribute setAttr = (ParameterSetAttribute) Attribute.GetCustomAttribute(type, typeof(ParameterSetAttribute), true);
+
             PropertyInfo[] publicProps = type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
 
             Parameter[] allParams = new Parameter[publicProps.Length];
+            
+            Func<string> helpMessage;
+            string name;
 
             for (int i = 0; i < publicProps.Length; i++)
             {
                 var propInfo = publicProps[i];
-                object[] attrs = propInfo.GetCustomAttributes(typeof(ParameterAttribute), true);
-                if (attrs.Length == 0)
+                ParameterAttribute attr = (ParameterAttribute)propInfo.GetCustomAttribute(typeof(ParameterAttribute), true);
+                if (attr == null)
                     continue;
 
-                ParameterAttribute attr = (ParameterAttribute)attrs[0];
+                name = string.IsNullOrWhiteSpace(attr.Name) ? propInfo.Name : attr.Name;
 
-                string name = string.IsNullOrWhiteSpace(attr.Name) ? propInfo.Name : attr.Name;
-
-                Func<string> helpMessage;
-
-                if (!string.IsNullOrWhiteSpace(attr.HelpMessage) &&
-                    string.IsNullOrEmpty(attr.HelpMessageResourceName) &&
-                    attr.HelpMessageResourceType == null)
+                try
                 {
-                    helpMessage = () => attr.HelpMessage;
+                    helpMessage = attr.GetHelpMessageSelector();
                 }
-                else if (string.IsNullOrWhiteSpace(attr.HelpMessage) &&
-                         string.IsNullOrEmpty(attr.HelpMessageResourceName) &&
-                         attr.HelpMessageResourceType != null)
+                catch (InvalidOperationException ex)
                 {
-                    if (attr.HelpMessageResourceType.GetInterface(typeof(IResourceProvider).Name) != null)
-                    {
-                        IResourceProvider provider = (IResourceProvider) Activator.CreateInstance(attr.HelpMessageResourceType);
-                        helpMessage = () => provider.GetValue(attr.HelpMessageResourceName);
-                    }
-                    else
-                        helpMessage = ResourceProvider.CreateStaticPropertyAccessor(attr.HelpMessageResourceType, attr.HelpMessageResourceName);
-                } else
-                {
-                    throw new ParameterDefinitionException(propInfo, 
-                        "You must specify either ParameterAttribute.HelpMessage or ParameterAttribute.HelpMessageResourceType and ParameterAttribute.HelpMessageResourceName");
+                    throw new ParameterDefinitionException(propInfo,
+                                                           ex.Message);
                 }
 
                 var validators = Attribute.GetCustomAttributes(propInfo, true).OfType<ValidationAttribute>();
@@ -102,17 +90,24 @@ namespace LBi.Cli.Arguments
                     throw new ParameterSetDefinitionException(positionalParams, "Missing parameter position: " +
                                                                                 i.ToString(CultureInfo.InvariantCulture));
             }
-
-            return new ParameterSet(type, allParams);
+            helpMessage = setAttr.GetHelpMessageSelector();
+            name = string.IsNullOrWhiteSpace(setAttr.Name) ? type.Name : setAttr.Name;
+            return new ParameterSet(type, name, allParams, helpMessage);
         }
 
         protected Parameter[] Parameters;
 
-        private ParameterSet(Type type, Parameter[] parameters)
+        private ParameterSet(Type type, string name, Parameter[] parameters, Func<string> helpMessage)
         {
             this.UnderlyingType = type;
             this.Parameters = parameters;
+            this.HelpMessage = helpMessage;
+            this.Name = name;
         }
+
+        public Func<string> HelpMessage { get; protected set; }
+
+        public string Name { get; protected set; }
 
         public Type UnderlyingType { get; protected set; }
 
@@ -171,5 +166,13 @@ namespace LBi.Cli.Arguments
             return GetEnumerator();
         }
 
+        public bool TryGetParameter(string name, out Parameter[] parameters)
+        {
+            parameters =
+                this.Parameters
+                    .Where(p => p.Name.StartsWith(name, StringComparison.InvariantCultureIgnoreCase))
+                    .ToArray();
+
+        }
     }
 }

@@ -22,7 +22,7 @@ namespace LBi.Cli.Arguments
 {
     public class ParameterSetResult
     {
-        public ParameterSetResult(ArgumentCollection arguments, ParameterSet parameterSet, object setInstance, IEnumerable<ResolveError> errors)
+        public ParameterSetResult(NodeSequence arguments, ParameterSet parameterSet, object setInstance, IEnumerable<ResolveError> errors)
         {
             this.Arguments = arguments;
             this.ParameterSet = parameterSet;
@@ -36,6 +36,6 @@ namespace LBi.Cli.Arguments
 
         public ParameterSet ParameterSet { get; protected set; }
 
-        public ArgumentCollection Arguments { get; protected set; }
+        public NodeSequence Arguments { get; protected set; }
     }
 }

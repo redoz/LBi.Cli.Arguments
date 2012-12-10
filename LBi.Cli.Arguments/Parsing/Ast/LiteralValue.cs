@@ -19,7 +19,7 @@ namespace LBi.Cli.Arguments.Parsing.Ast
     public class LiteralValue : AstNode
     {
         public LiteralValue(ISourceInfo sourceInfo, LiteralValueType type, string value)
-            : base(sourceInfo)
+            : base(NodeType.Literal, sourceInfo)
         {
             this.Value = value;
             this.Type = type;

@@ -17,21 +17,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using LBi.Cli.Arguments.Parsing;
+using LBi.Cli.Arguments.Parsing.Ast;
 
 namespace LBi.Cli.Arguments
 {
     public class ResolveError
     {
-        public ResolveError(ErrorType type, IEnumerable<Parameter> parameter, ParsedArgument argument, string message)
+        public ResolveError(ErrorType type, IEnumerable<Parameter> parameter, AstNode[] nodes, string message)
         {
             this.Type = type;
             this.Parameter = parameter.ToArray();
-            this.Argument = argument;
+            this.Argument = nodes;
             this.Message = message;
         }
         public ErrorType Type { get; protected set; }
         public Parameter[] Parameter { get; protected set; }
-        public ParsedArgument Argument { get; protected set; }
+        public AstNode[] Argument { get; protected set; }
         public string Message { get; protected set; }
     }
 }

@@ -15,11 +15,7 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using LBi.Cli.Arguments;
 using LBi.Cli.Arguments.Output;
 using LBi.Cli.Arguments.Parsing;
@@ -62,27 +58,44 @@ namespace LBi.CLi.Arguments.Sample
     {
         static void Main(string[] args)
         {
+            /*
+             *  simple usage
+             */
+
+            // set up argument parser
+            ArgumentParser<ExecuteCommandBase> argParser = new ArgumentParser<ExecuteCommandBase>(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
+            ExecuteCommandBase paramSet;
+            if (argParser.TryParse(args, out paramSet))
+            {
+                paramSet.Execute();
+            }
+
+
+            /*
+             *  advanced usage
+             */
+
             // create parameter set collection from types
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
 
             // parse the command line arguments
             Parser parser = new Parser();
-            ArgumentCollection parsedArguments = parser.Parse(string.Join(" ", args));
+            NodeSequence nodes = parser.Parse(string.Join(" ", args));
 
-            // resolve parameter set against the parsed arguments
-            ResolveResult result = sets.Resolve(parsedArguments);
+            // resolve parameter set against the parsed node set
+            ResolveResult result = sets.Resolve(nodes);
             if (result.IsMatch)
             {
-                ParameterSetResult matchingSet = result.BestMatch;
-                ExecuteCommandBase command = (ExecuteCommandBase)matchingSet.Object;
-                command.Execute();
+                paramSet = (ExecuteCommandBase)result.BestMatch.Object;
+                paramSet.Execute();
             }
             else
             {
                 ErrorWriter errorWriter = new ErrorWriter(Console.Error);
                 errorWriter.Write(result.BestMatch);
+
                 HelpWriter helpWriter = new HelpWriter(Console.Out);
-                helpWriter.Write(sets, HelpLevel.Parameters);
+                helpWriter.Write(sets, HelpLevel.Full);
             }
         }
     }

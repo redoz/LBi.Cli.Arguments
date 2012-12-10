@@ -15,11 +15,12 @@
  */
 
 using System;
+using LBi.Cli.Arguments.Globalization;
 
 namespace LBi.Cli.Arguments
 {
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
-    public class ParameterAttribute : Attribute
+    public class ParameterAttribute : Attribute, IHelpMessage
     {
         public ParameterAttribute()
         {

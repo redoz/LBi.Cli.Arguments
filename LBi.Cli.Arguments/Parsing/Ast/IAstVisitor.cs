@@ -25,5 +25,7 @@ namespace LBi.Cli.Arguments.Parsing.Ast
         object Visit(Sequence sequence);
 
         object Visit(AssociativeArray array);
+
+        object Visit(ParameterName parameterName);
     }
 }
