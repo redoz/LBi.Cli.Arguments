@@ -52,8 +52,8 @@ namespace LBi.CLI.Arguments.Test
         [Fact]
         public void ParsePositionalAndNamedParameters()
         {
-            ParsedArgument[] parsedArgs = this.Parse("val -arg @($null)").ToArray();
-            Assert.Equal(2, parsedArgs.Length);
+            NodeSequence parsedArgs = this.Parse("val -arg @($null)");
+            Assert.Equal(2, parsedArgs.Count);
             Assert.IsType<LiteralValue>(parsedArgs[0].Value);
             Assert.IsType<Sequence>(parsedArgs[1].Value);
             Assert.Equal(1, ((Sequence)parsedArgs[1].Value).Elements.Length);
@@ -62,7 +62,7 @@ namespace LBi.CLI.Arguments.Test
         }
 
 
-        private IEnumerable<ParsedArgument> Parse(params string[] arg)
+        private NodeSequence Parse(params string[] arg)
         {
             //Tokenizer tok = new Tokenizer();
             //Token[] tokens = tok.Tokenize(arg).ToArray();

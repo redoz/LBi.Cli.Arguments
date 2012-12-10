@@ -31,7 +31,14 @@ namespace LBi.Cli.Arguments.Parsing
 
         public string Input { get; protected set; }
 
-        public AstNode[] Sequence { get; protected set; }
+        protected readonly AstNode[] Sequence;
+
+        public AstNode this[int index]
+        {
+            get { return this.Sequence[index]; }
+        }
+
+        public int Count { get { return this.Sequence.Length; }}
 
         public string GetInputString(IEnumerable<ISourceInfo> sourceInfos)
         {

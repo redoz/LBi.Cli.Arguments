@@ -56,6 +56,10 @@ namespace LBi.Cli.Arguments.Parsing
                                             enumerator.Current.Value);
                     enumerator.MoveNext();
                     break;
+                //case TokenType.SwitchParameter:
+                //    ret = null;
+                //    enumerator.MoveNext();
+                //    break;
                 case TokenType.NumericValue:
                     ret = new LiteralValue(
                                             enumerator.Current,

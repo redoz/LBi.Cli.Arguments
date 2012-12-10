@@ -173,6 +173,7 @@ namespace LBi.Cli.Arguments
                     .Where(p => p.Name.StartsWith(name, StringComparison.InvariantCultureIgnoreCase))
                     .ToArray();
 
+            return parameters.Length == 1;
         }
     }
 }

@@ -279,10 +279,20 @@ namespace LBi.Cli.Arguments.Parsing
             reader.Skip(1);
 
             int startPos = reader.Position;
+            StringBuilder name = new StringBuilder();
+            char next;
+            while (!reader.TryPeek(out next) && next != ':' && !char.IsWhiteSpace(next))
+            {
+                name.Append(reader.Read());
+            }
 
-            string val = reader.ReadUntil(char.IsWhiteSpace);
-
-            tokenWriter.Add(new Token(TokenType.ParameterName, val, startPos, reader.Position - startPos));
+            if (next == ':')
+            {
+                string value = reader.ReadUntil(char.IsWhiteSpace);
+                tokenWriter.Add(new SwitchToken(name.ToString(), value, startPos, reader.Position - startPos));
+            }
+            else
+                tokenWriter.Add(new Token(TokenType.ParameterName, name.ToString(), startPos, reader.Position - startPos));
         }
 
         protected virtual void ParseQuotedString(TokenWriter tokenWriter, BasicReader reader)
@@ -367,6 +377,15 @@ namespace LBi.Cli.Arguments.Parsing
             while (!reader.Eof);
 
             tokenWriter.Add(new Token(TokenType.StringValue, val.ToString(), pos, reader.Position - pos));
+        }
+    }
+
+    public class SwitchToken : Token
+    {
+        public SwitchToken(string name, string value, int position, int length)
+            :base(TokenType.SwitchParameterToken, name, position, length)
+        {
+            this.Value = value;
         }
     }
 }

@@ -102,109 +102,151 @@ namespace LBi.Cli.Arguments
             return new ResolveResult(setResults);
         }
 
-        private static ParameterSetResult BuildParameterSet(NodeSequence sequence, ParameterSet paramSet)
+        protected virtual bool TryGetParameter(IEnumerable<Parameter> parameters, string name, out Parameter[] matches)
+        {
+            matches =
+                parameters
+                    .Where(p => p.Name.StartsWith(name, StringComparison.InvariantCultureIgnoreCase))
+                    .ToArray();
+
+            return matches.Length == 1;
+        }
+
+        protected virtual ParameterSetResult BuildParameterSet(NodeSequence sequence, ParameterSet paramSet)
         {
             object setInstance = Activator.CreateInstance(paramSet.UnderlyingType);
             List<ResolveError> paramSetErrors = new List<ResolveError>();
-
+            List<Parameter> remainingParams = new List<Parameter>(paramSet);
             using (IEnumerator<AstNode> enumerator = sequence.GetEnumerator())
             {
-
-                if (enumerator.Current.Type == NodeType.Parameter)
+                
+                while (enumerator.MoveNext())
                 {
-                    ParameterName parameterName = (ParameterName)enumerator.Current;
-                    Parameter[] parameters;
-                    if (paramSet.TryGetParameter(parameterName.Name, out parameters) && parameters.Length == 1)
+                    if (enumerator.Current.Type == NodeType.Parameter)
                     {
-                        //using (ValueBuilder builder = new ValueBuilder())
-                        //{
-                        //    Parameter curParam = parameters[0];
-                        //    PropertyInfo paramProp = curParam.Property;
-                        //    object value;
-                        //    if (builder.Build(paramProp.PropertyType, namedArguments[argNum].Value, out value))
-                        //    {
-                        //        paramProp.SetValue(instances[setNum], value, null);
-                        //    }
-                        //    else
-                        //    {
-                        //        foreach (ValueError valueError in builder.Errors)
-                        //        {
-                        //            TypeError typeError = valueError as TypeError;
-                        //            if (typeError != null)
-                        //            {
-                        //                paramSetErrors.Add(
-                        //                    new ResolveError(ErrorType.IncompatibleType,
-                        //                                     matchingParams,
-                        //                                     namedArguments[argNum],
-                        //                                     String.Format(Resources.ErrorMessages.IncompatibleType,
-                        //                                                   args.GetInputString(
-                        //                                                       typeError.AstNode.SourceInfo),
-                        //                                                   matchingParams[0].Name)));
-                        //            }
+                        ParameterName parameterName = (ParameterName) enumerator.Current;
+                        Parameter[] parameters;
+                        if (paramSet.TryGetParameter(parameterName.Name, out parameters) && parameters.Length == 1)
+                        {
+                            if (!remainingParams.Remove(parameters[0]))
+                            {
+                                paramSetErrors.Add(
+                                    new ResolveError(ErrorType.MultipleBindings,
+                                                     parameters,
+                                                     new[] {parameterName},
+                                                     String.Format(Resources.ErrorMessages.AmbigiousName,
+                                                                   parameterName.Name,
+                                                                   string.Join(", ", parameters.Select(p => p.Name)))));
 
-                        //            InvokeError invokeError = valueError as InvokeError;
+                                if (parameters[0].Property.PropertyType != typeof (SwitchParameter))
+                                    enumerator.MoveNext();
+                            }
 
-                        //            if (invokeError != null)
-                        //            {
-                        //                if (invokeError.Method != null)
-                        //                {
-                        //                    paramSetErrors.Add(
-                        //                        new ResolveError(ErrorType.IncompatibleType,
-                        //                                         matchingParams,
-                        //                                         namedArguments[argNum],
-                        //                                         String.Format(Resources.ErrorMessages.MethodInvocationFailed,
-                        //                                                       args.GetInputString(invokeError.AstNodes.Select(ast => ast.SourceInfo)),
-                        //                                                       matchingParams[0].Name,
-                        //                                                       invokeError.Method.ReflectedType.Name,
-                        //                                                       invokeError.Method.Name,
-                        //                                                       invokeError.Exception.GetType().Name,
-                        //                                                       invokeError.Exception.Message)));
-                        //                }
-                        //                else
-                        //                {
-                        //                    paramSetErrors.Add(
-                        //                        new ResolveError(ErrorType.IncompatibleType,
-                        //                                         matchingParams,
-                        //                                         namedArguments[argNum],
-                        //                                         String.Format(Resources.ErrorMessages.ObjectInitializationFailed,
-                        //                                                       args.GetInputString(invokeError.AstNodes.Select(ast => ast.SourceInfo)),
-                        //                                                       matchingParams[0].Name,
-                        //                                                       invokeError.Constructor.ReflectedType.Name,
-                        //                                                       invokeError.Exception.GetType().Name,
-                        //                                                       invokeError.Exception.Message)));
-                        //                }
-                        //            }
-                        //        }
-                        //    }
-                        //}
-                    }
-                    else if (parameters != null && parameters.Length > 1)
-                    {
-                        // report error, ambigious name
-                        paramSetErrors.Add(
-                            new ResolveError(ErrorType.AmbigiousName,
-                                             parameters,
-                                             new[] { parameterName },
-                                             String.Format(Resources.ErrorMessages.AmbigiousName,
-                                                           parameterName.Name,
-                                                           string.Join(", ", parameters.Select(p => p.Name)))));
+                            //using (ValueBuilder builder = new ValueBuilder())
+                            //{
+                            //    Parameter curParam = parameters[0];
+                            //    PropertyInfo paramProp = curParam.Property;
+                            //    object value;
+                            //    if (builder.Build(paramProp.PropertyType, namedArguments[argNum].Value, out value))
+                            //    {
+                            //        paramProp.SetValue(instances[setNum], value, null);
+                            //    }
+                            //    else
+                            //    {
+                            //        foreach (ValueError valueError in builder.Errors)
+                            //        {
+                            //            TypeError typeError = valueError as TypeError;
+                            //            if (typeError != null)
+                            //            {
+                            //                paramSetErrors.Add(
+                            //                    new ResolveError(ErrorType.IncompatibleType,
+                            //                                     matchingParams,
+                            //                                     namedArguments[argNum],
+                            //                                     String.Format(Resources.ErrorMessages.IncompatibleType,
+                            //                                                   args.GetInputString(
+                            //                                                       typeError.AstNode.SourceInfo),
+                            //                                                   matchingParams[0].Name)));
+                            //            }
+
+                            //            InvokeError invokeError = valueError as InvokeError;
+
+                            //            if (invokeError != null)
+                            //            {
+                            //                if (invokeError.Method != null)
+                            //                {
+                            //                    paramSetErrors.Add(
+                            //                        new ResolveError(ErrorType.IncompatibleType,
+                            //                                         matchingParams,
+                            //                                         namedArguments[argNum],
+                            //                                         String.Format(Resources.ErrorMessages.MethodInvocationFailed,
+                            //                                                       args.GetInputString(invokeError.AstNodes.Select(ast => ast.SourceInfo)),
+                            //                                                       matchingParams[0].Name,
+                            //                                                       invokeError.Method.ReflectedType.Name,
+                            //                                                       invokeError.Method.Name,
+                            //                                                       invokeError.Exception.GetType().Name,
+                            //                                                       invokeError.Exception.Message)));
+                            //                }
+                            //                else
+                            //                {
+                            //                    paramSetErrors.Add(
+                            //                        new ResolveError(ErrorType.IncompatibleType,
+                            //                                         matchingParams,
+                            //                                         namedArguments[argNum],
+                            //                                         String.Format(Resources.ErrorMessages.ObjectInitializationFailed,
+                            //                                                       args.GetInputString(invokeError.AstNodes.Select(ast => ast.SourceInfo)),
+                            //                                                       matchingParams[0].Name,
+                            //                                                       invokeError.Constructor.ReflectedType.Name,
+                            //                                                       invokeError.Exception.GetType().Name,
+                            //                                                       invokeError.Exception.Message)));
+                            //                }
+                            //            }
+                            //        }
+                            //    }
+                            //}
+                        }
+                        else if (parameters != null && parameters.Length > 1)
+                        {
+                            // report error, ambigious name
+                            paramSetErrors.Add(
+                                new ResolveError(ErrorType.AmbigiousName,
+                                                 parameters,
+                                                 new[] {parameterName},
+                                                 String.Format(Resources.ErrorMessages.AmbigiousName,
+                                                               parameterName.Name,
+                                                               string.Join(", ", parameters.Select(p => p.Name)))));
+                        }
+                        else
+                        {
+                            // report error, parameter not found
+                            paramSetErrors.Add(
+                                new ResolveError(ErrorType.ArgumentNameMismatch,
+                                                 Enumerable.Empty<Parameter>(),
+                                                 new[] {parameterName},
+                                                 string.Format(Resources.ErrorMessages.ArgumentNameMismatch,
+                                                               parameterName.Name)));
+                        }
                     }
                     else
                     {
-                        // report error, parameter not found
-                        paramSetErrors.Add(
-                            new ResolveError(ErrorType.ArgumentNameMismatch,
-                                             Enumerable.Empty<Parameter>(),
-                                             new[] { parameterName },
-                                             string.Format(Resources.ErrorMessages.ArgumentNameMismatch,
-                                                           parameterName.Name)));
+                        // positional param
                     }
                 }
-                else
-                {
-                    // positional param
-                }
+            }
 
+            ValidationContext validationContext = new ValidationContext(setInstance, null, null);
+
+            List<ValidationResult> validationResults = new List<ValidationResult>();
+            bool valid = Validator.TryValidateObject(setInstance, validationContext, validationResults, true);
+
+            if (!valid)
+            {
+                foreach (ValidationResult validationResult in validationResults)
+                {
+                    paramSetErrors.Add(new ResolveError(ErrorType.Validation,
+                                                            validationResult.MemberNames.Select(n => paramSet[n]),
+                                                            null,
+                                                            validationResult.ErrorMessage));
+                }
             }
 
             return new ParameterSetResult(sequence, paramSet, setInstance, paramSetErrors);

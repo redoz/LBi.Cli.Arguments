@@ -48,6 +48,11 @@ namespace LBi.Cli.Arguments
         /// <summary>
         /// More than one <see cref="Parameter"/>  matches the <see cref="ParsedArgument"/>.
         /// </summary>
-        AmbigiousName
+        AmbigiousName,
+
+        /// <summary>
+        /// <see cref="Parameter"/> has already been bound.
+        /// </summary>
+        MultipleBindings
     }
 }
