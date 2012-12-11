@@ -146,6 +146,19 @@ namespace LBi.CLI.Arguments.Test
         }
 
         [Fact]
+        public void TokenizeImplicitList()
+        {
+            Tokenizer tokenizer = new Tokenizer();
+            var tokens = tokenizer.Tokenize("1,2,3,4,5").ToArray();
+            Assert.Equal(10, tokens.Length);
+            for (int i = 0; i < (tokens.Length- 1) / 2; i++)
+            {
+                Assert.Equal(TokenType.ListValueSeperator, tokens[i * 2 + 1].Type);
+            }
+            Assert.Equal(TokenType.EndOfString, tokens[tokens.Length - 1].Type);
+        }
+
+        [Fact]
         public void TokenizeSwitchParameter()
         {
             Tokenizer tokenizer = new Tokenizer();

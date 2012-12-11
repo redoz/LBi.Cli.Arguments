@@ -108,6 +108,23 @@ namespace LBi.Cli.Arguments.Parsing
                     throw new ArgumentOutOfRangeException();
             }
 
+            if (enumerator.Current.Type == TokenType.ListValueSeperator)
+            {
+                enumerator.MoveNext();
+
+                AstNode obj = this.GetAstNode(enumerator);
+                if (obj is Sequence)
+                {
+                    var list = new List<AstNode>(((Sequence) obj).Elements);
+                    list.Add(ret);
+                    ret = new Sequence(ret.SourceInfo, list);
+                }
+                else
+                {
+                    ret = new Sequence(ret.SourceInfo, new[] {ret, obj});
+                }
+            }
+
             return ret;
         }
 
