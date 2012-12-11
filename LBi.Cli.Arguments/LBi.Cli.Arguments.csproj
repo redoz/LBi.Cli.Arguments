@@ -58,6 +58,7 @@
     <Compile Include="Binding\Lookup.cs" />
     <Compile Include="Binding\Reflection.cs" />
     <Compile Include="Binding\ResolveTypeArgs.cs" />
+    <Compile Include="Binding\SwitchTypeConverter.cs" />
     <Compile Include="ErrorType.cs" />
     <Compile Include="Globalization\HelpMessageExtensions.cs" />
     <Compile Include="Globalization\IResourceProvider.cs" />
@@ -71,6 +72,7 @@
     <Compile Include="ParameterSetDefinitionException.cs" />
     <Compile Include="ParameterSetResult.cs" />
     <Compile Include="Parsing\Ast\NodeType.cs" />
+    <Compile Include="Parsing\Ast\SwitchParameter.cs" />
     <Compile Include="Parsing\NodeSequence.cs" />
     <Compile Include="Parsing\Ast\AssociativeArray.cs" />
     <Compile Include="Parsing\Ast\IAstVisitor.cs" />
@@ -102,7 +104,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Exceptions.resx</DependentUpon>
     </Compile>
-    <Compile Include="SwitchParameter.cs" />
+    <Compile Include="Switch.cs" />
     <Compile Include="TypeError.cs" />
     <Compile Include="Binding\ValueBuilder.cs" />
     <Compile Include="ValueError.cs" />

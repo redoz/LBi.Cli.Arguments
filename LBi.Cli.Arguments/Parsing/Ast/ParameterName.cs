@@ -18,9 +18,15 @@ namespace LBi.Cli.Arguments.Parsing.Ast
 {
     public class ParameterName : AstNode
     {
-        public ParameterName(ISourceInfo sourceInfo, string name) : base(NodeType.Parameter, sourceInfo)
+        protected ParameterName(NodeType type, ISourceInfo sourceInfo, string name)
+            : base(type, sourceInfo)
         {
             this.Name = name;
+        }
+
+        public ParameterName(ISourceInfo sourceInfo, string name) : this(NodeType.Parameter, sourceInfo, name)
+        {
+            
         }
 
         public string Name { get; protected set; }

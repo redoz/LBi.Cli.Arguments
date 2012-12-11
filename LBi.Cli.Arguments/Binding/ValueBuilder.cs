@@ -494,6 +494,11 @@ namespace LBi.Cli.Arguments.Binding
             throw new NotSupportedException();
         }
 
+        public object Visit(Parsing.Ast.SwitchParameter switchParameter)
+        {
+            return switchParameter.Value.Visit(this);
+        }
+
         #region AssociativeArray Handling
 
         private object HandleMethodBasedAssocArray(AssociativeArray array, Type targetType)

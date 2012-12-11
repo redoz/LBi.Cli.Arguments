@@ -21,6 +21,7 @@ namespace LBi.Cli.Arguments.Parsing.Ast
         Parameter,
         Literal,
         Sequence,
-        AssocArray
+        AssocArray,
+        Switch
     }
 }

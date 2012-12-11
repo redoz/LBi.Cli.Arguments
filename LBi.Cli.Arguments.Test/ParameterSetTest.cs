@@ -31,6 +31,9 @@ namespace LBi.CLI.Arguments.Test
         {
             [Parameter(HelpMessage = "Action to take"), Required]
             public string Action { get; set; }
+
+            [Parameter(HelpMessage = "Verbose output")]
+            public Switch Verbose { get; set; }
         }
 
         [ParameterSet("Name", HelpMessage = "Executes command given a name.")]
@@ -54,6 +57,8 @@ namespace LBi.CLI.Arguments.Test
             public IDictionary<string, object> Parameters { get; set; }  
         }
 
+
+
         [Fact]
         public void BuildParameterSet()
         {
@@ -66,7 +71,7 @@ namespace LBi.CLI.Arguments.Test
         {
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
             Assert.NotNull(sets);
-
+            Assert.Equal(2, sets.Count);
         }
 
         [Fact]
@@ -114,6 +119,51 @@ namespace LBi.CLI.Arguments.Test
             Assert.NotNull(cmd);
             Assert.Equal("True", cmd.Name);
             Assert.Equal("Execute", cmd.Action);
+        }
+
+        [Fact]
+        public void ResolveParameterSet_WithSwitch()
+        {
+            ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
+            NodeSequence args = this.Parse("-Action Execute -Name $true -Verbose");
+            ResolveResult result = sets.Resolve(args);
+
+            var selectedSet = result.Single(r => r.Errors.Length == 0);
+            ExecuteCommandUsingName cmd = selectedSet.Object as ExecuteCommandUsingName;
+            Assert.NotNull(cmd);
+            Assert.Equal("True", cmd.Name);
+            Assert.Equal("Execute", cmd.Action);
+            Assert.True(cmd.Verbose.IsPresent);
+        }
+
+        [Fact]
+        public void ResolveParameterSet_WithSwitchNegated()
+        {
+            ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
+            NodeSequence args = this.Parse("-Action Execute -Name $true -Verbose:$false");
+            ResolveResult result = sets.Resolve(args);
+
+            var selectedSet = result.Single(r => r.Errors.Length == 0);
+            ExecuteCommandUsingName cmd = selectedSet.Object as ExecuteCommandUsingName;
+            Assert.NotNull(cmd);
+            Assert.Equal("True", cmd.Name);
+            Assert.Equal("Execute", cmd.Action);
+            Assert.False(cmd.Verbose.IsPresent);
+        }
+
+        [Fact]
+        public void ResolveParameterSet_WithSwitchExplicit()
+        {
+            ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
+            NodeSequence args = this.Parse("-Action Execute -Name $true -Verbose:$true");
+            ResolveResult result = sets.Resolve(args);
+
+            var selectedSet = result.Single(r => r.Errors.Length == 0);
+            ExecuteCommandUsingName cmd = selectedSet.Object as ExecuteCommandUsingName;
+            Assert.NotNull(cmd);
+            Assert.Equal("True", cmd.Name);
+            Assert.Equal("Execute", cmd.Action);
+            Assert.True(cmd.Verbose.IsPresent);
         }
 
         [Fact]

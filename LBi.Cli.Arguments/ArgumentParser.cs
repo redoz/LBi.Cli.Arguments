@@ -29,19 +29,19 @@ namespace LBi.Cli.Arguments
         protected class HelpCommand
         {
             [Parameter, Required]
-            public SwitchParameter Help { get; set; }
+            public Switch Help { get; set; }
 
             [Parameter]
-            public SwitchParameter Full { get; set; }
+            public Switch Full { get; set; }
 
             [Parameter]
-            public SwitchParameter Detailed { get; set; }
+            public Switch Detailed { get; set; }
 
             [Parameter]
-            public SwitchParameter Parameters { get; set; }
+            public Switch Parameters { get; set; }
 
             [Parameter]
-            public SwitchParameter Examples { get; set; }
+            public Switch Examples { get; set; }
 
             public HelpLevel ToHelpLevel()
             {
@@ -70,8 +70,9 @@ namespace LBi.Cli.Arguments
 
         public ArgumentParser(params Type[] types)
         {
-            Array.Resize(ref types, types.Length + 1);
-            types[types.Length - 1] = typeof(HelpCommand);
+            Array.Resize(ref types, types.Length + 2);
+            types[types.Length - 2] = typeof(HelpCommand);
+            types[types.Length - 1] = typeof(TParamSetBase);
             // create parameter set collection from types
             this.ParameterSets = ParameterSetCollection.FromTypes(types);
             this.Out = Console.Out;

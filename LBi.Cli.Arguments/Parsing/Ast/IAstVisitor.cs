@@ -14,8 +14,6 @@
  * limitations under the License. 
  */
 
-using System.Security.Policy;
-
 namespace LBi.Cli.Arguments.Parsing.Ast
 {
     public interface IAstVisitor
@@ -27,5 +25,7 @@ namespace LBi.Cli.Arguments.Parsing.Ast
         object Visit(AssociativeArray array);
 
         object Visit(ParameterName parameterName);
+        
+        object Visit(SwitchParameter switchParameter);
     }
 }

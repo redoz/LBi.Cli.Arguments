@@ -17,54 +17,58 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using LBi.Cli.Arguments.Binding;
 
 namespace LBi.Cli.Arguments
 {
-    public struct SwitchParameter
+    [TypeConverter(typeof(SwitchTypeConverter))]
+    public struct Switch
     {
-        private static readonly SwitchParameter _present = new SwitchParameter(true);
+        private static readonly Switch _present = new Switch(true);
 
-        public static SwitchParameter Present { get { return _present; } }
+        public static Switch Present { get { return _present; } }
 
-        public static implicit operator SwitchParameter(bool boolean)
+        public static implicit operator Switch(bool boolean)
         {
-            return new SwitchParameter(boolean);
+            return new Switch(boolean);
         }
 
-        public static implicit operator bool(SwitchParameter switchParam)
+
+        public static implicit operator bool(Switch switchParam)
         {
             return switchParam.IsPresent;
         }
 
-        public static bool operator ==(SwitchParameter swp, bool boolean)
+        public static bool operator ==(Switch swp, bool boolean)
         {
             return swp.IsPresent == boolean;
         }
 
-        public static bool operator !=(SwitchParameter swp, bool boolean)
+        public static bool operator !=(Switch swp, bool boolean)
         {
             return !(swp == boolean);
         }
 
-        public static bool operator ==(bool boolean, SwitchParameter swp)
+        public static bool operator ==(bool boolean, Switch swp)
         {
             return swp.IsPresent == boolean;
         }
 
-        public static bool operator !=(bool boolean, SwitchParameter swp)
+        public static bool operator !=(bool boolean, Switch swp)
         {
             return !(swp == boolean);
         }
 
-        public static bool operator ==(SwitchParameter sp1, SwitchParameter sp2)
+        public static bool operator ==(Switch sp1, Switch sp2)
         {
             return sp1.IsPresent == sp2.IsPresent;
         }
 
-        public static bool operator !=(SwitchParameter sp1, SwitchParameter sp2)
+        public static bool operator !=(Switch sp1, Switch sp2)
         {
             return !(sp1 == sp2);
         }
@@ -72,7 +76,7 @@ namespace LBi.Cli.Arguments
 
         public override bool Equals(object obj)
         {
-            SwitchParameter other = (SwitchParameter)obj;
+            Switch other = (Switch)obj;
             return other.IsPresent == this.IsPresent;
         }
 
@@ -83,7 +87,7 @@ namespace LBi.Cli.Arguments
 
         public readonly bool IsPresent;
 
-        public SwitchParameter(bool present)
+        public Switch(bool present)
         {
             this.IsPresent = present;
         }

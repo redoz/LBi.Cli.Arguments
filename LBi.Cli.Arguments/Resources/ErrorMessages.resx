@@ -132,7 +132,10 @@
   <data name="MethodInvocationFailed" xml:space="preserve">
     <value>An exception of type {4} occured calling method {2}.{3} while processing argument '{0}' for parameter {1}: {5}</value>
   </data>
+  <data name="MultipleBindings" xml:space="preserve">
+    <value>Cannot bind parameter because parameter '{0}' is specified more than once. To provide multiple values to parameters that can accept multiple values, use the array syntax. For example, "-parameter value1,value2,value3" or "-parameter @(value1,value2,value3)".</value>
+  </data>
   <data name="ObjectInitializationFailed" xml:space="preserve">
-    <value>An exception of type {3} occured creating instance of type {2} while processing argument '{0}' for parameter {1}: 4</value>
+    <value>An exception of type {3} occured creating instance of type {2} while processing argument '{0}' for parameter {1}: {4}</value>
   </data>
 </root>

@@ -106,7 +106,16 @@ namespace LBi.Cli.Arguments.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to An exception of type {3} occured creating instance of type {2} while processing argument &apos;{0}&apos; for parameter {1}: 4.
+        ///   Looks up a localized string similar to Cannot bind parameter because parameter &apos;{0}&apos; is specified more than once. To provide multiple values to parameters that can accept multiple values, use the array syntax. For example, &quot;-parameter value1,value2,value3&quot; or &quot;-parameter @(value1,value2,value3)&quot;..
+        /// </summary>
+        internal static string MultipleBindings {
+            get {
+                return ResourceManager.GetString("MultipleBindings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An exception of type {3} occured creating instance of type {2} while processing argument &apos;{0}&apos; for parameter {1}: {4}.
         /// </summary>
         internal static string ObjectInitializationFailed {
             get {

@@ -29,7 +29,7 @@ namespace LBi.CLI.Arguments.Test
         {
             Tokenizer tokenizer = new Tokenizer();
             var tokens = tokenizer.Tokenize("-myparam test").ToArray();
-            Assert.Equal(3, tokens.Length);
+
             Assert.Equal(tokens.Select(t => t.Type),
                          new[]
                              {
@@ -44,7 +44,7 @@ namespace LBi.CLI.Arguments.Test
         {
             Tokenizer tokenizer = new Tokenizer();
             var tokens = tokenizer.Tokenize("-myparam test -my2ndparam $true -dictp @{} -arrayp @()").ToArray();
-            Assert.Equal(11, tokens.Length);
+            
             Assert.Equal(tokens.Select(t => t.Type),
                          new[]
                              {
@@ -143,6 +143,29 @@ namespace LBi.CLI.Arguments.Test
             Assert.Equal("$true", tokens[0].Value);
             Assert.Equal(TokenType.BoolValue, tokens[0].Type);
             Assert.Equal(TokenType.EndOfString, tokens[1].Type);
+        }
+
+        [Fact]
+        public void TokenizeSwitchParameter()
+        {
+            Tokenizer tokenizer = new Tokenizer();
+            var tokens = tokenizer.Tokenize("-Switch:$false").ToArray();
+            Assert.Equal(3, tokens.Length);
+            Assert.Equal("Switch", tokens[0].Value);
+            Assert.Equal("$false", tokens[1].Value);
+            Assert.Equal(TokenType.SwitchParameter, tokens[0].Type);
+            Assert.Equal(TokenType.BoolValue, tokens[1].Type);
+            Assert.Equal(TokenType.EndOfString, tokens[2].Type);
+        }
+
+        [Fact]
+        public void TokenizeSwitchParameter_WithList()
+        {
+            Tokenizer tokenizer = new Tokenizer();
+            var tokens = tokenizer.Tokenize("-Switch:@($true,$true)").ToArray();
+            Assert.Equal(6, tokens.Length);
+            Assert.Equal("Switch", tokens[0].Value);
+            Assert.Equal(TokenType.SwitchParameter, tokens[0].Type);
         }
 
         [Fact]

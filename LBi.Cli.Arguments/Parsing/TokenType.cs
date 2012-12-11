@@ -24,7 +24,7 @@ namespace LBi.Cli.Arguments.Parsing
         BoolValue,
         NullValue,
         ListStart,
-        //ListValueSeperator,
+        ListValueSeperator,
         ListEnd,
         DictionaryStart,
         //DictionaryKey,
@@ -32,6 +32,6 @@ namespace LBi.Cli.Arguments.Parsing
         //DictionaryKeySeperator,
         DictionaryEnd,
         EndOfString,
-        SwitchParameterToken
+        SwitchParameter
     }
 }

@@ -16,7 +16,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+
 using LBi.Cli.Arguments.Parsing.Ast;
 
 namespace LBi.Cli.Arguments.Parsing
@@ -56,10 +56,13 @@ namespace LBi.Cli.Arguments.Parsing
                                             enumerator.Current.Value);
                     enumerator.MoveNext();
                     break;
-                //case TokenType.SwitchParameter:
-                //    ret = null;
-                //    enumerator.MoveNext();
-                //    break;
+                case TokenType.SwitchParameter:
+                    Token token = enumerator.Current;
+                    enumerator.MoveNext();
+                    ret = new SwitchParameter(token,
+                                              token.Value,
+                                              this.GetAstNode(enumerator));
+                    break;
                 case TokenType.NumericValue:
                     ret = new LiteralValue(
                                             enumerator.Current,
@@ -113,7 +116,7 @@ namespace LBi.Cli.Arguments.Parsing
             ISourceInfo sourceInfo = enumerator.Current;
             List<KeyValuePair<AstNode, AstNode>> elements = new List<KeyValuePair<AstNode, AstNode>>();
 
-            Debug.Assert(enumerator.Current.Type == TokenType.DictionaryStart);
+            System.Diagnostics.Debug.Assert(enumerator.Current.Type == TokenType.DictionaryStart);
 
             enumerator.MoveNext();
 

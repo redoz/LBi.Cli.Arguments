@@ -28,43 +28,48 @@ namespace LBi.CLI.Arguments.Test
         [Fact]
         public void ParseNamedParameters()
         {
-            ParsedArgument[] parsedArgs = this.Parse("-arg val -arg2 @($null)").ToArray();
-            Assert.Equal(2, parsedArgs.Length);
-            Assert.IsType<LiteralValue>(parsedArgs[0].Value);
-            Assert.IsType<Sequence>(parsedArgs[1].Value);
-            Assert.Equal(1, ((Sequence)parsedArgs[1].Value).Elements.Length);
-            Assert.IsType<LiteralValue>(((Sequence)parsedArgs[1].Value).Elements[0]);
-            Assert.Equal(LiteralValueType.Null, ((LiteralValue)((Sequence)parsedArgs[1].Value).Elements[0]).Type);
+            NodeSequence parsedArgs = this.Parse("-arg val -arg2 @($null)");
+            Assert.Equal(4, parsedArgs.Count);
+            Assert.IsType<ParameterName>(parsedArgs[0]);
+            Assert.IsType<LiteralValue>(parsedArgs[1]);
+            Assert.IsType<ParameterName>(parsedArgs[2]);
+            Assert.IsType<Sequence>(parsedArgs[3]);
+
+            
+            Assert.Equal(1, ((Sequence)parsedArgs[3]).Elements.Length);
+            Assert.IsType<LiteralValue>(((Sequence)parsedArgs[3]).Elements[0]);
+            Assert.Equal(LiteralValueType.Null, ((LiteralValue)((Sequence)parsedArgs[3]).Elements[0]).Type);
         }
 
         [Fact]
         public void ParsePositionalParameters()
         {
-            ParsedArgument[] parsedArgs = this.Parse("val @($null)").ToArray();
-            Assert.Equal(2, parsedArgs.Length);
-            Assert.IsType<LiteralValue>(parsedArgs[0].Value);
-            Assert.IsType<Sequence>(parsedArgs[1].Value);
-            Assert.Equal(1, ((Sequence)parsedArgs[1].Value).Elements.Length);
-            Assert.IsType<LiteralValue>(((Sequence)parsedArgs[1].Value).Elements[0]);
-            Assert.Equal(LiteralValueType.Null, ((LiteralValue)((Sequence)parsedArgs[1].Value).Elements[0]).Type);
+            NodeSequence parsedArgs = this.Parse("val @($null)");
+            Assert.Equal(2, parsedArgs.Count);
+            Assert.IsType<LiteralValue>(parsedArgs[0]);
+            Assert.IsType<Sequence>(parsedArgs[1]);
+            Assert.Equal(1, ((Sequence)parsedArgs[1]).Elements.Length);
+            Assert.IsType<LiteralValue>(((Sequence)parsedArgs[1]).Elements[0]);
+            Assert.Equal(LiteralValueType.Null, ((LiteralValue)((Sequence)parsedArgs[1]).Elements[0]).Type);
         }
 
         [Fact]
         public void ParsePositionalAndNamedParameters()
         {
             NodeSequence parsedArgs = this.Parse("val -arg @($null)");
-            Assert.Equal(2, parsedArgs.Count);
-            Assert.IsType<LiteralValue>(parsedArgs[0].Value);
-            Assert.IsType<Sequence>(parsedArgs[1].Value);
-            Assert.Equal(1, ((Sequence)parsedArgs[1].Value).Elements.Length);
-            Assert.IsType<LiteralValue>(((Sequence)parsedArgs[1].Value).Elements[0]);
-            Assert.Equal(LiteralValueType.Null, ((LiteralValue)((Sequence)parsedArgs[1].Value).Elements[0]).Type);
+            Assert.Equal(3, parsedArgs.Count);
+            Assert.IsType<LiteralValue>(parsedArgs[0]);
+            Assert.IsType<ParameterName>(parsedArgs[1]);
+            Assert.IsType<Sequence>(parsedArgs[2]);
+            Assert.Equal(1, ((Sequence)parsedArgs[2]).Elements.Length);
+            Assert.IsType<LiteralValue>(((Sequence)parsedArgs[2]).Elements[0]);
+            Assert.Equal(LiteralValueType.Null, ((LiteralValue)((Sequence)parsedArgs[2]).Elements[0]).Type);
         }
 
 
         private NodeSequence Parse(params string[] arg)
         {
-            //Tokenizer tok = new Tokenizer();
+            //Tokenizer tok = new Tokenizer()
             //Token[] tokens = tok.Tokenize(arg).ToArray();
             Parser parser = new Parser();
             return parser.Parse(string.Join(" ", arg));

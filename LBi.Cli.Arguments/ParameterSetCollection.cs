@@ -29,6 +29,28 @@ namespace LBi.Cli.Arguments
 {
     public class ParameterSetCollection
     {
+        protected class BuildContext
+        {
+            public BuildContext(NodeSequence sequence, ParameterSet paramSet, object instance)
+            {
+                this.Sequence = sequence;
+                this.Instance = instance;
+                this.ParameterSet = paramSet;
+                this.Errors = new List<ResolveError>();
+                this.RemainingParameters = new List<Parameter>(paramSet.OrderBy(p => p.Position.HasValue ? p.Position.Value : int.MinValue));
+            }
+
+            public NodeSequence Sequence { get; protected set; }
+
+            public List<Parameter> RemainingParameters { get; protected set; }
+
+            public List<ResolveError> Errors { get; protected set; }
+
+            public ParameterSet ParameterSet { get; protected set; }
+
+            public object Instance { get; protected set; }
+        }
+
         private List<ParameterSet> _sets;
 
         public ParameterSetCollection()
@@ -52,10 +74,10 @@ namespace LBi.Cli.Arguments
 
         private static void DiscoverTypes(ParameterSetCollection paramSets, Type curType)
         {
-            if (!paramSets.Contains(curType))
+            if (paramSets.Contains(curType))
                 return;
 
-            if (!curType.IsAbstract)
+            if (!curType.IsAbstract && Attribute.GetCustomAttribute(curType, typeof(ParameterSetAttribute), true) != null)
                 paramSets.Add(ParameterSet.FromType(curType));
 
             var attrs = Attribute.GetCustomAttributes(curType, typeof(KnownTypeAttribute), true);
@@ -114,103 +136,66 @@ namespace LBi.Cli.Arguments
 
         protected virtual ParameterSetResult BuildParameterSet(NodeSequence sequence, ParameterSet paramSet)
         {
-            object setInstance = Activator.CreateInstance(paramSet.UnderlyingType);
-            List<ResolveError> paramSetErrors = new List<ResolveError>();
-            List<Parameter> remainingParams = new List<Parameter>(paramSet);
+            BuildContext ctx = new BuildContext(sequence,
+                                                paramSet, Activator.CreateInstance(paramSet.UnderlyingType));
+
             using (IEnumerator<AstNode> enumerator = sequence.GetEnumerator())
             {
-                
                 while (enumerator.MoveNext())
                 {
-                    if (enumerator.Current.Type == NodeType.Parameter)
+                    if (enumerator.Current.Type == NodeType.Parameter ||
+                        enumerator.Current.Type == NodeType.Switch)
                     {
-                        ParameterName parameterName = (ParameterName) enumerator.Current;
+                        ParameterName parameterName = (ParameterName)enumerator.Current;
                         Parameter[] parameters;
-                        if (paramSet.TryGetParameter(parameterName.Name, out parameters) && parameters.Length == 1)
+                        if (ctx.ParameterSet.TryGetParameter(parameterName.Name, out parameters) && parameters.Length == 1)
                         {
-                            if (!remainingParams.Remove(parameters[0]))
+                            // remove from "remaining parameters" collection
+                            if (!ctx.RemainingParameters.Remove(parameters[0]))
                             {
-                                paramSetErrors.Add(
+                                // report error, multiple bindings
+                                ctx.Errors.Add(
                                     new ResolveError(ErrorType.MultipleBindings,
                                                      parameters,
-                                                     new[] {parameterName},
-                                                     String.Format(Resources.ErrorMessages.AmbigiousName,
-                                                                   parameterName.Name,
-                                                                   string.Join(", ", parameters.Select(p => p.Name)))));
+                                                     new[] { parameterName },
+                                                     String.Format(Resources.ErrorMessages.MultipleBindings,
+                                                                   parameterName.Name)));
 
-                                if (parameters[0].Property.PropertyType != typeof (SwitchParameter))
+                                // if the parameter was not of type Switch, skip next node
+                                if (parameters[0].Property.PropertyType != typeof(Switch))
                                     enumerator.MoveNext();
+
+                                // handled, continue and skip
+                                continue;
                             }
 
-                            //using (ValueBuilder builder = new ValueBuilder())
-                            //{
-                            //    Parameter curParam = parameters[0];
-                            //    PropertyInfo paramProp = curParam.Property;
-                            //    object value;
-                            //    if (builder.Build(paramProp.PropertyType, namedArguments[argNum].Value, out value))
-                            //    {
-                            //        paramProp.SetValue(instances[setNum], value, null);
-                            //    }
-                            //    else
-                            //    {
-                            //        foreach (ValueError valueError in builder.Errors)
-                            //        {
-                            //            TypeError typeError = valueError as TypeError;
-                            //            if (typeError != null)
-                            //            {
-                            //                paramSetErrors.Add(
-                            //                    new ResolveError(ErrorType.IncompatibleType,
-                            //                                     matchingParams,
-                            //                                     namedArguments[argNum],
-                            //                                     String.Format(Resources.ErrorMessages.IncompatibleType,
-                            //                                                   args.GetInputString(
-                            //                                                       typeError.AstNode.SourceInfo),
-                            //                                                   matchingParams[0].Name)));
-                            //            }
+                            // if it's a Switch we can simply set it to "Present"
+                            if (parameters[0].Property.PropertyType == typeof(Switch))
+                            {
+                                if (enumerator.Current.Type == NodeType.Switch)
+                                {
+                                    SwitchParameter switchParameter = (SwitchParameter) enumerator.Current;
+                                    SetPropertyValue(ctx, parameters[0], switchParameter.Value);
+                                }
+                                else
+                                    parameters[0].Property.SetValue(ctx.Instance, Switch.Present, null);
 
-                            //            InvokeError invokeError = valueError as InvokeError;
+                                // handled, continue and skip
+                                continue;
+                            }
 
-                            //            if (invokeError != null)
-                            //            {
-                            //                if (invokeError.Method != null)
-                            //                {
-                            //                    paramSetErrors.Add(
-                            //                        new ResolveError(ErrorType.IncompatibleType,
-                            //                                         matchingParams,
-                            //                                         namedArguments[argNum],
-                            //                                         String.Format(Resources.ErrorMessages.MethodInvocationFailed,
-                            //                                                       args.GetInputString(invokeError.AstNodes.Select(ast => ast.SourceInfo)),
-                            //                                                       matchingParams[0].Name,
-                            //                                                       invokeError.Method.ReflectedType.Name,
-                            //                                                       invokeError.Method.Name,
-                            //                                                       invokeError.Exception.GetType().Name,
-                            //                                                       invokeError.Exception.Message)));
-                            //                }
-                            //                else
-                            //                {
-                            //                    paramSetErrors.Add(
-                            //                        new ResolveError(ErrorType.IncompatibleType,
-                            //                                         matchingParams,
-                            //                                         namedArguments[argNum],
-                            //                                         String.Format(Resources.ErrorMessages.ObjectInitializationFailed,
-                            //                                                       args.GetInputString(invokeError.AstNodes.Select(ast => ast.SourceInfo)),
-                            //                                                       matchingParams[0].Name,
-                            //                                                       invokeError.Constructor.ReflectedType.Name,
-                            //                                                       invokeError.Exception.GetType().Name,
-                            //                                                       invokeError.Exception.Message)));
-                            //                }
-                            //            }
-                            //        }
-                            //    }
-                            //}
+                            // advance to value 
+                            enumerator.MoveNext();
+
+                            SetPropertyValue(ctx, parameters[0], enumerator.Current);
                         }
                         else if (parameters != null && parameters.Length > 1)
                         {
                             // report error, ambigious name
-                            paramSetErrors.Add(
+                            ctx.Errors.Add(
                                 new ResolveError(ErrorType.AmbigiousName,
                                                  parameters,
-                                                 new[] {parameterName},
+                                                 new[] { parameterName },
                                                  String.Format(Resources.ErrorMessages.AmbigiousName,
                                                                parameterName.Name,
                                                                string.Join(", ", parameters.Select(p => p.Name)))));
@@ -218,10 +203,10 @@ namespace LBi.Cli.Arguments
                         else
                         {
                             // report error, parameter not found
-                            paramSetErrors.Add(
+                            ctx.Errors.Add(
                                 new ResolveError(ErrorType.ArgumentNameMismatch,
                                                  Enumerable.Empty<Parameter>(),
-                                                 new[] {parameterName},
+                                                 new[] { parameterName },
                                                  string.Format(Resources.ErrorMessages.ArgumentNameMismatch,
                                                                parameterName.Name)));
                         }
@@ -229,27 +214,113 @@ namespace LBi.Cli.Arguments
                     else
                     {
                         // positional param
+                        var positionalParam = ctx.RemainingParameters.FirstOrDefault(p => p.Position.HasValue);
+
+                        if (positionalParam == null)
+                        {
+                            // report error, there are no positional parameters
+                            ctx.Errors.Add(new ResolveError(ErrorType.ArgumentPositionMismatch,
+                                                            Enumerable.Empty<Parameter>(),
+                                                            new[] {enumerator.Current},
+                                                            string.Format(
+                                                                Resources.ErrorMessages.ArgumentPositionMismatch,
+                                                                ctx.Sequence.GetInputString(enumerator.Current.SourceInfo))));
+                        }
+                        else
+                        {
+                            SetPropertyValue(ctx, positionalParam, enumerator.Current);
+                        }
                     }
                 }
             }
 
-            ValidationContext validationContext = new ValidationContext(setInstance, null, null);
+            ValidationContext validationContext = new ValidationContext(ctx.Instance, null, null);
 
             List<ValidationResult> validationResults = new List<ValidationResult>();
-            bool valid = Validator.TryValidateObject(setInstance, validationContext, validationResults, true);
+            bool valid = Validator.TryValidateObject(ctx.Instance, validationContext, validationResults, true);
 
             if (!valid)
             {
                 foreach (ValidationResult validationResult in validationResults)
                 {
-                    paramSetErrors.Add(new ResolveError(ErrorType.Validation,
-                                                            validationResult.MemberNames.Select(n => paramSet[n]),
-                                                            null,
-                                                            validationResult.ErrorMessage));
+                    ctx.Errors.Add(new ResolveError(ErrorType.Validation,
+                                                    validationResult.MemberNames.Select(n => paramSet[n]),
+                                                    null,
+                                                    validationResult.ErrorMessage));
                 }
             }
 
-            return new ParameterSetResult(sequence, paramSet, setInstance, paramSetErrors);
+            return new ParameterSetResult(sequence, ctx.ParameterSet, ctx.Instance, ctx.Errors);
+        }
+
+        private static void SetPropertyValue(BuildContext ctx, Parameter parameter, AstNode astNode)
+        {
+            using (ValueBuilder builder = new ValueBuilder())
+            {
+                object value;
+                if (builder.Build(parameter.Property.PropertyType, astNode, out value))
+                {
+                    parameter.Property.SetValue(ctx.Instance, value, null);
+                }
+                else
+                {
+                    foreach (ValueError valueError in builder.Errors)
+                    {
+                        TypeError typeError = valueError as TypeError;
+                        if (typeError != null)
+                        {
+                            ctx.Errors.Add(
+                                new ResolveError(ErrorType.IncompatibleType,
+                                                 new[] { parameter },
+                                                 new[] { astNode },
+                                                 String.Format(Resources.ErrorMessages.IncompatibleType,
+                                                               ctx.Sequence.GetInputString(
+                                                                   typeError.AstNode.SourceInfo),
+                                                               parameter.Name)));
+                        }
+
+                        InvokeError invokeError = valueError as InvokeError;
+
+                        if (invokeError != null)
+                        {
+                            if (invokeError.Method != null)
+                            {
+                                ctx.Errors.Add(
+                                    new ResolveError(ErrorType.IncompatibleType,
+                                                     new[] { parameter },
+                                                     new[] { astNode },
+                                                     String.Format(
+                                                         Resources.ErrorMessages.MethodInvocationFailed,
+                                                         ctx.Sequence.GetInputString(
+                                                                 invokeError.AstNodes.Select(
+                                                                 ast => ast.SourceInfo)),
+                                                         parameter.Name,
+                                                         invokeError.Method.ReflectedType.Name,
+                                                         invokeError.Method.Name,
+                                                         invokeError.Exception.GetType().Name,
+                                                         invokeError.Exception.Message)));
+                            }
+                            else
+                            {
+                                ctx.Errors.Add(
+                                    new ResolveError(ErrorType.IncompatibleType,
+                                                     new[] { parameter },
+                                                     new[] { astNode },
+                                                     String.Format(
+                                                         Resources.ErrorMessages
+                                                                  .ObjectInitializationFailed,
+                                                         ctx.Sequence.GetInputString(
+                                                             invokeError.AstNodes.Select(
+                                                                 ast => ast.SourceInfo)),
+                                                         parameter.Name,
+                                                         invokeError.Constructor.ReflectedType.Name,
+                                                         invokeError.Exception.GetType().Name,
+                                                         invokeError.Exception.Message)));
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         //public ResolveResult Resolve(NodeSequence args)
