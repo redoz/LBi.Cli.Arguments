@@ -145,6 +145,9 @@ namespace LBi.Cli.Arguments.Binding
 
         public bool Build(Type propertyType, AstNode astNode, out object value)
         {
+            if (this._errorHandlers.Count > 0)
+                throw new InvalidOperationException("This method is not reentrant.");
+
             if (this._errorCollector != null)
                 this._errorCollector.Dispose();
 
@@ -159,12 +162,17 @@ namespace LBi.Cli.Arguments.Binding
             return this._errorCollector.Count == 0;
         }
 
+        // TODO maybe this should Raise errors?
         private bool TryConvertType(Type targetType, ref object value, out Exception exception)
         {
             bool success = false;
             exception = null;
             object ret = value;
-            if (targetType.IsInstanceOfType(value))
+            if (value == null)
+            {
+                success = !targetType.IsValueType;
+            }
+            else if (targetType.IsInstanceOfType(value))
                 success = true;
             else
             {
@@ -241,38 +249,67 @@ namespace LBi.Cli.Arguments.Binding
                 }
             }
 
-            value = ret;
-            return success;
-        }
 
-        private bool TryConstructPair(Type targetType, object key, object value, out object pair)
-        {
-            bool success = false;
-            pair = null;
-            var ctors = targetType.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
-
-            foreach (var ctor in ctors)
+            if (!success)
             {
-                object keyArg = key;
-                object valueArg = value;
 
-                var ctorParams = ctor.GetParameters();
+                // check for ctor with single param
+                IEnumerable<ConstructorInfo> ctors = targetType.GetConstructors(BindingFlags.Instance | BindingFlags.Public);
+                ctors = ctors.Where(ct => ct.GetParameters().Length == 1);
 
-                if (ctorParams.Length != 2)
-                    continue;
-
-                Exception exception;
-                if (this.TryConvertType(ctorParams[0].ParameterType, ref keyArg, out exception))
+                foreach (var ct in ctors)
                 {
-                    if (this.TryConvertType(ctorParams[1].ParameterType, ref valueArg, out exception))
+                    var ctorParams = ct.GetParameters();
+
+                    if (this.TryConvertType(ctorParams[0].ParameterType, ref ret, out exception))
                     {
-                        pair = ctor.Invoke(new[] { keyArg, valueArg });
-                        success = true;
-                        break;
+                        try
+                        {
+                            ret = ct.Invoke(new[] {ret});
+                            success = true;
+                            break;
+                        }
+                        catch (Exception ex)
+                        {
+                            exception = ex;
+                        }
                     }
                 }
+                // check for static "Parse" method 
+
+                object[] args = new[] {ret};
+                MethodInfo parseMethod = targetType.GetMethod("Parse",
+                                                              BindingFlags.Public | BindingFlags.Static,
+                                                              null,
+                                                              new[] {ret.GetType()},
+                                                              null);
+
+                if (parseMethod == null)
+                {
+                    args[0] = ret.ToString();
+                    parseMethod = targetType.GetMethod("Parse",
+                                                       BindingFlags.Public | BindingFlags.Static,
+                                                       null,
+                                                       new[] {typeof(string)},
+                                                       null);
+                }
+
+                if (parseMethod != null)
+                {
+                    try
+                    {
+                        ret = parseMethod.Invoke(null, args);
+                        success = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        exception = ex;
+                    }
+                }
+ 
             }
 
+            value = ret;
             return success;
         }
 
@@ -397,7 +434,7 @@ namespace LBi.Cli.Arguments.Binding
                             error = new AggregateError(errors);
                     }
 
-                    if(error != null)
+                    if (error != null)
                         this.RaiseError(error);
                 }
                 this._targetType.Pop();
@@ -473,7 +510,15 @@ namespace LBi.Cli.Arguments.Binding
             return ret;
         }
 
+        object IAstVisitor.Visit(ParameterName parameterName)
+        {
+            throw new NotSupportedException();
+        }
 
+        object IAstVisitor.Visit(SwitchParameter switchParameter)
+        {
+            return switchParameter.Value.Visit(this);
+        }
 
         object IAstVisitor.Visit(AssociativeArray array)
         {
@@ -489,15 +534,6 @@ namespace LBi.Cli.Arguments.Binding
             return ret;
         }
 
-        public object Visit(ParameterName parameterName)
-        {
-            throw new NotSupportedException();
-        }
-
-        public object Visit(Parsing.Ast.SwitchParameter switchParameter)
-        {
-            return switchParameter.Value.Visit(this);
-        }
 
         #region AssociativeArray Handling
 
@@ -566,8 +602,8 @@ namespace LBi.Cli.Arguments.Binding
                             catch (TargetInvocationException ex)
                             {
                                 this.RaiseError(new InvokeError(addWithTwoArgs[addNum],
-                                                                new[] {keyValue, valueValue},
-                                                                new[] {keyNode, valueNode}, 
+                                                                new[] { keyValue, valueValue },
+                                                                new[] { keyNode, valueNode },
                                                                 ex.InnerException));
                             }
                         }
@@ -625,16 +661,16 @@ namespace LBi.Cli.Arguments.Binding
                                         catch (TargetInvocationException ex)
                                         {
                                             this.RaiseError(new InvokeError(addWithOneArgs[addNum],
-                                                                            new[] {elementObj},
-                                                                            new[] {keyNode, valueNode}, 
+                                                                            new[] { elementObj },
+                                                                            new[] { keyNode, valueNode },
                                                                             ex.InnerException));
                                         }
                                     }
                                     catch (TargetInvocationException ex)
                                     {
                                         this.RaiseError(new InvokeError(paramTypeCtors[ctorNum],
-                                                                        new[] {keyValue, valueValue},
-                                                                        new[] {keyNode, valueNode},
+                                                                        new[] { keyValue, valueValue },
+                                                                        new[] { keyNode, valueNode },
                                                                         ex.InnerException));
                                     }
 

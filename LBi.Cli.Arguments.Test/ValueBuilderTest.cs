@@ -74,6 +74,20 @@ namespace LBi.CLI.Arguments.Test
         }
 
         [Fact]
+        public void String_To_PathInfo()
+        {
+            using (ValueBuilder builder = new ValueBuilder())
+            {
+                object value;
+                Assert.True(builder.Build(typeof(System.IO.DirectoryInfo),
+                                          new LiteralValue(SourceInfo.Empty, LiteralValueType.String, "c:\\doesnt exist\\"),
+                                          out value));
+                Assert.IsType<System.IO.DirectoryInfo>(value);
+                Assert.Empty(builder.Errors);
+            }
+        }
+
+        [Fact]
         public void StringAlpha_ToByte()
         {
             using (ValueBuilder builder = new ValueBuilder())

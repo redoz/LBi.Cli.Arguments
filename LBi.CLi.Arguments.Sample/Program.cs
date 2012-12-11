@@ -22,10 +22,16 @@ using LBi.Cli.Arguments.Parsing;
 
 namespace LBi.CLi.Arguments.Sample
 {
+    public enum Actions
+    {
+        Create,
+        Destroy
+    }
+
     public abstract class ExecuteCommandBase
     {
         [Parameter(HelpMessage = "Action to take"), Required]
-        public string Action { get; set; }
+        public Actions Action { get; set; }
 
         public abstract void Execute();
     }
@@ -95,7 +101,7 @@ namespace LBi.CLi.Arguments.Sample
                 errorWriter.Write(result.BestMatch);
 
                 HelpWriter helpWriter = new HelpWriter(Console.Out);
-                helpWriter.Write(sets, HelpLevel.Full);
+                helpWriter.Write(sets, HelpLevel.Parameters);
             }
         }
     }

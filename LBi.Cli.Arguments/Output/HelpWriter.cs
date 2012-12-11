@@ -41,9 +41,14 @@ namespace LBi.Cli.Arguments.Output
             this.OutputWriter = outputWriter;
         }
 
-        public void Write(ParameterSetCollection sets, HelpLevel level)
+        public void Write(ParameterSet set, HelpLevel level)
         {
             
+        }
+
+        public void Write(ParameterSetCollection sets, HelpLevel level)
+        {
+            var allParams = sets.SelectMany(s => s);
         }
     }
 }
