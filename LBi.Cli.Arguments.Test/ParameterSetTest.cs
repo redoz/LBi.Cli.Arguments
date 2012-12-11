@@ -152,6 +152,22 @@ namespace LBi.CLI.Arguments.Test
         }
 
         [Fact]
+        public void ResolveParameterSet_WithPath()
+        {
+            ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
+            NodeSequence args = this.Parse(@"-Action Execute -Path c:\temp\foo -Verbose");
+            ResolveResult result = sets.Resolve(args);
+
+            var selectedSet = result.Single(r => r.Errors.Length == 0);
+            ExecuteCommandUsingPath cmd = selectedSet.Object as ExecuteCommandUsingPath;
+            Assert.NotNull(cmd);
+            Assert.Equal(@"c:\temp\foo", cmd.Path);
+            Assert.Equal("Execute", cmd.Action);
+            Assert.True(cmd.Verbose.IsPresent);
+        }
+
+
+        [Fact]
         public void ResolveParameterSet_WithSwitchExplicit()
         {
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));

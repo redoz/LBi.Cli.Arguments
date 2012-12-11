@@ -58,6 +58,21 @@ namespace LBi.CLI.Arguments.Test
             }
         }
 
+
+        [Fact]
+        public void String_To_Enum()
+        {
+            using (ValueBuilder builder = new ValueBuilder())
+            {
+                object value;
+                Assert.True(builder.Build(typeof(ConsoleColor),
+                                          new LiteralValue(SourceInfo.Empty, LiteralValueType.String, "Red"),
+                                          out value));
+                Assert.Equal(ConsoleColor.Red, (ConsoleColor)value);
+                Assert.Empty(builder.Errors);
+            }
+        }
+
         [Fact]
         public void StringAlpha_ToByte()
         {

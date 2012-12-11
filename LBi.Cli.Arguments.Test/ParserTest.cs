@@ -76,6 +76,16 @@ namespace LBi.CLI.Arguments.Test
             Assert.Equal(5, ((Sequence)parsedArgs[1]).Elements.Length);
         }
 
+        [Fact]
+        public void ParseImplicitList2()
+        {
+            NodeSequence parsedArgs = this.Parse("1,2,3,4,5 @(1,2,3,4,5)");
+            Assert.Equal(2, parsedArgs.Count);
+            Assert.IsType<Sequence>(parsedArgs[0]);
+            Assert.Equal(5, ((Sequence)parsedArgs[0]).Elements.Length);
+            Assert.Equal(5, ((Sequence)parsedArgs[1]).Elements.Length);
+        }
+
 
         private NodeSequence Parse(params string[] arg)
         {
