@@ -22,10 +22,10 @@ namespace LBi.Cli.Arguments.Parsing.Ast
             : base(NodeType.Literal, sourceInfo)
         {
             this.Value = value;
-            this.Type = type;
+            this.ValueType = type;
         }
 
-        public LiteralValueType Type { get; protected set; }
+        public LiteralValueType ValueType { get; protected set; }
 
         public string Value { get; protected set; }
 
@@ -36,7 +36,7 @@ namespace LBi.Cli.Arguments.Parsing.Ast
 
         public override string ToString()
         {
-            return string.Format("{0} ({1})", this.Value, this.Type);
+            return string.Format("{0} ({1})", this.Value, this.ValueType);
         }
     }
 }

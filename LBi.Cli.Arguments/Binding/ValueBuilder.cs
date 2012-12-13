@@ -318,7 +318,7 @@ namespace LBi.Cli.Arguments.Binding
         object IAstVisitor.Visit(LiteralValue literalValue)
         {
             object ret;
-            switch (literalValue.Type)
+            switch (literalValue.ValueType)
             {
                 case LiteralValueType.Numeric:
                     {

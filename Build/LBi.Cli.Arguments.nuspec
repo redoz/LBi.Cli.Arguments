@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
+    <metadata>
+        <id>LBi.Cli.Arguments</id>
+        <version>0.0.1.0-dev</version>
+        <title>LBi.Cli.Arguments</title>
+        <authors>LBi Netherlands</authors>
+        <owners>LBi Netherlands B.V.</owners>
+        <licenseUrl>https://raw.github.com/LBiNetherlands/LBi.Cli.Arguments/master/LICENSE.txt</licenseUrl>
+        <projectUrl>https://github.com/LBiNetherlands/LBi.Cli.Arguments</projectUrl>
+        <requireLicenseAcceptance>true</requireLicenseAcceptance>
+        <description>This is a command line argument parser that attempts to mimic the syntax and capabilities of PowerShell.</description>
+        <copyright>2012 LBi Netherlands</copyright>
+        <tags>LBi,CLI,arguments,command line</tags>
+    </metadata>
+    <files>
+        <file src="..\LBi.Cli.Arguments\bin\Debug\LBi.Cli.Arguments.dll" target="lib\net45\LBi.Cli.Arguments.dll" />
+        <file src="..\LBi.Cli.Arguments\bin\Debug\LBi.Cli.Arguments.pdb" target="lib\net45\LBi.Cli.Arguments.pdb" />
+    </files>
+</package>

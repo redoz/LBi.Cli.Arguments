@@ -38,7 +38,7 @@ namespace LBi.CLI.Arguments.Test
             
             Assert.Equal(1, ((Sequence)parsedArgs[3]).Elements.Length);
             Assert.IsType<LiteralValue>(((Sequence)parsedArgs[3]).Elements[0]);
-            Assert.Equal(LiteralValueType.Null, ((LiteralValue)((Sequence)parsedArgs[3]).Elements[0]).Type);
+            Assert.Equal(LiteralValueType.Null, ((LiteralValue)((Sequence)parsedArgs[3]).Elements[0]).ValueType);
         }
 
         [Fact]
@@ -50,7 +50,7 @@ namespace LBi.CLI.Arguments.Test
             Assert.IsType<Sequence>(parsedArgs[1]);
             Assert.Equal(1, ((Sequence)parsedArgs[1]).Elements.Length);
             Assert.IsType<LiteralValue>(((Sequence)parsedArgs[1]).Elements[0]);
-            Assert.Equal(LiteralValueType.Null, ((LiteralValue)((Sequence)parsedArgs[1]).Elements[0]).Type);
+            Assert.Equal(LiteralValueType.Null, ((LiteralValue)((Sequence)parsedArgs[1]).Elements[0]).ValueType);
         }
 
         [Fact]
@@ -63,7 +63,7 @@ namespace LBi.CLI.Arguments.Test
             Assert.IsType<Sequence>(parsedArgs[2]);
             Assert.Equal(1, ((Sequence)parsedArgs[2]).Elements.Length);
             Assert.IsType<LiteralValue>(((Sequence)parsedArgs[2]).Elements[0]);
-            Assert.Equal(LiteralValueType.Null, ((LiteralValue)((Sequence)parsedArgs[2]).Elements[0]).Type);
+            Assert.Equal(LiteralValueType.Null, ((LiteralValue)((Sequence)parsedArgs[2]).Elements[0]).ValueType);
         }
 
         [Fact]

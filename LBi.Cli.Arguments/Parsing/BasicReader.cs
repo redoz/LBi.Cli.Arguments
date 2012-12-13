@@ -26,13 +26,15 @@ namespace LBi.Cli.Arguments.Parsing
         private readonly StringComparer _comparer;
         private readonly TextReader _reader;
         private int _position;
+        private readonly bool _disposeReader;
 
-        public BasicReader(TextReader reader, StringComparer comparer)
+        public BasicReader(TextReader reader, StringComparer comparer, bool disposeReader = false)
         {
             this._reader = reader;
             this._buffer = new StringBuilder();
             this._comparer = comparer;
             this._position = 0;
+            this._disposeReader = disposeReader;
         }
 
         public bool Eof
@@ -49,7 +51,22 @@ namespace LBi.Cli.Arguments.Parsing
 
         public void Dispose()
         {
-            this._reader.Dispose();
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~BasicReader()
+        {
+            this.Dispose(false);
+        }
+
+        protected virtual void Dispose(bool isDisposing)
+        {
+            if (isDisposing)
+            {
+                if (this._disposeReader)
+                    this._reader.Dispose();
+            }
         }
 
         #endregion

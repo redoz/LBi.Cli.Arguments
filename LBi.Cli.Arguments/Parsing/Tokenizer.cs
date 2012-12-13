@@ -35,6 +35,7 @@ namespace LBi.Cli.Arguments.Parsing
         internal const string DictionaryKeySeperator = ";";
         internal const string DictionaryEnd = "}";
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
         public virtual IEnumerable<Token> Tokenize(params string[] args)
         {
             TokenWriter tokenWriter = new TokenWriter();
