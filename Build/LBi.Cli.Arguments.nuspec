@@ -5,12 +5,13 @@
         <version>0.0.1.0-dev</version>
         <title>LBi.Cli.Arguments</title>
         <authors>LBi Netherlands</authors>
-        <owners>LBi Netherlands B.V.</owners>
+        <owners>LBi Netherlands</owners>
         <licenseUrl>https://raw.github.com/LBiNetherlands/LBi.Cli.Arguments/master/LICENSE.txt</licenseUrl>
         <projectUrl>https://github.com/LBiNetherlands/LBi.Cli.Arguments</projectUrl>
+        <iconUrl>https://raw.github.com/LBiNetherlands/LBi.Cli.Arguments/master/Resources/logo.png</iconUrl>
         <requireLicenseAcceptance>true</requireLicenseAcceptance>
         <description>This is a command line argument parser that attempts to mimic the syntax and capabilities of PowerShell.</description>
-        <copyright>2012 LBi Netherlands</copyright>
+        <copyright>© LBi Netherlands</copyright>
         <tags>LBi,CLI,arguments,command line</tags>
     </metadata>
     <files>
