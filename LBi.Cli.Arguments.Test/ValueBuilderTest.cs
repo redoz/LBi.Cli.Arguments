@@ -452,8 +452,8 @@ namespace LBi.CLI.Arguments.Test
                 int i = 0;
                 foreach (object kvp in ((IEnumerable)value))
                 {
-                    object keyValue = kvp.GetType().GetProperty(keyName).GetValue(kvp);
-                    object valueValue = kvp.GetType().GetProperty(valueName).GetValue(kvp);
+                    object keyValue = kvp.GetType().GetProperty(keyName).GetValue(kvp, null);
+                    object valueValue = kvp.GetType().GetProperty(valueName).GetValue(kvp, null);
 
                     switch (i)
                     {
@@ -514,7 +514,7 @@ namespace LBi.CLI.Arguments.Test
 
                 object group = ((IEnumerable) value).Cast<object>().Single();
 
-                Assert.Equal("1", group.GetType().GetProperty("Key").GetValue(group).ToString());
+                Assert.Equal("1", group.GetType().GetProperty("Key").GetValue(group, null).ToString());
 
                 object[] values = ((IEnumerable) group).Cast<object>().ToArray();
 
