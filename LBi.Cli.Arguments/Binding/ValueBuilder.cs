@@ -162,8 +162,8 @@ namespace LBi.Cli.Arguments.Binding
             return this._errorCollector.Count == 0;
         }
 
-        // TODO maybe this should Raise errors?
-        private bool TryConvertType(Type targetType, ref object value, out Exception exception)
+        // TODO have to fix this, the "out Exception" isn't very useful, maybe this should Raise errors?
+        protected virtual bool TryConvertType(Type targetType, ref object value, out Exception exception)
         {
             bool success = false;
             exception = null;
@@ -317,6 +317,11 @@ namespace LBi.Cli.Arguments.Binding
 
         object IAstVisitor.Visit(LiteralValue literalValue)
         {
+            return Visit(literalValue);
+        }
+
+        protected virtual object Visit(LiteralValue literalValue)
+        {
             object ret;
             switch (literalValue.ValueType)
             {
@@ -366,20 +371,20 @@ namespace LBi.Cli.Arguments.Binding
                         if (!this.TryConvertType(this._targetType.Peek(), ref ret, out exception))
                         {
                             this.RaiseError(new TypeError(this._targetType.Peek(), ret, literalValue,
-                                                           exception));
+                                                          exception));
                         }
                     }
 
                     break;
                 case LiteralValueType.String:
                     ret = literalValue.Value;
-                    if (this._targetType.Peek() != typeof(string))
+                    if (this._targetType.Peek() != typeof (string))
                     {
                         Exception exception;
                         if (!this.TryConvertType(this._targetType.Peek(), ref ret, out exception))
                         {
                             this.RaiseError(new TypeError(this._targetType.Peek(), literalValue.Value, literalValue,
-                                                           exception));
+                                                          exception));
                         }
                     }
                     break;
@@ -388,13 +393,13 @@ namespace LBi.Cli.Arguments.Binding
                     break;
                 case LiteralValueType.Boolean:
                     ret = StringComparer.InvariantCultureIgnoreCase.Equals(literalValue.Value, "$true");
-                    if (this._targetType.Peek() != typeof(bool))
+                    if (this._targetType.Peek() != typeof (bool))
                     {
                         Exception exception;
                         if (!this.TryConvertType(this._targetType.Peek(), ref ret, out exception))
                         {
                             this.RaiseError(new TypeError(this._targetType.Peek(), ret, literalValue,
-                                                           exception));
+                                                          exception));
                         }
                     }
                     break;
@@ -407,6 +412,11 @@ namespace LBi.Cli.Arguments.Binding
 
 
         object IAstVisitor.Visit(Sequence sequence)
+        {
+            return Visit(sequence);
+        }
+
+        protected virtual object Visit(Sequence sequence)
         {
             Type targetType = this._targetType.Peek();
             object ret;
@@ -476,7 +486,7 @@ namespace LBi.Cli.Arguments.Binding
                             {
                                 try
                                 {
-                                    addMethods[addNum].Invoke(ret, new[] { value });
+                                    addMethods[addNum].Invoke(ret, new[] {value});
                                     success = true;
                                     break;
                                 }
@@ -484,8 +494,8 @@ namespace LBi.Cli.Arguments.Binding
                                 {
                                     this.RaiseError(
                                         new InvokeError(addMethods[addNum],
-                                                        new[] { value },
-                                                        new[] { sequence.Elements[elemNum] }, ex.InnerException));
+                                                        new[] {value},
+                                                        new[] {sequence.Elements[elemNum]}, ex.InnerException));
                                 }
                             }
 
@@ -512,15 +522,30 @@ namespace LBi.Cli.Arguments.Binding
 
         object IAstVisitor.Visit(ParameterName parameterName)
         {
+            return Visit(parameterName);
+        }
+
+        protected virtual object Visit(ParameterName switchParameter)
+        {
             throw new NotSupportedException();
         }
 
         object IAstVisitor.Visit(SwitchParameter switchParameter)
         {
+            return Visit(switchParameter);
+        }
+
+        protected virtual object Visit(SwitchParameter switchParameter)
+        {
             return switchParameter.Value.Visit(this);
         }
 
         object IAstVisitor.Visit(AssociativeArray array)
+        {
+            return Visit(array);
+        }
+
+        protected virtual object Visit(AssociativeArray array)
         {
             object ret;
             Type targetType = this._targetType.Peek();
@@ -533,7 +558,6 @@ namespace LBi.Cli.Arguments.Binding
 
             return ret;
         }
-
 
         #region AssociativeArray Handling
 
