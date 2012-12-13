@@ -43,7 +43,7 @@ namespace LBi.Cli.Arguments
             for (int i = 0; i < publicProps.Length; i++)
             {
                 var propInfo = publicProps[i];
-                ParameterAttribute attr = (ParameterAttribute)propInfo.GetCustomAttribute(typeof(ParameterAttribute), true);
+                ParameterAttribute attr = (ParameterAttribute)Attribute.GetCustomAttribute(propInfo, typeof(ParameterAttribute), true);
                 if (attr == null)
                     continue;
 
