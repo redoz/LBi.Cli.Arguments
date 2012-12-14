@@ -67,10 +67,10 @@ namespace LBi.CLi.Arguments.Sample
         }
     }
 
-
-    // LBi.Cli.Arguments.exe -Name test -WhatIf -Parameters @{"foo" = "bar"}
-    // or 
-    // LBi.Cli.Arguments.exe -Path "c:\test\foo.txt" -WhatIf -Parameters @{"foo" = "bar"}
+    // Examples
+    // LBi.Cli.Arguments.Sample.exe -Name test -WhatIf -Parameters @{"foo" = "bar"}
+    // LBi.Cli.Arguments.Sample.exe -Path "c:\test\foo.txt" -WhatIf -Parameters @{"foo" = "bar"}
+    // LBi.Cli.Arguments.Sample.exe -Help -Detailed
     class Program
     {
         static void Main(string[] args)
