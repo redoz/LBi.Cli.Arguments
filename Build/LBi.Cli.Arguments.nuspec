@@ -9,13 +9,15 @@
         <licenseUrl>https://raw.github.com/LBiNetherlands/LBi.Cli.Arguments/master/LICENSE.txt</licenseUrl>
         <projectUrl>https://github.com/LBiNetherlands/LBi.Cli.Arguments</projectUrl>
         <iconUrl>https://raw.github.com/LBiNetherlands/LBi.Cli.Arguments/master/Resources/logo.png</iconUrl>
-        <requireLicenseAcceptance>true</requireLicenseAcceptance>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>This is a command line argument parser that attempts to mimic the syntax and capabilities of PowerShell.</description>
         <copyright>© LBi Netherlands</copyright>
         <tags>LBi,CLI,arguments,command line</tags>
     </metadata>
     <files>
-        <file src="..\LBi.Cli.Arguments\bin\Debug\LBi.Cli.Arguments.dll" target="lib\net45\LBi.Cli.Arguments.dll" />
-        <file src="..\LBi.Cli.Arguments\bin\Debug\LBi.Cli.Arguments.pdb" target="lib\net45\LBi.Cli.Arguments.pdb" />
+        <file src="..\Input\v45\LBi.Cli.Arguments.dll" target="lib\net45\LBi.Cli.Arguments.dll" />
+        <file src="..\Input\v45\LBi.Cli.Arguments.pdb" target="lib\net45\LBi.Cli.Arguments.pdb" />
+        <file src="..\Input\v40\LBi.Cli.Arguments.dll" target="lib\net40\LBi.Cli.Arguments.dll" />
+        <file src="..\Input\v40\LBi.Cli.Arguments.pdb" target="lib\net40\LBi.Cli.Arguments.pdb" />        
     </files>
 </package>
