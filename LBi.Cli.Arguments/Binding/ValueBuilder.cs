@@ -18,7 +18,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Numerics;
@@ -67,17 +66,19 @@ namespace LBi.Cli.Arguments.Binding
         private readonly Stack<Type> _targetType;
         private readonly Stack<EventHandler<ErrorEventArg>> _errorHandlers;
         private ErrorCollector _errorCollector;
+        private readonly ITypeConverter _typeConverter;
 
         public ValueBuilder()
-            : this(CultureInfo.InvariantCulture)
+            : this(CultureInfo.InvariantCulture, new IntransigentTypeConverter(CultureInfo.InvariantCulture))
         {
             // register custom BooleanTypeConverter, this might be a bad idea.
             TypeConverterAttribute converterAttribute = new TypeConverterAttribute(typeof(CustomBooleanConverter));
             _typeDescriptorProvider = TypeDescriptor.AddAttributes(typeof(Boolean), converterAttribute);
         }
 
-        public ValueBuilder(CultureInfo cultureInfo)
+        public ValueBuilder(CultureInfo cultureInfo, ITypeConverter typeConverter)
         {
+            this._typeConverter = typeConverter;
             this._culture = cultureInfo;
             this._errorCollector = null;
             this._targetType = new Stack<Type>();
@@ -162,156 +163,7 @@ namespace LBi.Cli.Arguments.Binding
             return this._errorCollector.Count == 0;
         }
 
-        // TODO have to fix this, the "out Exception" isn't very useful, maybe this should Raise errors?
-        protected virtual bool TryConvertType(Type targetType, ref object value, out Exception exception)
-        {
-            bool success = false;
-            exception = null;
-            object ret = value;
-            if (value == null)
-            {
-                success = !targetType.IsValueType;
-            }
-            else if (targetType.IsInstanceOfType(value))
-                success = true;
-            else
-            {
-                var targetConverter = TypeDescriptor.GetConverter(targetType);
-                var sourceConverter = TypeDescriptor.GetConverter(value);
 
-                if (targetConverter.CanConvertFrom(value.GetType()))
-                {
-                    try
-                    {
-                        ret = targetConverter.ConvertFrom(null, this._culture, value);
-                        success = true;
-                    }
-                    catch (NotSupportedException ex)
-                    {
-                        exception = ex;
-                    }
-                    catch (Exception ex)
-                    {
-                        exception = ex;
-                    }
-                }
-                else if (sourceConverter.CanConvertTo(targetType))
-                {
-                    ret = sourceConverter.ConvertTo(null, this._culture, value, targetType);
-                    success = true;
-                }
-                else
-                {
-                    try
-                    {
-                        ret = Convert.ChangeType(value, targetType, this._culture);
-                        success = true;
-                    }
-                    catch (InvalidCastException ex)
-                    {
-                        exception = ex;
-                    }
-                    catch (FormatException ex)
-                    {
-                        exception = ex;
-                    }
-                    catch (OverflowException ex)
-                    {
-                        exception = ex;
-                    }
-                    catch (ArgumentNullException ex)
-                    {
-                        exception = ex;
-                    }
-
-                    if (!success)
-                    {
-                        // attempt round-trip to string
-                        if (targetConverter.CanConvertFrom(typeof(string)))
-                        {
-                            try
-                            {
-                                string tmp;
-                                if (sourceConverter.CanConvertTo(typeof(string)))
-                                    tmp = sourceConverter.ConvertToString(null, this._culture, value);
-                                else
-                                    tmp = value.ToString();
-
-                                ret = targetConverter.ConvertFromString(null, this._culture, tmp);
-                                success = true;
-                            }
-                            catch (Exception ex)
-                            {
-                                exception = ex;
-                            }
-                        }
-                    }
-                }
-            }
-
-
-            if (!success)
-            {
-
-                // check for ctor with single param
-                IEnumerable<ConstructorInfo> ctors = targetType.GetConstructors(BindingFlags.Instance | BindingFlags.Public);
-                ctors = ctors.Where(ct => ct.GetParameters().Length == 1);
-
-                foreach (var ct in ctors)
-                {
-                    var ctorParams = ct.GetParameters();
-
-                    if (this.TryConvertType(ctorParams[0].ParameterType, ref ret, out exception))
-                    {
-                        try
-                        {
-                            ret = ct.Invoke(new[] {ret});
-                            success = true;
-                            break;
-                        }
-                        catch (Exception ex)
-                        {
-                            exception = ex;
-                        }
-                    }
-                }
-                // check for static "Parse" method 
-
-                object[] args = new[] {ret};
-                MethodInfo parseMethod = targetType.GetMethod("Parse",
-                                                              BindingFlags.Public | BindingFlags.Static,
-                                                              null,
-                                                              new[] {ret.GetType()},
-                                                              null);
-
-                if (parseMethod == null)
-                {
-                    args[0] = ret.ToString();
-                    parseMethod = targetType.GetMethod("Parse",
-                                                       BindingFlags.Public | BindingFlags.Static,
-                                                       null,
-                                                       new[] {typeof(string)},
-                                                       null);
-                }
-
-                if (parseMethod != null)
-                {
-                    try
-                    {
-                        ret = parseMethod.Invoke(null, args);
-                        success = true;
-                    }
-                    catch (Exception ex)
-                    {
-                        exception = ex;
-                    }
-                }
- 
-            }
-
-            value = ret;
-            return success;
-        }
 
         #region Implementation of IAstVisitor
 
@@ -368,7 +220,7 @@ namespace LBi.Cli.Arguments.Binding
                             ret = literalValue.Value;
 
                         Exception exception;
-                        if (!this.TryConvertType(this._targetType.Peek(), ref ret, out exception))
+                        if (!this._typeConverter.TryConvertType(this._targetType.Peek(), ref ret, out exception))
                         {
                             this.RaiseError(new TypeError(this._targetType.Peek(), ret, literalValue,
                                                           exception));
@@ -381,7 +233,7 @@ namespace LBi.Cli.Arguments.Binding
                     if (this._targetType.Peek() != typeof (string))
                     {
                         Exception exception;
-                        if (!this.TryConvertType(this._targetType.Peek(), ref ret, out exception))
+                        if (!this._typeConverter.TryConvertType(this._targetType.Peek(), ref ret, out exception))
                         {
                             this.RaiseError(new TypeError(this._targetType.Peek(), literalValue.Value, literalValue,
                                                           exception));
@@ -396,7 +248,7 @@ namespace LBi.Cli.Arguments.Binding
                     if (this._targetType.Peek() != typeof (bool))
                     {
                         Exception exception;
-                        if (!this.TryConvertType(this._targetType.Peek(), ref ret, out exception))
+                        if (!this._typeConverter.TryConvertType(this._targetType.Peek(), ref ret, out exception))
                         {
                             this.RaiseError(new TypeError(this._targetType.Peek(), ret, literalValue,
                                                           exception));

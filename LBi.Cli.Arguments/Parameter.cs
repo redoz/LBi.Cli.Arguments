@@ -39,5 +39,10 @@ namespace LBi.Cli.Arguments
         public int? Position { get; protected set; }
         public ValidationAttribute[] Validators { get; protected set; }
         public PropertyInfo Property { get; protected set; }
+
+        public T GetAttribute<T>(bool inherit = true) where T: Attribute
+        {
+            return (T)Attribute.GetCustomAttribute(this.Property, typeof(T), inherit);
+        }
     }
 }

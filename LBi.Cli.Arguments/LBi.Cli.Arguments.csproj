@@ -54,7 +54,9 @@
     <Compile Include="Binding\ErrorCollector.cs" />
     <Compile Include="Binding\ErrorEventArg.cs" />
     <Compile Include="Binding\InterfaceResolutionException.cs" />
+    <Compile Include="Binding\IntransigentTypeConverter.cs" />
     <Compile Include="Binding\InvokeError.cs" />
+    <Compile Include="Binding\ITypeConverter.cs" />
     <Compile Include="Binding\Lookup.cs" />
     <Compile Include="Binding\Reflection.cs" />
     <Compile Include="Binding\ResolveTypeArgs.cs" />

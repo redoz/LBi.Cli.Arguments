@@ -15,6 +15,8 @@
  */
 
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using LBi.Cli.Arguments;
 using LBi.Cli.Arguments.Output;
@@ -22,16 +24,15 @@ using LBi.Cli.Arguments.Parsing;
 
 namespace LBi.CLi.Arguments.Sample
 {
-    public enum Actions
-    {
-        Create,
-        Destroy
-    }
 
     public abstract class ExecuteCommandBase
     {
-        [Parameter(HelpMessage = "Action to take"), Required]
-        public Actions Action { get; set; }
+        [Parameter(HelpMessage = "Optional parameter dictionary")]
+        [DefaultValue("@{}")]
+        public IDictionary<string, object> Paremters { get; set; }
+
+        [Parameter(HelpMessage = "If set, no action is taken.")]
+        public Switch WhatIf { get; set; }
 
         public abstract void Execute();
     }
@@ -44,7 +45,10 @@ namespace LBi.CLi.Arguments.Sample
 
         public override void Execute()
         {
-            Console.WriteLine("Executing action {0} using name: {1}", this.Action, this.Name);
+            if (this.WhatIf.IsPresent)
+                Console.WriteLine("Would have executed using name: {0}", this.Name);
+            else
+                Console.WriteLine("Executing using name: {0}", this.Name);
         }
     }
 
@@ -56,10 +60,17 @@ namespace LBi.CLi.Arguments.Sample
 
         public override void Execute()
         {
-            Console.WriteLine("Executing action {0} using path: {1}", this.Action, this.Path);
+            if (this.WhatIf.IsPresent)
+                Console.WriteLine("Would have executed using path: {0}", this.Path);
+            else
+                Console.WriteLine("Executing using path: {0}", this.Path);
         }
     }
 
+
+    // LBi.Cli.Arguments.exe -Name test -WhatIf -Parameters @{"foo" = "bar"}
+    // or 
+    // LBi.Cli.Arguments.exe -Path "c:\test\foo.txt" -WhatIf -Parameters @{"foo" = "bar"}
     class Program
     {
         static void Main(string[] args)

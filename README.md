@@ -10,8 +10,14 @@ Example
 ```csharp
 public abstract class ExecuteCommandBase
 {
-    [Parameter(HelpMessage = "Action to take"), Required]
-    public string Action { get; set; }
+    [Parameter(HelpMessage = "Optional parameter dictionary")]
+    [DefaultValue("@{}")]
+    public IDictionary<string, object> Paremters { get; set; }
+
+    [Parameter(HelpMessage = "If set, no action is taken.")]
+    public Switch WhatIf { get; set; }
+
+    public abstract void Execute();
 }
 
 [ParameterSet("Name", HelpMessage = "Executes command given a name.")]
@@ -19,6 +25,14 @@ public class ExecuteCommandUsingName : ExecuteCommandBase
 {
     [Parameter(HelpMessage = "Name"), Required]
     public string Name { get; set; }
+
+    public override void Execute()
+    {
+        if (this.WhatIf.IsPresent)
+            Console.WriteLine("Would have executed using name: {0}", this.Name);
+        else
+            Console.WriteLine("Executing using name: {0}", this.Name);
+    }
 }
 
 [ParameterSet("Path", HelpMessage = "Executes command given a path.")]
@@ -26,6 +40,14 @@ public class ExecuteCommandUsingPath : ExecuteCommandBase
 {
     [Parameter(HelpMessage = "The path."), Required]
     public string Path { get; set; }
+
+    public override void Execute()
+    {
+        if (this.WhatIf.IsPresent)
+            Console.WriteLine("Would have executed using path: {0}", this.Path);
+        else
+            Console.WriteLine("Executing using path: {0}", this.Path);
+    }
 }
 ```
 

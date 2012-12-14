@@ -19,12 +19,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using LBi.Cli.Arguments.Binding;
 using LBi.Cli.Arguments.Parsing;
 using LBi.Cli.Arguments.Parsing.Ast;
+using LBi.Cli.Arguments.Resources;
 
 namespace LBi.Cli.Arguments
 {
@@ -139,6 +141,84 @@ namespace LBi.Cli.Arguments
         {
             BuildContext ctx = new BuildContext(sequence,
                                                 paramSet, Activator.CreateInstance(paramSet.UnderlyingType));
+
+            // set default values
+            foreach (Parameter parameter in paramSet)
+            {
+                var attr = parameter.GetAttribute<DefaultValueAttribute>();
+
+                if (attr == null)
+                    continue;
+
+                string strVal = attr.Value as string;
+                if (strVal != null)
+                {
+                    if (parameter.Property.PropertyType != typeof(string))
+                    {
+                        Parser parser = new Parser();
+                        NodeSequence seq = parser.Parse(strVal);
+                        using (ValueBuilder valueBuilder = new ValueBuilder())
+                        {
+                            object value;
+                            if (valueBuilder.Build(parameter.Property.PropertyType, seq[0], out value))
+                            {
+                                parameter.Property.SetValue(ctx.Instance, value, null);
+                            }
+                            else
+                            {
+                                throw new ParameterDefinitionException(parameter.Property,
+                                                                       string.Format(
+                                                                           Exceptions.FailedToParseDefaultValue,
+                                                                           strVal,
+                                                                           parameter.Property.PropertyType.FullName));
+                            }
+                        }
+                    }
+                    else
+                    {
+                        parameter.Property.SetValue(ctx.Instance, strVal, null);
+                    }
+                }
+                else
+                {
+                    // TODO _maybe_ use some dependency injection for the ITypeConverter
+                    ITypeConverter typeConverter = new IntransigentTypeConverter(CultureInfo.InvariantCulture);
+                    object value = attr.Value;
+                    if (value == null)
+                    {
+                        if (!parameter.Property.PropertyType.IsValueType)
+                        {
+                            parameter.Property.SetValue(ctx.Instance, value, null);
+                        }
+                        else
+                        {
+                            throw new ParameterDefinitionException(parameter.Property,
+                                                                   string.Format(
+                                                                       Exceptions.FailedToConvertDefaultValue,
+                                                                       "NULL",
+                                                                       "",
+                                                                       parameter.Property.PropertyType.FullName));
+                        }
+                    }
+                    else
+                    {
+                        Exception exception;
+                        if (typeConverter.TryConvertType(parameter.Property.PropertyType, ref value, out exception))
+                        {
+                            parameter.Property.SetValue(ctx.Instance, value, null);
+                        }
+                        else
+                        {
+                            throw new ParameterDefinitionException(parameter.Property,
+                                                                   string.Format(
+                                                                       Exceptions.FailedToConvertDefaultValue,
+                                                                       value,
+                                                                       value.GetType().FullName,
+                                                                       parameter.Property.PropertyType.FullName));
+                        }
+                    }
+                }
+            }
 
             using (IEnumerator<AstNode> enumerator = sequence.GetEnumerator())
             {
