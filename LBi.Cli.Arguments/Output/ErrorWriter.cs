@@ -18,21 +18,16 @@ using System.IO;
 
 namespace LBi.Cli.Arguments.Output
 {
-
-    public class ErrorWriter
+    public class ErrorWriter : IErrorWriter
     {
-        protected readonly TextWriter OutputWriter;
- 
-
-        public ErrorWriter(TextWriter outputWriter)
+        public ErrorWriter()
         {
-            this.OutputWriter = outputWriter;
         }
 
-        public virtual void Write(ParameterSetResult result)
+        public virtual void Write(TextWriter writer, ParameterSetResult result)
         {
             var error = result.Errors[0];
-            this.OutputWriter.WriteLine(error.Message);            
+            writer.WriteLine(error.Message);            
         }
     }
 }

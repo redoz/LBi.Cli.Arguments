@@ -28,9 +28,7 @@ namespace LBi.Cli.Arguments
     [TypeConverter(typeof(SwitchTypeConverter))]
     public struct Switch
     {
-        private static readonly Switch _present = new Switch(true);
-
-        public static Switch Present { get { return _present; } }
+        public static readonly Switch Present = new Switch(true);
 
         public static implicit operator Switch(bool boolean)
         {

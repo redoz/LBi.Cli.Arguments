@@ -16,39 +16,221 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
 
 namespace LBi.Cli.Arguments.Output
 {
-    [Flags]
-    public enum HelpLevel
+    // TODO refactor and clean this up, it's a bit of a kludge atm
+    public class HelpWriter : IHelpWriter
     {
-        Parameters = 2,
-        Detailed = 4,        
-        Examples = 8,
-        Full = Detailed | Examples | Parameters,
-    }
-
-    public class HelpWriter
-    {
-        protected readonly TextWriter OutputWriter;
-
-        public HelpWriter(TextWriter outputWriter)
+        public HelpWriter()
         {
-            this.OutputWriter = outputWriter;
         }
 
-        public void Write(ParameterSet set, HelpLevel level)
+        protected virtual void WriteSyntax(TextWriter writer, IEnumerable<ParameterSet> parameterSets, HelpLevel level)
         {
-            
+            const string indent = "   ";
+            writer.WriteLine("SYNTAX");
+            string fileName = Path.GetFileName(Assembly.GetEntryAssembly().Location);
+
+            WriteSyntax(writer,
+                        parameterSets,
+                        indent,
+                        fileName,
+                        true,
+                        p => true,
+                        p =>
+                        {
+                            if (p.Property.PropertyType == typeof(Switch))
+                                return "";
+
+                            if (p.Property.PropertyType == typeof(Switch))
+                                return "";
+
+                            if (level.HasFlag(HelpLevel.Detailed))
+                                return string.Format("<{0}>", p.Property.PropertyType.FullName);
+
+                            return string.Format("<{0}>", GetHumanReadableTypeName(p.Property.PropertyType));
+                        });
         }
 
-        public void Write(ParameterSetCollection sets, HelpLevel level)
+        protected virtual void WriteSyntax(TextWriter writer, IEnumerable<ParameterSet> parameterSets, string indent, string fileName, bool includeOptionalMarkers, Func<Parameter, bool> shouldWrite, Func<Parameter, string> valueWriter)
         {
-            var allParams = sets.SelectMany(s => s);
+            foreach (ParameterSet set in parameterSets)
+            {
+                writer.Write(indent);
+                writer.Write(fileName);
+
+                foreach (Parameter parameter in set.PositionalParameters)
+                {
+                    if (!shouldWrite(parameter))
+                        continue;
+
+                    bool optional = parameter.GetAttribute<RequiredAttribute>() == null;
+
+                    writer.Write(" ");
+
+                    if (optional && includeOptionalMarkers)
+                    {
+                        writer.Write("[");
+                    }
+                    if (includeOptionalMarkers)
+                        writer.Write("[");
+
+                    writer.Write('-');
+                    writer.Write(parameter.Name);
+                    if (includeOptionalMarkers)
+                        writer.Write("]");
+                    var value = valueWriter(parameter);
+                    if (value.Length > 0
+                        && !(parameter.Property.PropertyType == typeof(Switch)
+                             && StringComparer.InvariantCultureIgnoreCase.Equals("$true", value)))
+                    {
+                        if (parameter.Property.PropertyType == typeof(Switch))
+                            writer.Write(':');
+                        else
+                            writer.Write(' ');
+                        writer.Write(value);
+                    }
+                    if (optional && includeOptionalMarkers)
+                    {
+                        writer.Write("]");
+                    }
+                }
+
+                var namedParameters = set.Except(set.PositionalParameters).ToArray();
+                var requriedParams = namedParameters.Where(p => p.GetAttribute<RequiredAttribute>() != null)
+                                                    .OrderBy(p => p.Name, StringComparer.InvariantCultureIgnoreCase)
+                                                    .ToArray();
+                var optionalParams =
+                    namedParameters.Except(requriedParams)
+                                   .OrderBy(p => p.Name, StringComparer.InvariantCultureIgnoreCase)
+                                   .ToArray();
+                foreach (Parameter parameter in requriedParams.Concat(optionalParams))
+                {
+                    if (!shouldWrite(parameter))
+                        continue;
+
+                    bool optional = parameter.GetAttribute<RequiredAttribute>() == null;
+
+                    writer.Write(" ");
+
+                    if (optional && includeOptionalMarkers)
+                    {
+                        writer.Write("[");
+                    }
+                    writer.Write('-');
+                    writer.Write(parameter.Name);
+
+                    var value = valueWriter(parameter);
+                    if (value.Length > 0
+                        && !(parameter.Property.PropertyType == typeof(Switch)
+                             && StringComparer.InvariantCultureIgnoreCase.Equals("$true", value)))
+                    {
+                        if (parameter.Property.PropertyType == typeof(Switch))
+                            writer.Write(':');
+                        else
+                            writer.Write(' ');
+                        writer.Write(value);
+                    }
+
+                    if (optional && includeOptionalMarkers)
+                    {
+                        writer.Write("]");
+                    }
+                }
+
+                writer.WriteLine();
+                writer.WriteLine();
+            }
+        }
+
+
+        public virtual void Write(TextWriter writer, ParameterSet set, HelpLevel level)
+        {
+            var tmp = new ParameterSetCollection(new[] { set });
+            Write(writer, tmp, level);
+        }
+
+        public virtual void Write(TextWriter writer, ParameterSetCollection sets, HelpLevel level)
+        {
+
+            if (level.HasFlag(HelpLevel.Syntax))
+            {
+                WriteSyntax(writer, sets, level);
+            }
+
+            if (level.HasFlag(HelpLevel.Examples))
+            {
+                WriteExample(writer, sets, level);
+            }
+        }
+
+        protected virtual void WriteExample(TextWriter writer, ParameterSetCollection parameterSets, HelpLevel level)
+        {
+            const string indent = "   ";
+            writer.WriteLine("EXAMPLES");
+            string fileName = Path.GetFileName(Assembly.GetEntryAssembly().Location);
+
+            foreach (var set in parameterSets)
+            {
+                var examples =
+                    set.SelectMany(p => p.GetAttributes<ExampleValueAttribute>()
+                                         .Select(ev => new Tuple<Parameter, ExampleValueAttribute>(p, ev)))
+                       .GroupBy(t => t.Item2.Set,
+                                StringComparer.InvariantCultureIgnoreCase);
+
+                examples = examples.Where(g => g.Any(t => t.Item1.Property.DeclaringType == set.UnderlyingType));
+
+                foreach (IGrouping<string, Tuple<Parameter, ExampleValueAttribute>> group in examples)
+                {
+                    var attrDict = group.ToDictionary(t => t.Item1, t => t.Item2);
+                    WriteSyntax(writer,
+                                new[] { set },
+                                indent,
+                                fileName,
+                                false,
+                                p =>
+                                {
+                                    ExampleValueAttribute attr;
+                                    if (attrDict.TryGetValue(p, out attr))
+                                        return true;
+                                    return p.GetAttribute<RequiredAttribute>() != null;
+                                },
+                                p =>
+                                {
+                                    ExampleValueAttribute attr;
+                                    if (attrDict.TryGetValue(p, out attr))
+                                        return attr.Value;
+
+                                    if (p.Property.PropertyType == typeof(Switch))
+                                        return "";
+
+                                    if (level.HasFlag(HelpLevel.Detailed))
+                                        return string.Format("<{0}>", p.Property.PropertyType.FullName);
+
+                                    return string.Format("<{0}>", GetHumanReadableTypeName(p.Property.PropertyType));
+                                });
+                }
+
+
+            }
+
+
+        }
+
+        private string GetHumanReadableTypeName(Type type)
+        {
+            bool isArray;
+            if (isArray = type.IsArray)
+                type = type.GetElementType();
+
+            if (type.IsGenericType)
+                return type.Name.Substring(0, type.Name.IndexOf('`')) + (isArray ? "[]" : "");
+            return type.Name + (isArray ? "[]" : "");
         }
     }
 }

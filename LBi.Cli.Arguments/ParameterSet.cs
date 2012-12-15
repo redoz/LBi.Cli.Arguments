@@ -110,6 +110,11 @@ namespace LBi.Cli.Arguments
 
         public Type UnderlyingType { get; protected set; }
 
+        public T GetAttribute<T>(bool inherit = true) where T : Attribute
+        {
+            return (T)Attribute.GetCustomAttribute(this.UnderlyingType, typeof(T), inherit);
+        }
+
         public int Count { get { return this.Parameters.Length; } }
 
         /// <summary>

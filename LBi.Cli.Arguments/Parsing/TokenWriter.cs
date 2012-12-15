@@ -22,13 +22,15 @@ using System.Threading;
 
 namespace LBi.Cli.Arguments.Parsing
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable", 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable",
         Justification = "TokenWriter.Enumerable disposes the disposable members of the TokenWriter class.")]
     public class TokenWriter
     {
         protected readonly ConcurrentQueue<Token> Queue;
         protected readonly BlockingCollection<Token> BlockingCollection;
         protected readonly CancellationTokenSource CancellationTokenSource;
+        protected bool IsDisposed;
+        protected readonly object DisposeLock;
         protected Exception Exception;
 
         public TokenWriter()
@@ -36,6 +38,8 @@ namespace LBi.Cli.Arguments.Parsing
             this.Queue = new ConcurrentQueue<Token>();
             this.CancellationTokenSource = new CancellationTokenSource();
             this.BlockingCollection = new BlockingCollection<Token>(this.Queue);
+            this.IsDisposed = false;
+            this.DisposeLock = new object();
         }
 
         public void Add(Token token)
@@ -48,9 +52,14 @@ namespace LBi.Cli.Arguments.Parsing
             return new Enumerable(this);
         }
 
+        // FIX this got called _after_ Dispose
         public void Close()
         {
-            this.BlockingCollection.CompleteAdding();
+            lock (this.DisposeLock)
+            {
+                if (!this.IsDisposed)
+                    this.BlockingCollection.CompleteAdding();
+            }
         }
 
         public void Abort(Exception exception)
@@ -82,9 +91,13 @@ namespace LBi.Cli.Arguments.Parsing
 
             public void Dispose()
             {
-                this._enumerator.Dispose();
-                this._writer.BlockingCollection.Dispose();
-                this._writer.CancellationTokenSource.Dispose();
+                lock (this._writer.DisposeLock)
+                {
+                    this._writer.IsDisposed = true;
+                    this._enumerator.Dispose();
+                    this._writer.BlockingCollection.Dispose();
+                    this._writer.CancellationTokenSource.Dispose();
+                }
             }
 
             public bool MoveNext()
@@ -92,12 +105,12 @@ namespace LBi.Cli.Arguments.Parsing
                 try
                 {
                     return this._enumerator.MoveNext();
-                } 
+                }
                 catch (OperationCanceledException)
                 {
                     if (this._writer.Exception != null)
                         throw new AggregateException(this._writer.Exception);
-                    
+
                     throw;
                 }
             }

@@ -30,7 +30,6 @@ namespace LBi.Cli.Arguments.Binding
     {
         #region Error handling
 
-
         internal event EventHandler<ErrorEventArg> Error
         {
             add
@@ -60,7 +59,6 @@ namespace LBi.Cli.Arguments.Binding
 
         #endregion
 
-
         private static TypeDescriptionProvider _typeDescriptorProvider;
         private readonly CultureInfo _culture;
         private readonly Stack<Type> _targetType;
@@ -69,15 +67,16 @@ namespace LBi.Cli.Arguments.Binding
         private readonly ITypeConverter _typeConverter;
 
         public ValueBuilder()
-            : this(CultureInfo.InvariantCulture, new IntransigentTypeConverter(CultureInfo.InvariantCulture))
+            : this(CultureInfo.InvariantCulture, new IntransigentTypeConverter())
         {
-            // register custom BooleanTypeConverter, this might be a bad idea.
-            TypeConverterAttribute converterAttribute = new TypeConverterAttribute(typeof(CustomBooleanConverter));
-            _typeDescriptorProvider = TypeDescriptor.AddAttributes(typeof(Boolean), converterAttribute);
         }
 
         public ValueBuilder(CultureInfo cultureInfo, ITypeConverter typeConverter)
         {
+            // register custom BooleanTypeConverter, this might be a bad idea.
+            TypeConverterAttribute converterAttribute = new TypeConverterAttribute(typeof(CustomBooleanConverter));
+            _typeDescriptorProvider = TypeDescriptor.AddAttributes(typeof(Boolean), converterAttribute);
+
             this._typeConverter = typeConverter;
             this._culture = cultureInfo;
             this._errorCollector = null;
@@ -89,7 +88,7 @@ namespace LBi.Cli.Arguments.Binding
                     if (args.RealType != null)
                         return;
 
-                    if (typeof(IEnumerable).Equals(args.InterfaceType))
+                    if (typeof(IEnumerable) == args.InterfaceType)
                         args.RealType = typeof(List<object>);
                     else
                     {
@@ -220,7 +219,7 @@ namespace LBi.Cli.Arguments.Binding
                             ret = literalValue.Value;
 
                         Exception exception;
-                        if (!this._typeConverter.TryConvertType(this._targetType.Peek(), ref ret, out exception))
+                        if (!this._typeConverter.TryConvertType(this._culture, this._targetType.Peek(), ref ret, out exception))
                         {
                             this.RaiseError(new TypeError(this._targetType.Peek(), ret, literalValue,
                                                           exception));
@@ -233,7 +232,7 @@ namespace LBi.Cli.Arguments.Binding
                     if (this._targetType.Peek() != typeof (string))
                     {
                         Exception exception;
-                        if (!this._typeConverter.TryConvertType(this._targetType.Peek(), ref ret, out exception))
+                        if (!this._typeConverter.TryConvertType(this._culture, this._targetType.Peek(), ref ret, out exception))
                         {
                             this.RaiseError(new TypeError(this._targetType.Peek(), literalValue.Value, literalValue,
                                                           exception));
@@ -248,7 +247,7 @@ namespace LBi.Cli.Arguments.Binding
                     if (this._targetType.Peek() != typeof (bool))
                     {
                         Exception exception;
-                        if (!this._typeConverter.TryConvertType(this._targetType.Peek(), ref ret, out exception))
+                        if (!this._typeConverter.TryConvertType(this._culture, this._targetType.Peek(), ref ret, out exception))
                         {
                             this.RaiseError(new TypeError(this._targetType.Peek(), ret, literalValue,
                                                           exception));

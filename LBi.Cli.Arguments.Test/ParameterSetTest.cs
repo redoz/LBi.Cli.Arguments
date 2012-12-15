@@ -18,9 +18,11 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using LBi.Cli.Arguments;
+using LBi.Cli.Arguments.Binding;
 using LBi.Cli.Arguments.Parsing;
 using Xunit;
 
@@ -84,7 +86,9 @@ namespace LBi.CLI.Arguments.Test
         {
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
             NodeSequence args = this.Parse("-Action Execute -Name 'a b c'");
-            ResolveResult result = sets.Resolve(args);
+            ResolveResult result = sets.Resolve(new ParameterSetBuilder(),
+                                                new IntransigentTypeConverter(),
+                                                CultureInfo.InvariantCulture, args);
             
             var selectedSet = result.Single(r => r.Errors.Length == 0);
             ExecuteCommandUsingName cmd = selectedSet.Object as ExecuteCommandUsingName;
@@ -103,7 +107,7 @@ namespace LBi.CLI.Arguments.Test
         {
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
             NodeSequence args = this.Parse("-Action Execute -Name 50");
-            ResolveResult result = sets.Resolve(args);
+            ResolveResult result = sets.Resolve(new ParameterSetBuilder(),new IntransigentTypeConverter(),CultureInfo.InvariantCulture, args);
     
             var selectedSet = result.Single(r => r.Errors.Length == 0);
             ExecuteCommandUsingName cmd = selectedSet.Object as ExecuteCommandUsingName;
@@ -117,7 +121,7 @@ namespace LBi.CLI.Arguments.Test
         {
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
             NodeSequence args = this.Parse("-Action Execute -Name $true");
-            ResolveResult result = sets.Resolve(args);
+            ResolveResult result = sets.Resolve(new ParameterSetBuilder(),new IntransigentTypeConverter(),CultureInfo.InvariantCulture, args);
 
             var selectedSet = result.Single(r => r.Errors.Length == 0);
             ExecuteCommandUsingName cmd = selectedSet.Object as ExecuteCommandUsingName;
@@ -131,7 +135,7 @@ namespace LBi.CLI.Arguments.Test
         {
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
             NodeSequence args = this.Parse("-Action Execute -Name $true -Verbose");
-            ResolveResult result = sets.Resolve(args);
+            ResolveResult result = sets.Resolve(new ParameterSetBuilder(),new IntransigentTypeConverter(),CultureInfo.InvariantCulture, args);
 
             var selectedSet = result.Single(r => r.Errors.Length == 0);
             ExecuteCommandUsingName cmd = selectedSet.Object as ExecuteCommandUsingName;
@@ -146,7 +150,7 @@ namespace LBi.CLI.Arguments.Test
         {
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
             NodeSequence args = this.Parse("-Action Execute -Name $true -Verbose:$false");
-            ResolveResult result = sets.Resolve(args);
+            ResolveResult result = sets.Resolve(new ParameterSetBuilder(),new IntransigentTypeConverter(),CultureInfo.InvariantCulture, args);
 
             var selectedSet = result.Single(r => r.Errors.Length == 0);
             ExecuteCommandUsingName cmd = selectedSet.Object as ExecuteCommandUsingName;
@@ -161,7 +165,7 @@ namespace LBi.CLI.Arguments.Test
         {
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
             NodeSequence args = this.Parse(@"-Action Execute -Path c:\temp\foo -Verbose");
-            ResolveResult result = sets.Resolve(args);
+            ResolveResult result = sets.Resolve(new ParameterSetBuilder(),new IntransigentTypeConverter(),CultureInfo.InvariantCulture, args);
 
             var selectedSet = result.Single(r => r.Errors.Length == 0);
             ExecuteCommandUsingPath cmd = selectedSet.Object as ExecuteCommandUsingPath;
@@ -177,7 +181,7 @@ namespace LBi.CLI.Arguments.Test
         {
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
             NodeSequence args = this.Parse("-Action Execute -Name $true -Verbose:$true");
-            ResolveResult result = sets.Resolve(args);
+            ResolveResult result = sets.Resolve(new ParameterSetBuilder(),new IntransigentTypeConverter(),CultureInfo.InvariantCulture, args);
 
             var selectedSet = result.Single(r => r.Errors.Length == 0);
             ExecuteCommandUsingName cmd = selectedSet.Object as ExecuteCommandUsingName;
@@ -192,7 +196,7 @@ namespace LBi.CLI.Arguments.Test
         {
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandWithParameters));
             NodeSequence args = this.Parse("-Action Execute -Parameters @{foo = 'bar'; bar = 4}");
-            ResolveResult result = sets.Resolve(args);
+            ResolveResult result = sets.Resolve(new ParameterSetBuilder(),new IntransigentTypeConverter(),CultureInfo.InvariantCulture, args);
 
             var selectedSet = result.Single(r => r.Errors.Length == 0);
             ExecuteCommandWithParameters cmd = selectedSet.Object as ExecuteCommandWithParameters;
@@ -207,7 +211,7 @@ namespace LBi.CLI.Arguments.Test
         {
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandWithParameters));
             NodeSequence args = this.Parse("-Action Execute -Test");
-            ResolveResult result = sets.Resolve(args);
+            ResolveResult result = sets.Resolve(new ParameterSetBuilder(),new IntransigentTypeConverter(),CultureInfo.InvariantCulture, args);
 
             var selectedSet = result.Single(r => r.Errors.Length == 0);
             ExecuteCommandWithParameters cmd = selectedSet.Object as ExecuteCommandWithParameters;

@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright 2012 LBi Netherlands B.V.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,15 +14,17 @@
  * limitations under the License. 
  */
 
-
 using System;
-using System.Globalization;
 
-namespace LBi.Cli.Arguments.Binding
+namespace LBi.Cli.Arguments.Output
 {
-    public interface ITypeConverter
+    [Flags]
+    public enum HelpLevel
     {
-        // TODO have to fix this, the "out Exception" isn't very useful, this should output IEnum<ValueError> or similar
-        bool TryConvertType(CultureInfo culture, Type targetType, ref object value, out Exception exception);
+        Syntax = 1,
+        Parameters = 2,
+        Detailed = 4,        
+        Examples = 8,
+        Full = Syntax | Examples | Parameters,
     }
 }

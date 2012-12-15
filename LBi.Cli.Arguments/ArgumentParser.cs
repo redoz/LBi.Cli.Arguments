@@ -16,7 +16,6 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.IO;
 using LBi.Cli.Arguments.Output;
 using LBi.Cli.Arguments.Parsing;
 
@@ -33,19 +32,19 @@ namespace LBi.Cli.Arguments
         [ParameterSet("Help", HelpMessage = "Show help")]
         protected class HelpCommand
         {
-            [Parameter, Required]
+            [Parameter(HelpMessage = "Show help"), Required]
             public Switch Help { get; set; }
 
-            [Parameter]
+            [Parameter(HelpMessage = "Show all help")]
             public Switch Full { get; set; }
 
-            [Parameter]
+            [Parameter(HelpMessage = "Show detailed help")]
             public Switch Detailed { get; set; }
 
-            [Parameter]
+            [Parameter(HelpMessage = "Show parameter information")]
             public Switch Parameters { get; set; }
 
-            [Parameter]
+            [Parameter(HelpMessage = "Show examples")]
             public Switch Examples { get; set; }
 
             public HelpLevel ToHelpLevel()
@@ -67,22 +66,25 @@ namespace LBi.Cli.Arguments
             }
         }
 
-        public TextWriter Out { get; set; }
-
-        public TextWriter Error { get; set; }
-
         protected readonly ParameterSetCollection ParameterSets;
 
-        public ArgumentParser(params Type[] types)
+        public ArgumentParser(ArgumentParserSettings settings, params Type[] types)
         {
+            this.Settings = settings;
             Array.Resize(ref types, types.Length + 2);
             types[types.Length - 2] = typeof(HelpCommand);
             types[types.Length - 1] = typeof(TParamSetBase);
             // create parameter set collection from types
             this.ParameterSets = ParameterSetCollection.FromTypes(types);
-            this.Out = Console.Out;
-            this.Error = Console.Error;
         }
+
+        public ArgumentParserSettings Settings { get; protected set; }
+
+        public ArgumentParser(params Type[] types)
+            : this(ArgumentParserSettings.Default, types)
+        {
+            
+        } 
 
         public virtual bool TryParse(string[] args, out TParamSetBase paramSet)
         {
@@ -92,15 +94,20 @@ namespace LBi.Cli.Arguments
             NodeSequence nodes = parser.Parse(string.Join(" ", args));
 
             // resolve parameter set against the parsed node set
-            ResolveResult result = this.ParameterSets.Resolve(nodes);
+            ResolveResult result = this.ParameterSets.Resolve(this.Settings.ParameterSetBuilder,
+                                                              this.Settings.TypeConverter,
+                                                              this.Settings.Culture,
+                                                              nodes);
 
             if (result.IsMatch && result.BestMatch.Object is HelpCommand)
             {
-                HelpWriter helpWriter = new HelpWriter(this.Out);
-                helpWriter.Write(this.ParameterSets, ((HelpCommand)result.BestMatch.Object).ToHelpLevel());
+                this.Settings.HelpWriter.Write(this.Settings.Out,
+                                               this.ParameterSets,
+                                               ((HelpCommand) result.BestMatch.Object).ToHelpLevel());
                 success = false;
                 paramSet = default(TParamSetBase);
-            } else if (result.IsMatch)
+            }
+            else if (result.IsMatch)
             {
                 paramSet = (TParamSetBase)result.BestMatch.Object;
                 success = true;
@@ -109,10 +116,11 @@ namespace LBi.Cli.Arguments
             {
                 paramSet = default(TParamSetBase);
                 success = false;
-                ErrorWriter errorWriter = new ErrorWriter(this.Error);
-                errorWriter.Write(result.BestMatch);
-                HelpWriter helpWriter = new HelpWriter(this.Out);
-                helpWriter.Write(this.ParameterSets, HelpLevel.Parameters);
+                this.Settings.ErrorWriter.Write(this.Settings.Error, result.BestMatch);
+
+                this.Settings.HelpWriter.Write(this.Settings.Out,
+                                               this.ParameterSets,
+                                               HelpLevel.Syntax | HelpLevel.Parameters);
             }
 
             return success;

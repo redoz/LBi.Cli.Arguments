@@ -18,7 +18,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using LBi.Cli.Arguments;
+using LBi.Cli.Arguments.Binding;
 using LBi.Cli.Arguments.Output;
 using LBi.Cli.Arguments.Parsing;
 
@@ -29,18 +31,24 @@ namespace LBi.CLi.Arguments.Sample
     {
         [Parameter(HelpMessage = "Optional parameter dictionary")]
         [DefaultValue("@{}")]
-        public IDictionary<string, object> Paremters { get; set; }
+        [ExampleValue("With parameters", "@{min = 5; max = 15}")]
+        public IDictionary<string, object> Parameters { get; set; }
 
+        [ExampleValue("With Parameters", "")]
         [Parameter(HelpMessage = "If set, no action is taken.")]
         public Switch WhatIf { get; set; }
 
         public abstract void Execute();
     }
 
+
+
     [ParameterSet("Name", HelpMessage = "Executes command given a name.")]
+    [Example("With parameters", HelpMessage ="This is an example of how to call a command with a parameter dictionary.")]
     public class ExecuteCommandUsingName : ExecuteCommandBase
     {
         [Parameter(HelpMessage = "Name"), Required]
+        [ExampleValue("With parameters", "System")]
         public string Name { get; set; }
 
         public override void Execute()
@@ -53,9 +61,11 @@ namespace LBi.CLi.Arguments.Sample
     }
 
     [ParameterSet("Path", HelpMessage = "Executes command given a path.")]
+    [Example("With Path", HelpMessage = "This is an example of how to call a command with a path")]
     public class ExecuteCommandUsingPath : ExecuteCommandBase
     {
         [Parameter(HelpMessage = "The path."), Required]
+        [ExampleValue("With Path", @"c:\temp\out.txt")]
         public string Path { get; set; }
 
         public override void Execute()
@@ -87,6 +97,7 @@ namespace LBi.CLi.Arguments.Sample
                 paramSet.Execute();
             }
 
+            Console.ReadLine();
 
             /*
              *  advanced usage
@@ -100,7 +111,10 @@ namespace LBi.CLi.Arguments.Sample
             NodeSequence nodes = parser.Parse(string.Join(" ", args));
 
             // resolve parameter set against the parsed node set
-            ResolveResult result = sets.Resolve(nodes);
+            ResolveResult result = sets.Resolve(new ParameterSetBuilder(),
+                                                new IntransigentTypeConverter(),
+                                                CultureInfo.InvariantCulture, 
+                                                nodes);
             if (result.IsMatch)
             {
                 paramSet = (ExecuteCommandBase)result.BestMatch.Object;
@@ -108,11 +122,11 @@ namespace LBi.CLi.Arguments.Sample
             }
             else
             {
-                ErrorWriter errorWriter = new ErrorWriter(Console.Error);
-                errorWriter.Write(result.BestMatch);
+                ErrorWriter errorWriter = new ErrorWriter();
+                errorWriter.Write(new ConsoleWriter(Console.Error), result.BestMatch);
 
-                HelpWriter helpWriter = new HelpWriter(Console.Out);
-                helpWriter.Write(sets, HelpLevel.Parameters);
+                HelpWriter helpWriter = new HelpWriter();
+                helpWriter.Write(new ConsoleWriter(Console.Out), sets, HelpLevel.Parameters);
             }
         }
     }

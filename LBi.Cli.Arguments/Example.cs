@@ -14,15 +14,23 @@
  * limitations under the License. 
  */
 
-
 using System;
-using System.Globalization;
+using LBi.Cli.Arguments.Globalization;
 
-namespace LBi.Cli.Arguments.Binding
+namespace LBi.Cli.Arguments
 {
-    public interface ITypeConverter
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
+    public class Example : Attribute, IHelpMessage
     {
-        // TODO have to fix this, the "out Exception" isn't very useful, this should output IEnum<ValueError> or similar
-        bool TryConvertType(CultureInfo culture, Type targetType, ref object value, out Exception exception);
+        public Example(string name)
+        {
+            this.Name = name;
+        }
+
+        public string Name { get; protected set; }
+
+        public string HelpMessage { get; set; }
+        public string HelpMessageResourceName { get; set; }
+        public Type HelpMessageResourceType { get; set; }
     }
 }

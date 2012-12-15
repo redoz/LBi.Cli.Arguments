@@ -48,8 +48,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AggregateError.cs" />
-    <Compile Include="AliasAttribute.cs" />
     <Compile Include="ArgumentParser.cs" />
+    <Compile Include="ArgumentParserSettings.cs" />
     <Compile Include="Binding\CustomBooleanConverter.cs" />
     <Compile Include="Binding\ErrorCollector.cs" />
     <Compile Include="Binding\ErrorEventArg.cs" />
@@ -62,14 +62,22 @@
     <Compile Include="Binding\ResolveTypeArgs.cs" />
     <Compile Include="Binding\SwitchTypeConverter.cs" />
     <Compile Include="ErrorType.cs" />
+    <Compile Include="Example.cs" />
+    <Compile Include="ExampleValueAttribute.cs" />
     <Compile Include="Globalization\HelpMessageExtensions.cs" />
     <Compile Include="Globalization\IResourceProvider.cs" />
     <Compile Include="Globalization\IHelpMessage.cs" />
+    <Compile Include="IParameterSetBuilder.cs" />
     <Compile Include="Output\ErrorWriter.cs" />
+    <Compile Include="Output\HelpLevel.cs" />
     <Compile Include="Output\HelpWriter.cs" />
+    <Compile Include="Output\ConsoleWriter.cs" />
+    <Compile Include="Output\IErrorWriter.cs" />
+    <Compile Include="Output\IHelpWriter.cs" />
     <Compile Include="Parameter.cs" />
     <Compile Include="ParameterDefinitionException.cs" />
     <Compile Include="ParameterSet.cs" />
+    <Compile Include="ParameterSetBuilder.cs" />
     <Compile Include="ParameterSetCollection.cs" />
     <Compile Include="ParameterSetDefinitionException.cs" />
     <Compile Include="ParameterSetResult.cs" />

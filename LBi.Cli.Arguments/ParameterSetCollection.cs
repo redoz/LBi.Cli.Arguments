@@ -32,27 +32,7 @@ namespace LBi.Cli.Arguments
 {
     public class ParameterSetCollection : IEnumerable<ParameterSet>
     {
-        protected class BuildContext
-        {
-            public BuildContext(NodeSequence sequence, ParameterSet paramSet, object instance)
-            {
-                this.Sequence = sequence;
-                this.Instance = instance;
-                this.ParameterSet = paramSet;
-                this.Errors = new List<ResolveError>();
-                this.RemainingParameters = new List<Parameter>(paramSet.OrderBy(p => p.Position.HasValue ? p.Position.Value : int.MinValue));
-            }
 
-            public NodeSequence Sequence { get; protected set; }
-
-            public List<Parameter> RemainingParameters { get; protected set; }
-
-            public List<ResolveError> Errors { get; protected set; }
-
-            public ParameterSet ParameterSet { get; protected set; }
-
-            public object Instance { get; protected set; }
-        }
 
         protected readonly List<ParameterSet> ParameterSets;
 
@@ -115,17 +95,6 @@ namespace LBi.Cli.Arguments
             this.ParameterSets.Remove(set);
         }
 
-        public ResolveResult Resolve(NodeSequence sequence)
-        {
-            List<ParameterSetResult> setResults = new List<ParameterSetResult>();
-
-            for (int setNum = 0; setNum < this.ParameterSets.Count; setNum++)
-            {
-                setResults.Add(BuildParameterSet(sequence, this.ParameterSets[setNum]));
-            }
-
-            return new ResolveResult(setResults);
-        }
 
         protected virtual bool TryGetParameter(IEnumerable<Parameter> parameters, string name, out Parameter[] matches)
         {
@@ -137,271 +106,20 @@ namespace LBi.Cli.Arguments
             return matches.Length == 1;
         }
 
-        protected virtual ParameterSetResult BuildParameterSet(NodeSequence sequence, ParameterSet paramSet)
+
+        public ResolveResult Resolve(IParameterSetBuilder builder, ITypeConverter typeConverter, CultureInfo cultureInfo, NodeSequence sequence)
         {
-            BuildContext ctx = new BuildContext(sequence,
-                                                paramSet, Activator.CreateInstance(paramSet.UnderlyingType));
+            List<ParameterSetResult> setResults = new List<ParameterSetResult>();
 
-            // set default values
-            foreach (Parameter parameter in paramSet)
+            for (int setNum = 0; setNum < this.ParameterSets.Count; setNum++)
             {
-                var attr = parameter.GetAttribute<DefaultValueAttribute>();
-
-                if (attr == null)
-                    continue;
-
-                string strVal = attr.Value as string;
-                if (strVal != null)
-                {
-                    if (parameter.Property.PropertyType != typeof(string))
-                    {
-                        Parser parser = new Parser();
-                        NodeSequence seq = parser.Parse(strVal);
-                        using (ValueBuilder valueBuilder = new ValueBuilder())
-                        {
-                            object value;
-                            if (valueBuilder.Build(parameter.Property.PropertyType, seq[0], out value))
-                            {
-                                parameter.Property.SetValue(ctx.Instance, value, null);
-                            }
-                            else
-                            {
-                                throw new ParameterDefinitionException(parameter.Property,
-                                                                       string.Format(
-                                                                           Exceptions.FailedToParseDefaultValue,
-                                                                           strVal,
-                                                                           parameter.Property.PropertyType.FullName));
-                            }
-                        }
-                    }
-                    else
-                    {
-                        parameter.Property.SetValue(ctx.Instance, strVal, null);
-                    }
-                }
-                else
-                {
-                    // TODO _maybe_ use some dependency injection for the ITypeConverter
-                    ITypeConverter typeConverter = new IntransigentTypeConverter(CultureInfo.InvariantCulture);
-                    object value = attr.Value;
-                    if (value == null)
-                    {
-                        if (!parameter.Property.PropertyType.IsValueType)
-                        {
-                            parameter.Property.SetValue(ctx.Instance, value, null);
-                        }
-                        else
-                        {
-                            throw new ParameterDefinitionException(parameter.Property,
-                                                                   string.Format(
-                                                                       Exceptions.FailedToConvertDefaultValue,
-                                                                       "NULL",
-                                                                       "",
-                                                                       parameter.Property.PropertyType.FullName));
-                        }
-                    }
-                    else
-                    {
-                        Exception exception;
-                        if (typeConverter.TryConvertType(parameter.Property.PropertyType, ref value, out exception))
-                        {
-                            parameter.Property.SetValue(ctx.Instance, value, null);
-                        }
-                        else
-                        {
-                            throw new ParameterDefinitionException(parameter.Property,
-                                                                   string.Format(
-                                                                       Exceptions.FailedToConvertDefaultValue,
-                                                                       value,
-                                                                       value.GetType().FullName,
-                                                                       parameter.Property.PropertyType.FullName));
-                        }
-                    }
-                }
+                setResults.Add(builder.Build(typeConverter,
+                                             cultureInfo,
+                                             sequence,
+                                             this.ParameterSets[setNum]));
             }
 
-            using (IEnumerator<AstNode> enumerator = sequence.GetEnumerator())
-            {
-                while (enumerator.MoveNext())
-                {
-                    if (enumerator.Current.Type == NodeType.Parameter ||
-                        enumerator.Current.Type == NodeType.Switch)
-                    {
-                        ParameterName parameterName = (ParameterName)enumerator.Current;
-                        Parameter[] parameters;
-                        if (ctx.ParameterSet.TryGetParameter(parameterName.Name, out parameters) && parameters.Length == 1)
-                        {
-                            // remove from "remaining parameters" collection
-                            if (!ctx.RemainingParameters.Remove(parameters[0]))
-                            {
-                                // report error, multiple bindings
-                                ctx.Errors.Add(
-                                    new ResolveError(ErrorType.MultipleBindings,
-                                                     parameters,
-                                                     new AstNode[] { parameterName },
-                                                     String.Format(Resources.ErrorMessages.MultipleBindings,
-                                                                   parameterName.Name)));
-
-                                // if the parameter was not of type Switch, skip next node
-                                if (parameters[0].Property.PropertyType != typeof(Switch))
-                                    enumerator.MoveNext();
-
-                                // handled, continue and skip
-                                continue;
-                            }
-
-                            // if it's a Switch we can simply set it to "Present"
-                            if (parameters[0].Property.PropertyType == typeof(Switch))
-                            {
-                                if (enumerator.Current.Type == NodeType.Switch)
-                                {
-                                    SwitchParameter switchParameter = (SwitchParameter)enumerator.Current;
-                                    SetPropertyValue(ctx, parameters[0], switchParameter.Value);
-                                }
-                                else
-                                    parameters[0].Property.SetValue(ctx.Instance, Switch.Present, null);
-
-                                // handled, continue and skip
-                                continue;
-                            }
-
-                            // advance to value 
-                            enumerator.MoveNext();
-
-                            SetPropertyValue(ctx, parameters[0], enumerator.Current);
-                        }
-                        else if (parameters != null && parameters.Length > 1)
-                        {
-                            // report error, ambigious name
-                            ctx.Errors.Add(
-                                new ResolveError(ErrorType.AmbigiousName,
-                                                 parameters,
-                                                 new AstNode[] { parameterName },
-                                                 String.Format(Resources.ErrorMessages.AmbigiousName,
-                                                               parameterName.Name,
-                                                               string.Join(", ", parameters.Select(p => p.Name)))));
-                        }
-                        else
-                        {
-                            // report error, parameter not found
-                            ctx.Errors.Add(
-                                new ResolveError(ErrorType.ArgumentNameMismatch,
-                                                 Enumerable.Empty<Parameter>(),
-                                                 new AstNode[] { parameterName },
-                                                 string.Format(Resources.ErrorMessages.ArgumentNameMismatch,
-                                                               parameterName.Name)));
-                        }
-                    }
-                    else
-                    {
-                        // positional param
-                        var positionalParam = ctx.RemainingParameters.FirstOrDefault(p => p.Position.HasValue);
-
-                        if (positionalParam == null)
-                        {
-                            // report error, there are no positional parameters
-                            ctx.Errors.Add(new ResolveError(ErrorType.ArgumentPositionMismatch,
-                                                            Enumerable.Empty<Parameter>(),
-                                                            new[] { enumerator.Current },
-                                                            string.Format(
-                                                                Resources.ErrorMessages.ArgumentPositionMismatch,
-                                                                ctx.Sequence.GetInputString(enumerator.Current.SourceInfo))));
-                        }
-                        else
-                        {
-                            SetPropertyValue(ctx, positionalParam, enumerator.Current);
-                        }
-                    }
-                }
-            }
-
-            ValidationContext validationContext = new ValidationContext(ctx.Instance, null, null);
-
-            List<ValidationResult> validationResults = new List<ValidationResult>();
-            bool valid = Validator.TryValidateObject(ctx.Instance, validationContext, validationResults, true);
-
-            if (!valid)
-            {
-                foreach (ValidationResult validationResult in validationResults)
-                {
-                    ctx.Errors.Add(new ResolveError(ErrorType.Validation,
-                                                    validationResult.MemberNames.Select(n => paramSet[n]),
-                                                    null,
-                                                    validationResult.ErrorMessage));
-                }
-            }
-
-            return new ParameterSetResult(sequence, ctx.ParameterSet, ctx.Instance, ctx.Errors);
-        }
-
-        private static void SetPropertyValue(BuildContext ctx, Parameter parameter, AstNode astNode)
-        {
-            using (ValueBuilder builder = new ValueBuilder())
-            {
-                object value;
-                if (builder.Build(parameter.Property.PropertyType, astNode, out value))
-                {
-                    parameter.Property.SetValue(ctx.Instance, value, null);
-                }
-                else
-                {
-                    foreach (ValueError valueError in builder.Errors)
-                    {
-                        TypeError typeError = valueError as TypeError;
-                        if (typeError != null)
-                        {
-                            ctx.Errors.Add(
-                                new ResolveError(ErrorType.IncompatibleType,
-                                                 new[] { parameter },
-                                                 new[] { astNode },
-                                                 String.Format(Resources.ErrorMessages.IncompatibleType,
-                                                               ctx.Sequence.GetInputString(
-                                                                   typeError.AstNode.SourceInfo),
-                                                               parameter.Name)));
-                        }
-
-                        InvokeError invokeError = valueError as InvokeError;
-
-                        if (invokeError != null)
-                        {
-                            if (invokeError.Method != null)
-                            {
-                                ctx.Errors.Add(
-                                    new ResolveError(ErrorType.IncompatibleType,
-                                                     new[] { parameter },
-                                                     new[] { astNode },
-                                                     String.Format(
-                                                         Resources.ErrorMessages.MethodInvocationFailed,
-                                                         ctx.Sequence.GetInputString(
-                                                                 invokeError.AstNodes.Select(
-                                                                 ast => ast.SourceInfo)),
-                                                         parameter.Name,
-                                                         invokeError.Method.ReflectedType.Name,
-                                                         invokeError.Method.Name,
-                                                         invokeError.Exception.GetType().Name,
-                                                         invokeError.Exception.Message)));
-                            }
-                            else
-                            {
-                                ctx.Errors.Add(
-                                    new ResolveError(ErrorType.IncompatibleType,
-                                                     new[] { parameter },
-                                                     new[] { astNode },
-                                                     String.Format(
-                                                         Resources.ErrorMessages
-                                                                  .ObjectInitializationFailed,
-                                                         ctx.Sequence.GetInputString(
-                                                             invokeError.AstNodes.Select(
-                                                                 ast => ast.SourceInfo)),
-                                                         parameter.Name,
-                                                         invokeError.Constructor.ReflectedType.Name,
-                                                         invokeError.Exception.GetType().Name,
-                                                         invokeError.Exception.Message)));
-                            }
-                        }
-                    }
-                }
-            }
+            return new ResolveResult(setResults);
         }
 
         public IEnumerator<ParameterSet> GetEnumerator()
@@ -412,6 +130,11 @@ namespace LBi.Cli.Arguments
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        public ParameterSet this[int index]
+        {
+            get { return this.ParameterSets[index]; }
         }
     }
 }

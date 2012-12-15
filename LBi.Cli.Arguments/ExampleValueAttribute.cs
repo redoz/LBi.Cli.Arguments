@@ -14,15 +14,19 @@
  * limitations under the License. 
  */
 
-
 using System;
-using System.Globalization;
 
-namespace LBi.Cli.Arguments.Binding
+namespace LBi.Cli.Arguments
 {
-    public interface ITypeConverter
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = true, Inherited = true)]
+    public class ExampleValueAttribute : Attribute
     {
-        // TODO have to fix this, the "out Exception" isn't very useful, this should output IEnum<ValueError> or similar
-        bool TryConvertType(CultureInfo culture, Type targetType, ref object value, out Exception exception);
+        public ExampleValueAttribute(string exampleSet, string exampleValue)
+        {
+            this.Set = exampleSet;
+            this.Value = exampleValue;
+        }
+        public string Value { get; protected set; }
+        public string Set { get; protected set; }
     }
 }

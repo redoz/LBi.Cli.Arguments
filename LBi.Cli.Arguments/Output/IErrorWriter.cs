@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright 2012 LBi Netherlands B.V.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,18 +14,12 @@
  * limitations under the License. 
  */
 
-using System;
+using System.IO;
 
-namespace LBi.Cli.Arguments
+namespace LBi.Cli.Arguments.Output
 {
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
-    public class AliasAttribute : Attribute
+    public interface IErrorWriter
     {
-        public AliasAttribute(params string[] aliases)
-        {
-            this.AliasNames = aliases;
-        }
-
-        public string[] AliasNames { get; protected set; }
+        void Write(TextWriter writer, ParameterSetResult result);
     }
 }

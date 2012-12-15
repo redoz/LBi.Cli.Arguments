@@ -25,14 +25,12 @@ namespace LBi.Cli.Arguments.Binding
 {
     public class IntransigentTypeConverter : ITypeConverter
     {
-        protected readonly CultureInfo _culture;
 
-        public IntransigentTypeConverter(CultureInfo cultureInfo)
+        public IntransigentTypeConverter()
         {
-            this._culture = cultureInfo;
         }
 
-        public virtual bool TryConvertType(Type targetType, ref object value, out Exception exception)
+        public virtual bool TryConvertType(CultureInfo culture, Type targetType, ref object value, out Exception exception)
         {
             bool success = false;
             exception = null;
@@ -52,7 +50,7 @@ namespace LBi.Cli.Arguments.Binding
                 {
                     try
                     {
-                        ret = targetConverter.ConvertFrom(null, this._culture, value);
+                        ret = targetConverter.ConvertFrom(null, culture, value);
                         success = true;
                     }
                     catch (NotSupportedException ex)
@@ -66,14 +64,14 @@ namespace LBi.Cli.Arguments.Binding
                 }
                 else if (sourceConverter.CanConvertTo(targetType))
                 {
-                    ret = sourceConverter.ConvertTo(null, this._culture, value, targetType);
+                    ret = sourceConverter.ConvertTo(null, culture, value, targetType);
                     success = true;
                 }
                 else
                 {
                     try
                     {
-                        ret = Convert.ChangeType(value, targetType, this._culture);
+                        ret = Convert.ChangeType(value, targetType, culture);
                         success = true;
                     }
                     catch (InvalidCastException ex)
@@ -102,11 +100,11 @@ namespace LBi.Cli.Arguments.Binding
                             {
                                 string tmp;
                                 if (sourceConverter.CanConvertTo(typeof(string)))
-                                    tmp = sourceConverter.ConvertToString(null, this._culture, value);
+                                    tmp = sourceConverter.ConvertToString(null, culture, value);
                                 else
                                     tmp = value.ToString();
 
-                                ret = targetConverter.ConvertFromString(null, this._culture, tmp);
+                                ret = targetConverter.ConvertFromString(null, culture, tmp);
                                 success = true;
                             }
                             catch (Exception ex)
@@ -130,7 +128,7 @@ namespace LBi.Cli.Arguments.Binding
                 {
                     var ctorParams = ct.GetParameters();
 
-                    if (this.TryConvertType(ctorParams[0].ParameterType, ref ret, out exception))
+                    if (this.TryConvertType(culture, ctorParams[0].ParameterType, ref ret, out exception))
                     {
                         try
                         {

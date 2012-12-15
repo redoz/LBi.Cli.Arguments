@@ -44,5 +44,10 @@ namespace LBi.Cli.Arguments
         {
             return (T)Attribute.GetCustomAttribute(this.Property, typeof(T), inherit);
         }
+
+        public T[] GetAttributes<T>(bool inherit = true) where T : Attribute
+        {
+            return (T[])Attribute.GetCustomAttributes(this.Property, typeof(T), inherit);
+        }
     }
 }

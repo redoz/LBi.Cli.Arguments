@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright 2012 LBi Netherlands B.V.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,14 +15,18 @@
  */
 
 
-using System;
 using System.Globalization;
+using LBi.Cli.Arguments.Binding;
+using LBi.Cli.Arguments.Parsing;
 
-namespace LBi.Cli.Arguments.Binding
+namespace LBi.Cli.Arguments
 {
-    public interface ITypeConverter
+    public interface IParameterSetBuilder
     {
-        // TODO have to fix this, the "out Exception" isn't very useful, this should output IEnum<ValueError> or similar
-        bool TryConvertType(CultureInfo culture, Type targetType, ref object value, out Exception exception);
+        ParameterSetResult Build(ITypeConverter typeConverter,
+                                             CultureInfo cultureInfo,
+                                             NodeSequence sequence,
+                                             ParameterSet paramSet);
+
     }
 }
