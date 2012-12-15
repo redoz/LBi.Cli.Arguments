@@ -21,12 +21,13 @@ using LBi.Cli.Arguments.Parsing;
 
 namespace LBi.Cli.Arguments
 {
+    // TODO should this encapsulate the ITypeConverter & CultureInfo
     public interface IParameterSetBuilder
     {
         ParameterSetResult Build(ITypeConverter typeConverter,
-                                             CultureInfo cultureInfo,
-                                             NodeSequence sequence,
-                                             ParameterSet paramSet);
+                                 CultureInfo cultureInfo,
+                                 NodeSequence sequence,
+                                 ParameterSet paramSet);
 
     }
 }

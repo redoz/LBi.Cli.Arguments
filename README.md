@@ -74,7 +74,10 @@ Parser parser = new Parser();
 NodeSequence nodes = parser.Parse(string.Join(" ", args));
 
 // resolve parameter set against the parsed node set
-ResolveResult result = sets.Resolve(nodes);
+ResolveResult result = sets.Resolve(new ParameterSetBuilder(),
+                                    new IntransigentTypeConverter(),
+                                    CultureInfo.InvariantCulture, 
+                                    nodes);
 if (result.IsMatch)
 {
     paramSet = (ExecuteCommandBase)result.BestMatch.Object;
@@ -82,11 +85,11 @@ if (result.IsMatch)
 }
 else
 {
-    ErrorWriter errorWriter = new ErrorWriter(Console.Error);
-    errorWriter.Write(result.BestMatch);
+    ErrorWriter errorWriter = new ErrorWriter();
+    errorWriter.Write(new ConsoleWriter(Console.Error), result.BestMatch);
 
-    HelpWriter helpWriter = new HelpWriter(Console.Out);
-    helpWriter.Write(sets, HelpLevel.Full);
+    HelpWriter helpWriter = new HelpWriter();
+    helpWriter.Write(new ConsoleWriter(Console.Out), sets, HelpLevel.Parameters);
 }
 
 ```

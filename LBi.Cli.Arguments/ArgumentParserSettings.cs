@@ -28,16 +28,18 @@ namespace LBi.Cli.Arguments
 
         static ArgumentParserSettings()
         {
-            Default = new ArgumentParserSettings
-                          {
-                              Out = new ConsoleWriter(Console.Out),
-                              Error = new ConsoleWriter(Console.Error),
-                              HelpWriter = new HelpWriter(),
-                              ErrorWriter = new ErrorWriter(),
-                              TypeConverter = new IntransigentTypeConverter(),
-                              ParameterSetBuilder = new ParameterSetBuilder(),
-                              Culture = CultureInfo.InvariantCulture,
-                          };
+            Default = new ArgumentParserSettings();
+        }
+
+        public ArgumentParserSettings()
+        {
+            Out = new ConsoleWriter(Console.Out);
+            Error = new ConsoleWriter(Console.Error);
+            HelpWriter = new HelpWriter();
+            ErrorWriter = new ErrorWriter();
+            TypeConverter = new IntransigentTypeConverter();
+            ParameterSetBuilder = new ParameterSetBuilder();
+            Culture = CultureInfo.InvariantCulture;
         }
 
         public TextWriter Out { get; set; }
@@ -46,6 +48,6 @@ namespace LBi.Cli.Arguments
         public IErrorWriter ErrorWriter { get; set; }
         public CultureInfo Culture { get; set; }
         public ITypeConverter TypeConverter { get; set; }
-        public IParameterSetBuilder ParameterSetBuilder{ get; set; }
+        public IParameterSetBuilder ParameterSetBuilder { get; set; }
     }
 }

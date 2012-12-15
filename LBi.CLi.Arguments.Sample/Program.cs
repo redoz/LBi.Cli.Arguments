@@ -100,8 +100,8 @@ namespace LBi.CLi.Arguments.Sample
             Console.ReadLine();
 
             /*
-             *  advanced usage
-             */
+            *  advanced usage
+            */
 
             // create parameter set collection from types
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
