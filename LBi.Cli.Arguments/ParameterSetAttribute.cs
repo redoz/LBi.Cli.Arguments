@@ -29,6 +29,8 @@ namespace LBi.Cli.Arguments
         }
 
         public string Name { get; protected set; }
+        
+        public string Command { get; set; }
 
         public string HelpMessage { get; set; }
         public string HelpMessageResourceName { get; set; }

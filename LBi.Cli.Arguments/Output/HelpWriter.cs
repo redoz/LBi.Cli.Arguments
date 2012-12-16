@@ -64,6 +64,12 @@ namespace LBi.Cli.Arguments.Output
                 writer.Write(indent);
                 writer.Write(fileName);
 
+                if (!string.IsNullOrEmpty(set.Command))
+                {
+                    writer.Write(' ');
+                    writer.Write(set.Command);
+                }
+
                 foreach (Parameter parameter in set.PositionalParameters)
                 {
                     if (!shouldWrite(parameter))
@@ -144,6 +150,8 @@ namespace LBi.Cli.Arguments.Output
                 }
 
                 writer.WriteLine();
+                writer.WriteLine();
+                writer.WriteLine(set.HelpMessage());
                 writer.WriteLine();
             }
         }

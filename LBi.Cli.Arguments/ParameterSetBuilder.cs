@@ -59,87 +59,37 @@ namespace LBi.Cli.Arguments
             BuildContext ctx = new BuildContext(sequence,
                                                 paramSet, Activator.CreateInstance(paramSet.UnderlyingType));
 
-            // set default values
-            foreach (Parameter parameter in paramSet)
-            {
-                var attr = parameter.GetAttribute<DefaultValueAttribute>();
+            var requiredValueTypeParams =
+                new HashSet<Parameter>(paramSet.Where(p => p.GetAttribute<RequiredAttribute>() != null &&
+                                                           p.Property.PropertyType.IsValueType));
 
-                if (attr == null)
-                    continue;
+            SetDefaultValues(typeConverter, cultureInfo, ctx);
 
-                string strVal = attr.Value as string;
-                if (strVal != null)
-                {
-                    if (parameter.Property.PropertyType != typeof(string))
-                    {
-                        Parser parser = new Parser();
-                        NodeSequence seq = parser.Parse(strVal);
-                        using (ValueBuilder valueBuilder = new ValueBuilder())
-                        {
-                            object value;
-                            if (valueBuilder.Build(parameter.Property.PropertyType, seq[0], out value))
-                            {
-                                parameter.Property.SetValue(ctx.Instance, value, null);
-                            }
-                            else
-                            {
-                                throw new ParameterDefinitionException(parameter.Property,
-                                                                       string.Format(
-                                                                           Exceptions.FailedToParseDefaultValue,
-                                                                           strVal,
-                                                                           parameter.Property.PropertyType.FullName));
-                            }
-                        }
-                    }
-                    else
-                    {
-                        parameter.Property.SetValue(ctx.Instance, strVal, null);
-                    }
-                }
-                else
-                {
-                    // TODO _maybe_ use some dependency injection for the ITypeConverter
-                    object value = attr.Value;
-                    if (value == null)
-                    {
-                        if (!parameter.Property.PropertyType.IsValueType)
-                        {
-                            parameter.Property.SetValue(ctx.Instance, value, null);
-                        }
-                        else
-                        {
-                            throw new ParameterDefinitionException(parameter.Property,
-                                                                   string.Format(
-                                                                       Exceptions.FailedToConvertDefaultValue,
-                                                                       "NULL",
-                                                                       "",
-                                                                       parameter.Property.PropertyType.FullName));
-                        }
-                    }
-                    else
-                    {
-                        Exception exception;
-                        if (typeConverter.TryConvertType(cultureInfo, parameter.Property.PropertyType, ref value, out exception))
-                        {
-                            parameter.Property.SetValue(ctx.Instance, value, null);
-                        }
-                        else
-                        {
-                            throw new ParameterDefinitionException(parameter.Property,
-                                                                   string.Format(
-                                                                       Exceptions.FailedToConvertDefaultValue,
-                                                                       value,
-                                                                       value.GetType().FullName,
-                                                                       parameter.Property.PropertyType.FullName));
-                        }
-                    }
-                }
-            }
+            bool first = true;
 
             using (IEnumerator<AstNode> enumerator = sequence.GetEnumerator())
             {
                 while (enumerator.MoveNext())
                 {
+                    if (first && !string.IsNullOrEmpty(ctx.ParameterSet.Command))
+                    {
+                        LiteralValue literal = enumerator.Current as LiteralValue;
+                        if (literal == null ||
+                            !StringComparer.InvariantCultureIgnoreCase.Equals(literal.Value, ctx.ParameterSet.Command))
+                        {
+                            // report error: missing/incorrect command
+                            ctx.Errors.Add(
+                                new ResolveError(ErrorType.MissingCommand,
+                                                 Enumerable.Empty<Parameter>(),
+                                                 new AstNode[] {literal},
+                                                 String.Format(ErrorMessages.MissingCommand,
+                                                               ctx.ParameterSet.Command)));
+                        }
+                        if (!enumerator.MoveNext())
+                            break;
+                    }
+                    first = false;
+
                     if (enumerator.Current.Type == NodeType.Parameter ||
                         enumerator.Current.Type == NodeType.Switch)
                     {
@@ -177,6 +127,7 @@ namespace LBi.Cli.Arguments
                                 else
                                     parameters[0].Property.SetValue(ctx.Instance, Switch.Present, null);
 
+                                requiredValueTypeParams.Remove(parameters[0]);
                                 // handled, continue and skip
                                 continue;
                             }
@@ -185,6 +136,7 @@ namespace LBi.Cli.Arguments
                             enumerator.MoveNext();
 
                             SetPropertyValue(ctx, parameters[0], enumerator.Current);
+                            requiredValueTypeParams.Remove(parameters[0]);
                         }
                         else if (parameters != null && parameters.Length > 1)
                         {
@@ -226,6 +178,7 @@ namespace LBi.Cli.Arguments
                         else
                         {
                             SetPropertyValue(ctx, positionalParam, enumerator.Current);
+                            requiredValueTypeParams.Remove(positionalParam);
                         }
                     }
                 }
@@ -247,7 +200,95 @@ namespace LBi.Cli.Arguments
                 }
             }
 
+            foreach (Parameter requiredValueTypeParam in requiredValueTypeParams)
+            {
+                ctx.Errors.Add(new ResolveError(ErrorType.Validation,
+                                                new[] { requiredValueTypeParam },
+                                                null,
+                                                requiredValueTypeParam.GetAttribute<RequiredAttribute>()
+                                                                      .FormatErrorMessage(requiredValueTypeParam.Name)));
+            }
+
             return new ParameterSetResult(sequence, ctx.ParameterSet, ctx.Instance, ctx.Errors);
+        }
+
+        private static void SetDefaultValues(ITypeConverter typeConverter, CultureInfo cultureInfo, BuildContext ctx)
+        {
+            // set default values
+            foreach (Parameter parameter in ctx.ParameterSet)
+            {
+                var attr = parameter.GetAttribute<DefaultValueAttribute>();
+
+                if (attr == null)
+                    continue;
+
+                string strVal = attr.Value as string;
+                if (strVal != null)
+                {
+                    if (parameter.Property.PropertyType != typeof(string))
+                    {
+                        Parser parser = new Parser();
+                        NodeSequence seq = parser.Parse(strVal);
+                        using (ValueBuilder valueBuilder = new ValueBuilder())
+                        {
+                            object value;
+                            if (valueBuilder.Build(parameter.Property.PropertyType, seq[0], out value))
+                            {
+                                parameter.Property.SetValue(ctx.Instance, value, null);
+                            }
+                            else
+                            {
+                                throw new ParameterDefinitionException(parameter.Property,
+                                                                       string.Format(
+                                                                           Exceptions.FailedToParseDefaultValue,
+                                                                           strVal,
+                                                                           parameter.Property.PropertyType.FullName));
+                            }
+                        }
+                    }
+                    else
+                    {
+                        parameter.Property.SetValue(ctx.Instance, strVal, null);
+                    }
+                }
+                else
+                {
+                    object value = attr.Value;
+                    if (value == null)
+                    {
+                        if (!parameter.Property.PropertyType.IsValueType)
+                        {
+                            parameter.Property.SetValue(ctx.Instance, value, null);
+                        }
+                        else
+                        {
+                            throw new ParameterDefinitionException(parameter.Property,
+                                                                   string.Format(
+                                                                       Exceptions.FailedToConvertDefaultValue,
+                                                                       "NULL",
+                                                                       "",
+                                                                       parameter.Property.PropertyType.FullName));
+                        }
+                    }
+                    else
+                    {
+                        Exception exception;
+                        if (typeConverter.TryConvertType(cultureInfo, parameter.Property.PropertyType, ref value, out exception))
+                        {
+                            parameter.Property.SetValue(ctx.Instance, value, null);
+                        }
+                        else
+                        {
+                            throw new ParameterDefinitionException(parameter.Property,
+                                                                   string.Format(
+                                                                       Exceptions.FailedToConvertDefaultValue,
+                                                                       value,
+                                                                       value.GetType().FullName,
+                                                                       parameter.Property.PropertyType.FullName));
+                        }
+                    }
+                }
+            }
         }
 
         private static void SetPropertyValue(BuildContext ctx, Parameter parameter, AstNode astNode)

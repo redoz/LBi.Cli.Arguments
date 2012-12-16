@@ -106,6 +106,15 @@ namespace LBi.Cli.Arguments.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Command not found &apos;{0}&apos;..
+        /// </summary>
+        internal static string MissingCommand {
+            get {
+                return ResourceManager.GetString("MissingCommand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot bind parameter because parameter &apos;{0}&apos; is specified more than once. To provide multiple values to parameters that can accept multiple values, use the array syntax. For example, &quot;-parameter value1,value2,value3&quot; or &quot;-parameter @(value1,value2,value3)&quot;..
         /// </summary>
         internal static string MultipleBindings {

@@ -64,6 +64,14 @@ namespace LBi.CLI.Arguments.Test
             public Switch Test { get; set; }
         }
 
+        [ParameterSet("WithCommand", Command = "Test", HelpMessage = "Executes command with parameters.")]
+        public class ParameterSetWithCommand : ExecuteCommandBase
+        {
+            [DefaultValue("@{}")]
+            [Parameter(HelpMessage = "Parameters")]
+            public IDictionary<string, object> Parameters { get; set; }
+        }
+
 
 
         [Fact]
@@ -100,6 +108,20 @@ namespace LBi.CLI.Arguments.Test
             ExecuteCommandUsingPath pathCmd = failedSet.Object as ExecuteCommandUsingPath;
             Assert.NotNull(pathCmd);
             Assert.Equal("Execute", pathCmd.Action);
+        }
+
+        [Fact]
+        public void ResolveParameterSetWithCommand()
+        {
+            ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath), typeof(ParameterSetWithCommand));
+            NodeSequence args = this.Parse("Test -Action Execute");
+            ResolveResult result = sets.Resolve(new ParameterSetBuilder(),
+                                                new IntransigentTypeConverter(),
+                                                CultureInfo.InvariantCulture, args);
+            
+            var selectedSet = result.Single(r => r.Errors.Length == 0);
+            ParameterSetWithCommand cmd = selectedSet.Object as ParameterSetWithCommand;
+            Assert.NotNull(cmd);
         }
 
         [Fact]

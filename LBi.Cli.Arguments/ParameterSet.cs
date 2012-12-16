@@ -34,7 +34,7 @@ namespace LBi.Cli.Arguments
 
             PropertyInfo[] publicProps = type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
 
-            Parameter[] allParams = new Parameter[publicProps.Length];
+            List<Parameter> allParams = new List<Parameter>();
             
             Func<string> helpMessage;
             string name;
@@ -60,7 +60,7 @@ namespace LBi.Cli.Arguments
 
                 var validators = Attribute.GetCustomAttributes(propInfo, true).OfType<ValidationAttribute>();
 
-                allParams[i] = new Parameter(propInfo, name,attr.Position, helpMessage, validators);
+                allParams.Add(new Parameter(propInfo, name,attr.Position, helpMessage, validators));
             }
 
             // sanity check input parameters
@@ -89,16 +89,31 @@ namespace LBi.Cli.Arguments
                     throw new ParameterSetDefinitionException(positionalParams, "Missing parameter position: " +
                                                                                 i.ToString(CultureInfo.InvariantCulture));
             }
-            helpMessage = setAttr.GetHelpMessageSelector();
+            try
+            {
+                helpMessage = setAttr.GetHelpMessageSelector();
+            }
+            catch (Exception ex)
+            {
+                throw new ParameterSetDefinitionException(positionalParams, ex.Message);
+            }
             name = string.IsNullOrWhiteSpace(setAttr.Name) ? type.Name : setAttr.Name;
-            return new ParameterSet(type, name, allParams, helpMessage);
+
+            // validate command name
+            if (setAttr.Command != null && setAttr.Command.Any(char.IsWhiteSpace))
+                throw new ParameterSetDefinitionException(Enumerable.Empty<Parameter>(),
+                                                          "Command cannot contain whitespace: '{0}'.",
+                                                          setAttr.Command);
+
+            return new ParameterSet(type, name, setAttr.Command, allParams.ToArray(), helpMessage);
         }
 
         protected Parameter[] Parameters;
 
-        private ParameterSet(Type type, string name, Parameter[] parameters, Func<string> helpMessage)
+        private ParameterSet(Type type, string name, string command, Parameter[] parameters, Func<string> helpMessage)
         {
             this.UnderlyingType = type;
+            this.Command = command;
             this.Parameters = parameters;
             this.HelpMessage = helpMessage;
             this.Name = name;
@@ -109,6 +124,8 @@ namespace LBi.Cli.Arguments
         public string Name { get; protected set; }
 
         public Type UnderlyingType { get; protected set; }
+
+        public string Command { get; protected set; }
 
         public T GetAttribute<T>(bool inherit = true) where T : Attribute
         {

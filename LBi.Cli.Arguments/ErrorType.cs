@@ -53,6 +53,11 @@ namespace LBi.Cli.Arguments
         /// <summary>
         /// <see cref="Parameter"/> has already been bound.
         /// </summary>
-        MultipleBindings
+        MultipleBindings,
+
+        /// <summary>
+        /// Command missing or not matching.
+        /// </summary>
+        MissingCommand
     }
 }
