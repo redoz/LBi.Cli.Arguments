@@ -49,7 +49,8 @@ namespace LBi.Cli.Arguments
 
             public HelpLevel ToHelpLevel()
             {
-                HelpLevel ret = 0;
+                HelpLevel ret = HelpLevel.Syntax;
+
                 if (this.Full)
                     ret = HelpLevel.Full;
 
@@ -91,7 +92,11 @@ namespace LBi.Cli.Arguments
             bool success;
             // parse the command line arguments
             Parser parser = new Parser();
-            NodeSequence nodes = parser.Parse(string.Join(" ", args));
+            string joinedArgs = string.Join(" ", args);
+            if (string.IsNullOrWhiteSpace(joinedArgs))
+                joinedArgs = "-Help";
+
+            NodeSequence nodes = parser.Parse(joinedArgs);
 
             // resolve parameter set against the parsed node set
             ResolveResult result = this.ParameterSets.Resolve(this.Settings.ParameterSetBuilder,
