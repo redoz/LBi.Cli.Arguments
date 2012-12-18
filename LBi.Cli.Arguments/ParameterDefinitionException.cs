@@ -27,6 +27,22 @@ namespace LBi.Cli.Arguments
             this.ParameterProperty = parameterProperty;
         }
 
+        public ParameterDefinitionException(PropertyInfo parameterProperty, string format, params object[] args)
+            : this(parameterProperty, string.Format(format, args))
+        {
+        }
+
+        public ParameterDefinitionException(Exception innerException, PropertyInfo parameterProperty, string message)
+            : base(WrapMessage(parameterProperty, message), innerException)
+        {
+            this.ParameterProperty = parameterProperty;
+        }
+
+        public ParameterDefinitionException(Exception innerException, PropertyInfo parameterProperty, string format, params object[] args)
+            : this(innerException, parameterProperty, string.Format(format, args))
+        {
+        }
+
         private static string WrapMessage(PropertyInfo parameterProperty, string message)
         {
             return string.Format("Error reported when processing property {0} on type {1}: {2}",
@@ -37,9 +53,6 @@ namespace LBi.Cli.Arguments
 
         public PropertyInfo ParameterProperty { get; protected set; }
 
-        public ParameterDefinitionException(PropertyInfo parameterProperty, string format, params object[] args) 
-            : this(parameterProperty, string.Format(format, args))
-        {
-        }
+
     }
 }

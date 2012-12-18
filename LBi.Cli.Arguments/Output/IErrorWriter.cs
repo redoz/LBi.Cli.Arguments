@@ -20,6 +20,6 @@ namespace LBi.Cli.Arguments.Output
 {
     public interface IErrorWriter
     {
-        void Write(TextWriter writer, ParameterSetResult result);
+        void Write(TextWriter writer, ResolveResult result);
     }
 }

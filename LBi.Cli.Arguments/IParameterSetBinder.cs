@@ -22,7 +22,7 @@ using LBi.Cli.Arguments.Parsing;
 namespace LBi.Cli.Arguments
 {
     // TODO should this encapsulate the ITypeConverter & CultureInfo
-    public interface IParameterSetBuilder
+    public interface IParameterSetBinder
     {
         ParameterSetResult Build(ITypeConverter typeConverter,
                                  CultureInfo cultureInfo,

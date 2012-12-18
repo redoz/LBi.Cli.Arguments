@@ -23,6 +23,9 @@ using System.Reflection;
 
 namespace LBi.Cli.Arguments.Binding
 {
+    /// <summary>
+    /// <see cref="ITypeConverter"/> that uses a combinaition of <see cref="TypeConverter"/> and Reflection to try to convert the value.
+    /// </summary>
     public class IntransigentTypeConverter : ITypeConverter
     {
 
@@ -30,12 +33,12 @@ namespace LBi.Cli.Arguments.Binding
         {
         }
 
-        public virtual bool TryConvertType(CultureInfo culture, Type targetType, ref object value, out Exception exception)
+        public virtual bool TryConvertType(CultureInfo culture, Type targetType, ref object value, out IEnumerable<Exception> errors)
         {
             bool success = false;
-            exception = null;
+            List<Exception> outErrors = new List<Exception>();
             object ret = value;
-            if (value == null)
+            if (ret == null)
             {
                 success = !targetType.IsValueType;
             }
@@ -53,13 +56,9 @@ namespace LBi.Cli.Arguments.Binding
                         ret = targetConverter.ConvertFrom(null, culture, value);
                         success = true;
                     }
-                    catch (NotSupportedException ex)
-                    {
-                        exception = ex;
-                    }
                     catch (Exception ex)
                     {
-                        exception = ex;
+                        outErrors.Add(ex);
                     }
                 }
                 else if (sourceConverter.CanConvertTo(targetType))
@@ -74,21 +73,9 @@ namespace LBi.Cli.Arguments.Binding
                         ret = Convert.ChangeType(value, targetType, culture);
                         success = true;
                     }
-                    catch (InvalidCastException ex)
+                    catch (Exception ex)
                     {
-                        exception = ex;
-                    }
-                    catch (FormatException ex)
-                    {
-                        exception = ex;
-                    }
-                    catch (OverflowException ex)
-                    {
-                        exception = ex;
-                    }
-                    catch (ArgumentNullException ex)
-                    {
-                        exception = ex;
+                        outErrors.Add(ex);
                     }
 
                     if (!success)
@@ -109,7 +96,7 @@ namespace LBi.Cli.Arguments.Binding
                             }
                             catch (Exception ex)
                             {
-                                exception = ex;
+                                outErrors.Add(ex);
                             }
                         }
                     }
@@ -117,7 +104,7 @@ namespace LBi.Cli.Arguments.Binding
             }
 
 
-            if (!success)
+            if (!success && value != null)
             {
 
                 // check for ctor with single param
@@ -128,18 +115,23 @@ namespace LBi.Cli.Arguments.Binding
                 {
                     var ctorParams = ct.GetParameters();
 
-                    if (this.TryConvertType(culture, ctorParams[0].ParameterType, ref ret, out exception))
+                    IEnumerable<Exception> exceptions;
+                    if (this.TryConvertType(culture, ctorParams[0].ParameterType, ref ret, out exceptions))
                     {
                         try
                         {
-                            ret = ct.Invoke(new[] { ret });
+                            ret = ct.Invoke(new[] {ret});
                             success = true;
                             break;
                         }
                         catch (Exception ex)
                         {
-                            exception = ex;
+                            outErrors.Add(ex);
                         }
+                    }
+                    else
+                    {
+                        outErrors.AddRange(exceptions);
                     }
                 }
                 // check for static "Parse" method 
@@ -170,12 +162,13 @@ namespace LBi.Cli.Arguments.Binding
                     }
                     catch (Exception ex)
                     {
-                        exception = ex;
+                        outErrors.Add(ex);
                     }
                 }
 
             }
 
+            errors = outErrors;
             value = ret;
             return success;
         }

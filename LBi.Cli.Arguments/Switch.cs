@@ -28,13 +28,15 @@ namespace LBi.Cli.Arguments
     [TypeConverter(typeof(SwitchTypeConverter))]
     public struct Switch
     {
+        /// <summary>
+        /// Static representing a present <see cref="Switch"/>.
+        /// </summary>
         public static readonly Switch Present = new Switch(true);
 
         public static implicit operator Switch(bool boolean)
         {
             return new Switch(boolean);
         }
-
 
         public static implicit operator bool(Switch switchParam)
         {

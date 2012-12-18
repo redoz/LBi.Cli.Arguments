@@ -14,7 +14,11 @@
  * limitations under the License. 
  */
 
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
+using System.Linq;
 
 namespace LBi.Cli.Arguments.Output
 {
@@ -24,10 +28,60 @@ namespace LBi.Cli.Arguments.Output
         {
         }
 
-        public virtual void Write(TextWriter writer, ParameterSetResult result)
+        protected virtual void WriteParameter(TextWriter writer, IEnumerable<ParameterSetResult> result, Parameter parameter)
         {
-            var error = result.Errors[0];
-            writer.WriteLine(error.Message);            
+            writer.Write('-');
+            writer.Write(parameter.Name);
+            writer.Write(' ');
+            if (parameter.Type == typeof(Switch))
+            {
+                writer.WriteLine("[<" + typeof(Switch).Name + ">]");
+            }
+            else
+            {
+                writer.Write('<');
+                writer.Write(parameter.Type.Name);
+                writer.Write('>');
+                writer.WriteLine();
+            }
+
+            writer.WriteLine();
+
+            writer.Write("   ");
+            writer.WriteLine(parameter.HelpMessage());
+
+            writer.WriteLine();
+
+            writer.WriteLine("   {0,-25}{1}", "Required?", parameter.GetAttribute<RequiredAttribute>() != null);
+            writer.WriteLine("   {0,-25}{1}", "Position?", parameter.Position.HasValue ? parameter.Position.Value.ToString() : "named");
+            string defValue;
+            var defValueAttr = parameter.GetAttribute<DefaultValueAttribute>();
+
+            if (defValueAttr == null)
+                defValue = "None";
+            else
+                defValue = defValueAttr.Value.ToString();
+
+            writer.WriteLine("   {0,-25}{1}", "Default value", defValue);
+
+            var sets = result.Select(r => r.ParameterSet)
+                             .Where(s => s.Contains(parameter));
+
+            writer.WriteLine("   {0,-25}{1}", "Parameter sets", string.Join(", ", sets.Select(s => s.Name)));
+        }
+
+        public virtual void Write(TextWriter writer, ResolveResult result)
+        {
+            var error = result.BestMatch.Errors[0];
+            writer.WriteLine(error.Message);
+
+            if (error.Parameter != null)
+            {
+                foreach (var parameter in error.Parameter)
+                {
+                    this.WriteParameter(writer, result, parameter);
+                }
+            }
         }
     }
 }

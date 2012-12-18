@@ -41,11 +41,6 @@ namespace LBi.Cli.Arguments
         ArgumentPositionMismatch,
 
         /// <summary>
-        /// <see cref="System.ComponentModel.DataAnnotations.ValidationAttribute"/> error.
-        /// </summary>
-        Validation,
-
-        /// <summary>
         /// More than one <see cref="Parameter"/>  matches the <see cref="ParsedArgument"/>.
         /// </summary>
         AmbigiousName,

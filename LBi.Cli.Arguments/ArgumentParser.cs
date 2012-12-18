@@ -99,7 +99,7 @@ namespace LBi.Cli.Arguments
             NodeSequence nodes = parser.Parse(joinedArgs);
 
             // resolve parameter set against the parsed node set
-            ResolveResult result = this.ParameterSets.Resolve(this.Settings.ParameterSetBuilder,
+            ResolveResult result = this.ParameterSets.Resolve(this.Settings.ParameterSetBinder,
                                                               this.Settings.TypeConverter,
                                                               this.Settings.Culture,
                                                               nodes);
@@ -121,7 +121,7 @@ namespace LBi.Cli.Arguments
             {
                 paramSet = default(TParamSetBase);
                 success = false;
-                this.Settings.ErrorWriter.Write(this.Settings.Error, result.BestMatch);
+                this.Settings.ErrorWriter.Write(this.Settings.Error, result);
 
                 this.Settings.HelpWriter.Write(this.Settings.Out,
                                                this.ParameterSets,

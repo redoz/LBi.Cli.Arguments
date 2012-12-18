@@ -107,13 +107,13 @@ namespace LBi.Cli.Arguments
         }
 
 
-        public ResolveResult Resolve(IParameterSetBuilder builder, ITypeConverter typeConverter, CultureInfo cultureInfo, NodeSequence sequence)
+        public ResolveResult Resolve(IParameterSetBinder binder, ITypeConverter typeConverter, CultureInfo cultureInfo, NodeSequence sequence)
         {
             List<ParameterSetResult> setResults = new List<ParameterSetResult>();
 
             for (int setNum = 0; setNum < this.ParameterSets.Count; setNum++)
             {
-                setResults.Add(builder.Build(typeConverter,
+                setResults.Add(binder.Build(typeConverter,
                                              cultureInfo,
                                              sequence,
                                              this.ParameterSets[setNum]));

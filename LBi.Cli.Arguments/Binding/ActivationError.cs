@@ -20,33 +20,22 @@ using LBi.Cli.Arguments.Parsing.Ast;
 
 namespace LBi.Cli.Arguments.Binding
 {
-    public class InvokeError : ValueError
+    /// <summary>
+    /// Represents an exception that occured while trying to create an instance of an object.
+    /// </summary>
+    public class ActivationError : ValueError
     {
-        public MethodInfo Method { get; protected set; }
         public ConstructorInfo Constructor { get; protected set; }
         public object[] Parameters { get; protected set; }
         public AstNode[] AstNodes { get; protected set; }
-        public string Message { get; protected set; }
         public Exception Exception { get; protected set; }
 
-        public InvokeError(MethodInfo method, object[] parameters, AstNode[] astNodes, Exception exception)
-        {
-            this.Exception = exception;
-            this.Constructor = null;
-            this.Method = method;
-            this.Parameters = parameters;
-            this.AstNodes = astNodes;
-        }
-
-        public InvokeError(ConstructorInfo ctor, object[] parameters, AstNode[] astNodes, Exception exception)
+        public ActivationError(ConstructorInfo ctor, object[] parameters, AstNode[] astNodes, Exception exception)
         {
             this.Exception = exception;
             this.Constructor = ctor;
-            this.Method = null;
             this.Parameters = parameters;
             this.AstNodes = astNodes;
         }
-
-        
     }
 }

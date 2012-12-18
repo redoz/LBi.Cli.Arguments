@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
@@ -28,6 +29,48 @@ namespace LBi.Cli.Arguments.Output
     {
         public HelpWriter()
         {
+        }
+
+        protected virtual void WriteParameter(TextWriter writer, IEnumerable<ParameterSet> sets, Parameter parameter)
+        {
+            writer.Write('-');
+            writer.Write(parameter.Name);
+            writer.Write(' ');
+            if (parameter.Type == typeof(Switch))
+            {
+                writer.WriteLine("[<" + typeof(Switch).Name + ">]");
+            }
+            else
+            {
+                writer.Write('<');
+                writer.Write(parameter.Type.Name);
+                writer.Write('>');
+                writer.WriteLine();
+            }
+
+            writer.WriteLine();
+
+            writer.Write("   ");
+            writer.WriteLine(parameter.HelpMessage());
+
+            writer.WriteLine();
+
+            writer.WriteLine("   {0,-25}{1}", "Required?", parameter.GetAttribute<RequiredAttribute>() != null);
+            writer.WriteLine("   {0,-25}{1}", "Position?", parameter.Position.HasValue ? parameter.Position.Value.ToString() : "named");
+            string defValue;
+            var defValueAttr = parameter.GetAttribute<DefaultValueAttribute>();
+
+            if (defValueAttr == null)
+                defValue = "None";
+            else
+                defValue = defValueAttr.Value.ToString();
+
+            writer.WriteLine("   {0,-25}{1}", "Default value", defValue);
+
+
+            writer.WriteLine("   {0,-25}{1}",
+                             "Parameter sets",
+                             string.Join(", ", sets.Where(s => s.Contains(parameter)).Select(s => s.Name)));
         }
 
         protected virtual void WriteSyntax(TextWriter writer, IEnumerable<ParameterSet> parameterSets, HelpLevel level)
@@ -174,6 +217,25 @@ namespace LBi.Cli.Arguments.Output
             if (level.HasFlag(HelpLevel.Examples))
             {
                 WriteExample(writer, sets, level);
+            }
+
+            if (level.HasFlag(HelpLevel.Parameters))
+            {
+                WriteParameters(writer, sets, level);
+            }
+        }
+
+        private void WriteParameters(TextWriter writer, ParameterSetCollection sets, HelpLevel level)
+        {
+            // TODO grouping by "name" alone is not good enough
+            var parameters = sets.SelectMany(set => set).GroupBy(p => p.Name)
+                                 .OrderBy(g => g.Key, StringComparer.InvariantCultureIgnoreCase)
+                                 .Select(g => g.First());
+
+            foreach (var parameter in parameters)
+            {
+                writer.WriteLine();
+                this.WriteParameter(writer, sets, parameter);
             }
         }
 

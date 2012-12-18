@@ -14,25 +14,25 @@
  * limitations under the License. 
  */
 
-using System.Collections.Generic;
-using System.Linq;
-using LBi.Cli.Arguments.Parsing;
+using System;
+using System.Reflection;
 using LBi.Cli.Arguments.Parsing.Ast;
 
-namespace LBi.Cli.Arguments
+namespace LBi.Cli.Arguments.Binding
 {
-    public class ResolveError
+    public class AddError : ValueError
     {
-        public ResolveError(ErrorType type, IEnumerable<Parameter> parameter, AstNode[] nodes, string message)
+        public MethodInfo Method { get; protected set; }
+        public object[] Parameters { get; protected set; }
+        public AstNode[] AstNodes { get; protected set; }
+        public Exception Exception { get; protected set; }
+
+        public AddError(MethodInfo method, object[] parameters, AstNode[] astNodes, Exception exception)
         {
-            this.Type = type;
-            this.Parameter = parameter.ToArray();
-            this.Argument = nodes;
-            this.Message = message;
+            this.Exception = exception;
+            this.Method = method;
+            this.Parameters = parameters;
+            this.AstNodes = astNodes;
         }
-        public ErrorType Type { get; protected set; }
-        public Parameter[] Parameter { get; protected set; }
-        public AstNode[] Argument { get; protected set; }
-        public string Message { get; protected set; }
     }
 }

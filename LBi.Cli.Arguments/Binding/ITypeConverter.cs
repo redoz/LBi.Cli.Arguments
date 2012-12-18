@@ -16,13 +16,13 @@
 
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace LBi.Cli.Arguments.Binding
 {
     public interface ITypeConverter
     {
-        // TODO have to fix this, the "out Exception" isn't very useful, this should output IEnum<ValueError> or similar
-        bool TryConvertType(CultureInfo culture, Type targetType, ref object value, out Exception exception);
+        bool TryConvertType(CultureInfo culture, Type targetType, ref object value, out IEnumerable<Exception> errors);
     }
 }

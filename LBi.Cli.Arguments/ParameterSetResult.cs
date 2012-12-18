@@ -22,7 +22,7 @@ namespace LBi.Cli.Arguments
 {
     public class ParameterSetResult
     {
-        public ParameterSetResult(NodeSequence arguments, ParameterSet parameterSet, object setInstance, IEnumerable<ResolveError> errors)
+        public ParameterSetResult(NodeSequence arguments, ParameterSet parameterSet, object setInstance, IEnumerable<BindError> errors)
         {
             this.Arguments = arguments;
             this.ParameterSet = parameterSet;
@@ -30,7 +30,7 @@ namespace LBi.Cli.Arguments
             this.Errors = errors.ToArray();
         }
 
-        public ResolveError[] Errors { get; protected set; }
+        public BindError[] Errors { get; protected set; }
 
         public object Object { get; protected set; }
 

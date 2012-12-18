@@ -111,7 +111,7 @@ namespace LBi.CLi.Arguments.Sample
             NodeSequence nodes = parser.Parse(string.Join(" ", args));
 
             // resolve parameter set against the parsed node set
-            ResolveResult result = sets.Resolve(new ParameterSetBuilder(),
+            ResolveResult result = sets.Resolve(new ParameterSetBinder(),
                                                 new IntransigentTypeConverter(),
                                                 CultureInfo.InvariantCulture, 
                                                 nodes);
@@ -123,7 +123,7 @@ namespace LBi.CLi.Arguments.Sample
             else
             {
                 ErrorWriter errorWriter = new ErrorWriter();
-                errorWriter.Write(new ConsoleWriter(Console.Error), result.BestMatch);
+                errorWriter.Write(new ConsoleWriter(Console.Error), result);
 
                 HelpWriter helpWriter = new HelpWriter();
                 helpWriter.Write(new ConsoleWriter(Console.Out), sets, HelpLevel.Parameters);

@@ -15,22 +15,36 @@
  */
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using LBi.Cli.Arguments.Parsing.Ast;
 
 namespace LBi.Cli.Arguments
 {
     public class TypeError : ValueError
     {
-        public TypeError(Type targetType, object value, AstNode astNode, Exception exception)
+        public TypeError(Type targetType, object value, AstNode astNode, IEnumerable<Exception> exceptions)
+            : this(targetType, value, astNode, exceptions.ToArray())
+        {
+            
+        }
+
+        public TypeError(Type targetType, object value, AstNode astNode, params Exception[] exceptions)
         {
             this.TargetType = targetType;
             this.Value = value;
             this.AstNode = astNode;
-            this.Exception =exception;
+            this.Exceptions = exceptions;
         }
-        public Exception Exception { get; protected set; }
+
+        public Exception[] Exceptions { get; protected set; }
         public Type TargetType { get; protected set; }
         public object Value { get; protected set; }
+
+        /// <summary>
+        /// The <see cref="AstNode"/> representing the value.
+        /// </summary>
+        /// <remarks>Can be null.</remarks>
         public AstNode AstNode { get; protected set; }
     }
 }

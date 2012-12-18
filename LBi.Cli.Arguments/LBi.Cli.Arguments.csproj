@@ -56,15 +56,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AggregateError.cs" />
     <Compile Include="ArgumentParser.cs" />
     <Compile Include="ArgumentParserSettings.cs" />
+    <Compile Include="Binding\ActivationError.cs" />
     <Compile Include="Binding\CustomBooleanConverter.cs" />
     <Compile Include="Binding\ErrorCollector.cs" />
     <Compile Include="Binding\ErrorEventArg.cs" />
     <Compile Include="Binding\InterfaceResolutionException.cs" />
     <Compile Include="Binding\IntransigentTypeConverter.cs" />
-    <Compile Include="Binding\InvokeError.cs" />
+    <Compile Include="Binding\AddError.cs" />
     <Compile Include="Binding\ITypeConverter.cs" />
     <Compile Include="Binding\Lookup.cs" />
     <Compile Include="Binding\Reflection.cs" />
@@ -76,7 +76,7 @@
     <Compile Include="Globalization\HelpMessageExtensions.cs" />
     <Compile Include="Globalization\IResourceProvider.cs" />
     <Compile Include="Globalization\IHelpMessage.cs" />
-    <Compile Include="IParameterSetBuilder.cs" />
+    <Compile Include="IParameterSetBinder.cs" />
     <Compile Include="Output\ErrorWriter.cs" />
     <Compile Include="Output\HelpLevel.cs" />
     <Compile Include="Output\HelpWriter.cs" />
@@ -86,7 +86,7 @@
     <Compile Include="Parameter.cs" />
     <Compile Include="ParameterDefinitionException.cs" />
     <Compile Include="ParameterSet.cs" />
-    <Compile Include="ParameterSetBuilder.cs" />
+    <Compile Include="ParameterSetBinder.cs" />
     <Compile Include="ParameterSetCollection.cs" />
     <Compile Include="ParameterSetDefinitionException.cs" />
     <Compile Include="ParameterSetResult.cs" />
@@ -111,7 +111,7 @@
     <Compile Include="Parsing\TokenType.cs" />
     <Compile Include="Parsing\TokenWriter.cs" />
     <Compile Include="Globalization\ResourceProvider.cs" />
-    <Compile Include="ResolveError.cs" />
+    <Compile Include="BindError.cs" />
     <Compile Include="ResolveResult.cs" />
     <Compile Include="Resources\ErrorMessages.Designer.cs">
       <AutoGen>True</AutoGen>

@@ -38,7 +38,7 @@ namespace LBi.Cli.Arguments
             HelpWriter = new HelpWriter();
             ErrorWriter = new ErrorWriter();
             TypeConverter = new IntransigentTypeConverter();
-            ParameterSetBuilder = new ParameterSetBuilder();
+            this.ParameterSetBinder = new ParameterSetBinder();
             Culture = CultureInfo.InvariantCulture;
         }
 
@@ -48,6 +48,6 @@ namespace LBi.Cli.Arguments
         public IErrorWriter ErrorWriter { get; set; }
         public CultureInfo Culture { get; set; }
         public ITypeConverter TypeConverter { get; set; }
-        public IParameterSetBuilder ParameterSetBuilder { get; set; }
+        public IParameterSetBinder ParameterSetBinder { get; set; }
     }
 }
