@@ -7,6 +7,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LBi.Cli.Arguments.Test", "L
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LBi.CLi.Arguments.Sample", "LBi.CLi.Arguments.Sample\LBi.CLi.Arguments.Sample.csproj", "{66E0E7BD-6BA0-4209-9DCC-988CCBCBA76B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Resources", "Resources", "{FA80A0C7-FF92-4F13-8CE6-8FB658EAE3BF}"
+	ProjectSection(SolutionItems) = preProject
+		Build\UnofficialBuild.snk = Build\UnofficialBuild.snk
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
