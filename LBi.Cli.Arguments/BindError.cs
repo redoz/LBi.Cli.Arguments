@@ -61,7 +61,7 @@ namespace LBi.Cli.Arguments
 
         public override string ToString()
         {
-            string.Format("{0}: {1}", this.Type, this.Message);
+            return string.Format("{0}: {1}", this.Type, this.Message);
         }
     }
 }
