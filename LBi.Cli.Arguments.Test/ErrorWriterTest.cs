@@ -14,14 +14,9 @@
  * limitations under the License. 
  */
 
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using LBi.Cli.Arguments.Binding;
 using LBi.Cli.Arguments.Output;
 using LBi.Cli.Arguments.Parsing;
@@ -54,17 +49,13 @@ namespace LBi.Cli.Arguments.Test
             using (StringWriter strWriter = new StringWriter())
             {
                 writer.Write(strWriter, result);
-                Assert.Equal(
-@"Missing requried paramter: 'ABool'.
--ABool <Boolean>
-
-   A bool
-
-   Required?                True
-   Position?                named
-   Default value            None
-   Parameter sets           Set1
-", strWriter.ToString());
+                string output = strWriter.ToString();
+                Assert.Contains("Missing requried paramter: 'ABool'.", output);
+                Assert.Contains("A bool", output);
+                Assert.Contains("Required?                True", output);
+                Assert.Contains("Position?                named", output);
+                Assert.Contains("Default value            None", output);
+                Assert.Contains("Parameter sets           Set1", output);
             }
         }
 
