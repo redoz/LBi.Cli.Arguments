@@ -58,5 +58,10 @@ namespace LBi.Cli.Arguments
         /// Error message.
         /// </summary>
         public string Message { get; protected set; }
+
+        public override string ToString()
+        {
+            string.Format("{0}: {1}", this.Type, this.Message);
+        }
     }
 }

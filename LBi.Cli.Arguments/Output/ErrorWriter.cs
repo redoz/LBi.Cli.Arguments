@@ -73,6 +73,7 @@ namespace LBi.Cli.Arguments.Output
         public virtual void Write(TextWriter writer, ResolveResult result)
         {
             var error = result.BestMatch.Errors[0];
+
             writer.WriteLine(error.Message);
 
             if (error.Parameter != null)

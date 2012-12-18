@@ -53,6 +53,11 @@ namespace LBi.Cli.Arguments
         /// <summary>
         /// Command missing or not matching.
         /// </summary>
-        MissingCommand
+        MissingCommand,
+
+        /// <summary>
+        /// Parameter name specified but no value is specified.
+        /// </summary>
+        MissingValue
     }
 }

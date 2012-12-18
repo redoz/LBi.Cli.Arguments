@@ -138,6 +138,9 @@
   <data name="MissingRequiredParameter" xml:space="preserve">
     <value>Missing requried paramter: '{0}'.</value>
   </data>
+  <data name="MissingValue" xml:space="preserve">
+    <value>Parameter '{0}' requires a value but none was specified.</value>
+  </data>
   <data name="MultipleBindings" xml:space="preserve">
     <value>Cannot bind parameter because parameter '{0}' is specified more than once. To provide multiple values to parameters that can accept multiple values, use the array syntax. For example, "-parameter value1,value2,value3" or "-parameter @(value1,value2,value3)".</value>
   </data>

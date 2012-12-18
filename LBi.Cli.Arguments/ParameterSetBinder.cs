@@ -132,7 +132,15 @@ namespace LBi.Cli.Arguments
                             }
 
                             // advance to value 
-                            enumerator.MoveNext();
+                            if (!enumerator.MoveNext())
+                            {
+                                ctx.Errors.Add(new BindError(ErrorType.MissingValue,
+                                                             new[] {parameters[0]},
+                                                             new[] {parameterName},
+                                                             string.Format(ErrorMessages.MissingValue,
+                                                                           parameters[0].Name)));
+                                break;
+                            }
 
                             SetPropertyValue(ctx, parameters[0], enumerator.Current);
                             requiredParameters.Remove(parameters[0]);
