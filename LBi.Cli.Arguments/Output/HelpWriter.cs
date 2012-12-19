@@ -246,7 +246,11 @@ namespace LBi.Cli.Arguments.Output
         {
             const string indent = "   ";
             writer.WriteLine("EXAMPLES");
-            string fileName = Path.GetFileName(Assembly.GetEntryAssembly().Location);
+            
+            var entryAsm = Assembly.GetEntryAssembly();
+            string fileName = "";
+            if (entryAsm != null)
+                fileName = Path.GetFileName(Assembly.GetEntryAssembly().Location);
 
             foreach (var set in parameterSets)
             {
