@@ -77,7 +77,10 @@ namespace LBi.Cli.Arguments.Output
         {
             const string indent = "   ";
             writer.WriteLine("SYNTAX");
-            string fileName = Path.GetFileName(Assembly.GetEntryAssembly().Location);
+            var entryAsm = Assembly.GetEntryAssembly();
+            string fileName = "";
+            if (entryAsm != null)
+                fileName = Path.GetFileName(Assembly.GetEntryAssembly().Location);
 
             WriteSyntax(writer,
                         parameterSets,
