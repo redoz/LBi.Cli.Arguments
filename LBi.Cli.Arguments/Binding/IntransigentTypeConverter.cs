@@ -43,7 +43,16 @@ namespace LBi.Cli.Arguments.Binding
                 success = !targetType.IsValueType;
             }
             else if (targetType.IsInstanceOfType(value))
+            {
                 success = true;
+            }
+            else if (targetType.IsArray && targetType.GetElementType().IsInstanceOfType(value))
+            {
+                Array arr = Array.CreateInstance(targetType.GetElementType(), 1);
+                arr.SetValue(value, 0);
+                ret = arr;
+                success = true;
+            }
             else
             {
                 var targetConverter = TypeDescriptor.GetConverter(targetType);

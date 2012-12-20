@@ -75,6 +75,37 @@ namespace LBi.CLI.Arguments.Test
             }
         }
 
+        [Fact]
+        public void String_ToArrayOfString()
+        {
+            using (ValueBuilder builder = new ValueBuilder())
+            {
+                object value;
+                Assert.True(builder.Build(typeof(string[]),
+                                          new LiteralValue(SourceInfo.Empty, LiteralValueType.String, "255"),
+                                          out value));
+                Assert.IsType<string[]>(value);
+                Assert.Equal(new[]{"255"}, value);
+                Assert.Empty(builder.Errors);
+            }
+        }
+
+        [Fact]
+        public void String_ToArrayOfObject()
+        {
+            using (ValueBuilder builder = new ValueBuilder())
+            {
+                object value;
+                Assert.True(builder.Build(typeof(object[]),
+                                          new LiteralValue(SourceInfo.Empty, LiteralValueType.String, "255"),
+                                          out value));
+                Assert.IsType<object[]>(value);
+                Assert.Equal(new object[] { "255" }, value);
+                Assert.Empty(builder.Errors);
+            }
+        }
+
+
 
         [Fact]
         public void String_To_Enum()
