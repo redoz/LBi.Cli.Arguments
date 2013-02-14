@@ -79,14 +79,14 @@ namespace LBi.Cli.Arguments
                     foreach (Parameter dupParam in dupGroups[i])
                         errMsg.AppendLine(dupParam.Name);
                 }
-                throw new ParameterSetDefinitionException(dupGroups.SelectMany(g => g), errMsg.ToString());
+                throw new ParameterSetDefinitionException(type, dupGroups.SelectMany(g => g), errMsg.ToString());
             }
 
             // check for missing positions
             for (int i = 0; i < positionalParams.Length; i++)
             {
                 if (i != positionalParams[i].Position.Value)
-                    throw new ParameterSetDefinitionException(positionalParams, "Missing parameter position: " +
+                    throw new ParameterSetDefinitionException(type, positionalParams, "Missing parameter position: " +
                                                                                 i.ToString(CultureInfo.InvariantCulture));
             }
             try
@@ -95,13 +95,14 @@ namespace LBi.Cli.Arguments
             }
             catch (Exception ex)
             {
-                throw new ParameterSetDefinitionException(positionalParams, ex.Message);
+                throw new ParameterSetDefinitionException(type, positionalParams, ex.Message);
             }
             name = string.IsNullOrWhiteSpace(setAttr.Name) ? type.Name : setAttr.Name;
 
             // validate command name
             if (setAttr.Command != null && setAttr.Command.Any(char.IsWhiteSpace))
-                throw new ParameterSetDefinitionException(Enumerable.Empty<Parameter>(),
+                throw new ParameterSetDefinitionException(type,
+                                                          Enumerable.Empty<Parameter>(),
                                                           "Command cannot contain whitespace: '{0}'.",
                                                           setAttr.Command);
 

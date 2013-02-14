@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 LBi Netherlands B.V.
+ * Copyright 2012,2013 LBi Netherlands B.V.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,17 +21,24 @@ namespace LBi.Cli.Arguments
 {
     public class ParameterSetDefinitionException : Exception
     {
-        public ParameterSetDefinitionException(IEnumerable<Parameter> parameters, string message)
-            : base(message)
+        public Type ParameterSetType { get; protected set; }
+        public IEnumerable<Parameter> ParameterProperties { get; protected set; }
+
+        public ParameterSetDefinitionException(Type parameterSetType, IEnumerable<Parameter> parameters, string message)
+            : base(WrapMessage(parameterSetType, message))
         {
+            this.ParameterSetType = parameterSetType;
             this.ParameterProperties = parameters;
         }
 
-        public IEnumerable<Parameter> ParameterProperties { get; protected set; }
-
-        public ParameterSetDefinitionException(IEnumerable<Parameter> parameters, string format, params object[] args)
-            : this(parameters, string.Format(format, args))
+        public ParameterSetDefinitionException(Type parameterSetType, IEnumerable<Parameter> parameters, string format, params object[] args)
+            : this(parameterSetType, parameters, string.Format(format, args))
         {
+        }
+
+        private static string WrapMessage(Type parameterSetType, string message)
+        {
+            return string.Format("Error reported when processing parameter set of type {0}: {1}", parameterSetType.Name, message);
         }
     }
 }

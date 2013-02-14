@@ -30,6 +30,30 @@ namespace LBi.CLI.Arguments.Test
 {
     public class ParameterSetTest
     {
+
+        [ParameterSet("Template", Command = "Template", HelpMessage = "Apply template to a set of ldoc files to generate output.")]
+        public class TemplateCommand
+        {
+            [Parameter(HelpMessage = "Include verbose output.")]
+            public LBi.Cli.Arguments.Switch Verbose { get; set; }
+
+            [Parameter(HelpMessage = "Overwrites existing files.")]
+            public LBi.Cli.Arguments.Switch Force { get; set; }
+
+            [Parameter(HelpMessage = "Path to ldoc file (or folder containing multiple ldoc files)."), Required]
+            public string Path { get; set; }
+
+            [Parameter(HelpMessage = "Template name or path"), Required]
+            public string Template { get; set; }
+
+            [Parameter(HelpMessage = "Output path.")]
+            public string Output { get; set; }
+
+            [Parameter(HelpMessage = "Optional template arguments.")]
+            [DefaultValue("@{}")]
+            public Dictionary<string, object> Arguments { get; set; }
+        }
+
         public abstract class ExecuteCommandBase
         {
             [Parameter(HelpMessage = "Action to take"), Required]
@@ -211,6 +235,17 @@ namespace LBi.CLI.Arguments.Test
             Assert.Equal("True", cmd.Name);
             Assert.Equal("Execute", cmd.Action);
             Assert.True(cmd.Verbose.IsPresent);
+        }
+        [Fact]
+        public void ResolveParameterSet_Template_WithParameters()
+        {
+            ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(TemplateCommand));
+            NodeSequence args = this.Parse(@"Template -Path .\Tmp -Template Library -Force -Output .\Html -Arguments @{SearchUri = '/search/'}");
+            ResolveResult result = sets.Resolve(new ParameterSetBinder(),new IntransigentTypeConverter(),CultureInfo.InvariantCulture, args);
+
+            var selectedSet = result.Single(r => r.Errors.Length == 0);
+            TemplateCommand cmd = selectedSet.Object as TemplateCommand;
+            Assert.NotNull(cmd);
         }
 
         [Fact]
