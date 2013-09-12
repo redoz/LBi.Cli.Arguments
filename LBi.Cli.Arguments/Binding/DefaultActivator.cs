@@ -20,6 +20,13 @@ namespace LBi.Cli.Arguments.Binding
 {
     public class DefaultActivator : ITypeActivator
     {
+        static DefaultActivator()
+        {
+            Instance = new DefaultActivator();
+        }
+
+        public static DefaultActivator Instance { get; private set; }
+
         public object CreateInstance(Type type)
         {
             return Activator.CreateInstance(type);

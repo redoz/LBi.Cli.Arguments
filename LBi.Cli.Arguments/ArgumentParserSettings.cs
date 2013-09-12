@@ -40,7 +40,7 @@ namespace LBi.Cli.Arguments
             this.TypeConverter = new IntransigentTypeConverter();
             this.ParameterSetBinder = new ParameterSetBinder();
             this.Culture = CultureInfo.InvariantCulture;
-            this.TypeActivator = new DefaultActivator();
+            this.TypeActivator = DefaultActivator.Instance;
         }
 
         public TextWriter Out { get; set; }

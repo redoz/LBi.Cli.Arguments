@@ -39,7 +39,7 @@ namespace LBi.Cli.Arguments.Test
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ParamSet));
             NodeSequence args = this.Parse("");
             ResolveResult result = sets.Resolve(new ParameterSetBinder(),
-                                                new DefaultActivator(),
+                                                DefaultActivator.Instance,
                                                 new IntransigentTypeConverter(),
                                                 CultureInfo.InvariantCulture,
                                                 args);

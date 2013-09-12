@@ -117,7 +117,7 @@ namespace LBi.CLI.Arguments.Test
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
             NodeSequence args = this.Parse("-Action Execute -Name 'a b c'");
             ResolveResult result = sets.Resolve(new ParameterSetBinder(),
-                                                new DefaultActivator(), 
+                                                DefaultActivator.Instance, 
                                                 new IntransigentTypeConverter(),
                                                 CultureInfo.InvariantCulture, args);
             
@@ -139,7 +139,7 @@ namespace LBi.CLI.Arguments.Test
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath), typeof(ParameterSetWithCommand));
             NodeSequence args = this.Parse("Test -Action Execute");
             ResolveResult result = sets.Resolve(new ParameterSetBinder(),
-                                                new DefaultActivator(),
+                                                DefaultActivator.Instance,
                                                 new IntransigentTypeConverter(),
                                                 CultureInfo.InvariantCulture,
                                                 args);
@@ -155,7 +155,7 @@ namespace LBi.CLI.Arguments.Test
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
             NodeSequence args = this.Parse("-Action Execute -Name 50");
             ResolveResult result = sets.Resolve(new ParameterSetBinder(),
-                                                new DefaultActivator(),
+                                                DefaultActivator.Instance,
                                                 new IntransigentTypeConverter(),
                                                 CultureInfo.InvariantCulture,
                                                 args);
@@ -173,7 +173,7 @@ namespace LBi.CLI.Arguments.Test
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
             NodeSequence args = this.Parse("-Action Execute -Name $true");
             ResolveResult result = sets.Resolve(new ParameterSetBinder(),
-                                                new DefaultActivator(),
+                                                DefaultActivator.Instance,
                                                 new IntransigentTypeConverter(),
                                                 CultureInfo.InvariantCulture,
                                                 args);
@@ -191,7 +191,7 @@ namespace LBi.CLI.Arguments.Test
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
             NodeSequence args = this.Parse("-Action Execute -Name $true -Verbose");
             ResolveResult result = sets.Resolve(new ParameterSetBinder(),
-                                                new DefaultActivator(),
+                                                DefaultActivator.Instance,
                                                 new IntransigentTypeConverter(),
                                                 CultureInfo.InvariantCulture,
                                                 args);
@@ -210,7 +210,7 @@ namespace LBi.CLI.Arguments.Test
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
             NodeSequence args = this.Parse("-Action Execute -Name $true -Verbose:$false");
             ResolveResult result = sets.Resolve(new ParameterSetBinder(),
-                                                new DefaultActivator(),
+                                                DefaultActivator.Instance,
                                                 new IntransigentTypeConverter(),
                                                 CultureInfo.InvariantCulture,
                                                 args);
@@ -229,7 +229,7 @@ namespace LBi.CLI.Arguments.Test
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
             NodeSequence args = this.Parse(@"-Action Execute -Path c:\temp\foo -Verbose");
             ResolveResult result = sets.Resolve(new ParameterSetBinder(),
-                                                new DefaultActivator(),
+                                                DefaultActivator.Instance,
                                                 new IntransigentTypeConverter(),
                                                 CultureInfo.InvariantCulture,
                                                 args);
@@ -249,7 +249,7 @@ namespace LBi.CLI.Arguments.Test
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
             NodeSequence args = this.Parse("-Action Execute -Name $true -Verbose:$true");
             ResolveResult result = sets.Resolve(new ParameterSetBinder(),
-                                                new DefaultActivator(),
+                                                DefaultActivator.Instance,
                                                 new IntransigentTypeConverter(),
                                                 CultureInfo.InvariantCulture,
                                                 args);
@@ -267,7 +267,7 @@ namespace LBi.CLI.Arguments.Test
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(TemplateCommand));
             NodeSequence args = this.Parse(@"Template -Path .\Tmp -Template Library -Force -Output .\Html -Arguments @{SearchUri = '/search/'}");
             ResolveResult result = sets.Resolve(new ParameterSetBinder(),
-                                                new DefaultActivator(),
+                                                DefaultActivator.Instance,
                                                 new IntransigentTypeConverter(),
                                                 CultureInfo.InvariantCulture,
                                                 args);
@@ -283,7 +283,7 @@ namespace LBi.CLI.Arguments.Test
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandWithParameters));
             NodeSequence args = this.Parse("-Action Execute -Parameters @{foo = 'bar'; bar = 4}");
             ResolveResult result = sets.Resolve(new ParameterSetBinder(),
-                                                new DefaultActivator(),
+                                                DefaultActivator.Instance,
                                                 new IntransigentTypeConverter(),
                                                 CultureInfo.InvariantCulture,
                                                 args);
@@ -302,7 +302,7 @@ namespace LBi.CLI.Arguments.Test
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandWithParameters));
             NodeSequence args = this.Parse("-Action Execute -Test");
             ResolveResult result = sets.Resolve(new ParameterSetBinder(),
-                                                new DefaultActivator(),
+                                                DefaultActivator.Instance,
                                                 new IntransigentTypeConverter(),
                                                 CultureInfo.InvariantCulture,
                                                 args);

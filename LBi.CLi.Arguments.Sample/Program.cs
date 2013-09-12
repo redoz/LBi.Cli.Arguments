@@ -112,7 +112,7 @@ namespace LBi.CLi.Arguments.Sample
 
             // resolve parameter set against the parsed node set
             ResolveResult result = sets.Resolve(new ParameterSetBinder(),
-                                                new DefaultActivator(),
+                                                DefaultActivator.Instance,
                                                 new IntransigentTypeConverter(),
                                                 CultureInfo.InvariantCulture,
                                                 nodes);
