@@ -78,6 +78,7 @@
     <Compile Include="Globalization\HelpMessageExtensions.cs" />
     <Compile Include="Globalization\IResourceProvider.cs" />
     <Compile Include="Globalization\IHelpMessage.cs" />
+    <Compile Include="HelpCommand.cs" />
     <Compile Include="IParameterSetBinder.cs" />
     <Compile Include="Binding\ITypeActivator.cs" />
     <Compile Include="Output\ErrorWriter.cs" />
