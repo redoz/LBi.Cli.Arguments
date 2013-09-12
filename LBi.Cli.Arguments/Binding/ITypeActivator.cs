@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2012 LBi Netherlands B.V.
+ * Copyright 2013 LBi Netherlands B.V.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,12 @@
  * limitations under the License. 
  */
 
+using System;
 
-using System.Globalization;
-using LBi.Cli.Arguments.Binding;
-using LBi.Cli.Arguments.Parsing;
-
-namespace LBi.Cli.Arguments
+namespace LBi.Cli.Arguments.Binding
 {
-    // TODO should this encapsulate the ITypeConverter & CultureInfo
-    public interface IParameterSetBinder
+    public interface ITypeActivator
     {
-        ParameterSetResult Build(ITypeActivator typeActivator,
-                                 ITypeConverter typeConverter,
-                                 CultureInfo cultureInfo,
-                                 NodeSequence sequence,
-                                 ParameterSet paramSet);
+        object CreateInstance(Type type);
     }
 }

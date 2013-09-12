@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2012 LBi Netherlands B.V.
+ * Copyright 2012-2013 LBi Netherlands B.V.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,13 +33,14 @@ namespace LBi.Cli.Arguments
 
         public ArgumentParserSettings()
         {
-            Out = new ConsoleWriter(Console.Out);
-            Error = new ConsoleWriter(Console.Error);
-            HelpWriter = new HelpWriter();
-            ErrorWriter = new ErrorWriter();
-            TypeConverter = new IntransigentTypeConverter();
+            this.Out = new ConsoleWriter(Console.Out);
+            this.Error = new ConsoleWriter(Console.Error);
+            this.HelpWriter = new HelpWriter();
+            this.ErrorWriter = new ErrorWriter();
+            this.TypeConverter = new IntransigentTypeConverter();
             this.ParameterSetBinder = new ParameterSetBinder();
-            Culture = CultureInfo.InvariantCulture;
+            this.Culture = CultureInfo.InvariantCulture;
+            this.TypeActivator = new DefaultActivator();
         }
 
         public TextWriter Out { get; set; }
@@ -49,5 +50,6 @@ namespace LBi.Cli.Arguments
         public CultureInfo Culture { get; set; }
         public ITypeConverter TypeConverter { get; set; }
         public IParameterSetBinder ParameterSetBinder { get; set; }
+        public ITypeActivator TypeActivator { get; set; }
     }
 }

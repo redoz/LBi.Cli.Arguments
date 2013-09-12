@@ -68,6 +68,7 @@
     <Compile Include="Binding\ITypeConverter.cs" />
     <Compile Include="Binding\Lookup.cs" />
     <Compile Include="Binding\Reflection.cs" />
+    <Compile Include="Binding\DefaultActivator.cs" />
     <Compile Include="Binding\ResolveTypeArgs.cs" />
     <Compile Include="Binding\SwitchTypeConverter.cs" />
     <Compile Include="ErrorType.cs" />
@@ -77,6 +78,7 @@
     <Compile Include="Globalization\IResourceProvider.cs" />
     <Compile Include="Globalization\IHelpMessage.cs" />
     <Compile Include="IParameterSetBinder.cs" />
+    <Compile Include="Binding\ITypeActivator.cs" />
     <Compile Include="Output\ErrorWriter.cs" />
     <Compile Include="Output\HelpLevel.cs" />
     <Compile Include="Output\HelpWriter.cs" />

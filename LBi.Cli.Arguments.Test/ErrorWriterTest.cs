@@ -39,8 +39,10 @@ namespace LBi.Cli.Arguments.Test
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ParamSet));
             NodeSequence args = this.Parse("");
             ResolveResult result = sets.Resolve(new ParameterSetBinder(),
+                                                new DefaultActivator(),
                                                 new IntransigentTypeConverter(),
-                                                CultureInfo.InvariantCulture, args);
+                                                CultureInfo.InvariantCulture,
+                                                args);
 
             Assert.False(result.IsMatch, "Expects no match");
             Assert.Equal(1, result.Count);

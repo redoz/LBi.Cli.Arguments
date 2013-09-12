@@ -84,8 +84,8 @@ namespace LBi.Cli.Arguments
         public ArgumentParser(params Type[] types)
             : this(ArgumentParserSettings.Default, types)
         {
-            
-        } 
+
+        }
 
         public virtual bool TryParse(string[] args, out TParamSetBase paramSet)
         {
@@ -100,6 +100,7 @@ namespace LBi.Cli.Arguments
 
             // resolve parameter set against the parsed node set
             ResolveResult result = this.ParameterSets.Resolve(this.Settings.ParameterSetBinder,
+                                                              this.Settings.TypeActivator,
                                                               this.Settings.TypeConverter,
                                                               this.Settings.Culture,
                                                               nodes);
@@ -108,7 +109,7 @@ namespace LBi.Cli.Arguments
             {
                 this.Settings.HelpWriter.Write(this.Settings.Out,
                                                this.ParameterSets,
-                                               ((HelpCommand) result.BestMatch.Object).ToHelpLevel());
+                                               ((HelpCommand)result.BestMatch.Object).ToHelpLevel());
                 success = false;
                 paramSet = default(TParamSetBase);
             }

@@ -14,15 +14,12 @@
  * limitations under the License. 
  */
 
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using LBi.Cli.Arguments.Binding;
 using LBi.Cli.Arguments.Parsing;
 using LBi.Cli.Arguments.Parsing.Ast;
@@ -54,13 +51,13 @@ namespace LBi.Cli.Arguments
             public object Instance { get; protected set; }
         }
 
-        public virtual ParameterSetResult Build(ITypeConverter typeConverter, CultureInfo cultureInfo, NodeSequence sequence, ParameterSet paramSet)
+        public virtual ParameterSetResult Build(ITypeActivator typeActivator, ITypeConverter typeConverter, CultureInfo cultureInfo, NodeSequence sequence, ParameterSet paramSet)
         {
             BuildContext ctx = new BuildContext(sequence,
-                                                paramSet, Activator.CreateInstance(paramSet.UnderlyingType));
+                                                paramSet,
+                                                typeActivator.CreateInstance(paramSet.UnderlyingType));
 
-            var requiredParameters =
-                new HashSet<Parameter>(paramSet.Where(p => p.GetAttribute<RequiredAttribute>() != null));
+            var requiredParameters = new HashSet<Parameter>(paramSet.Where(p => p.GetAttribute<RequiredAttribute>() != null));
 
             SetDefaultValues(typeConverter, cultureInfo, ctx);
 
@@ -73,24 +70,20 @@ namespace LBi.Cli.Arguments
                     if (first && !string.IsNullOrEmpty(ctx.ParameterSet.Command))
                     {
                         LiteralValue literal = enumerator.Current as LiteralValue;
-                        if (literal == null ||
-                            !StringComparer.InvariantCultureIgnoreCase.Equals(literal.Value, ctx.ParameterSet.Command))
+                        if (literal == null || !StringComparer.InvariantCultureIgnoreCase.Equals(literal.Value, ctx.ParameterSet.Command))
                         {
                             // report error: missing/incorrect command
-                            ctx.Errors.Add(
-                                new BindError(ErrorType.MissingCommand,
-                                                 Enumerable.Empty<Parameter>(),
-                                                 new AstNode[] { literal },
-                                                 String.Format(ErrorMessages.MissingCommand,
-                                                               ctx.ParameterSet.Command)));
+                            ctx.Errors.Add(new BindError(ErrorType.MissingCommand,
+                                                         Enumerable.Empty<Parameter>(),
+                                                         new AstNode[] { literal },
+                                                         String.Format(ErrorMessages.MissingCommand, ctx.ParameterSet.Command)));
                         }
                         if (!enumerator.MoveNext())
                             break;
                     }
                     first = false;
 
-                    if (enumerator.Current.Type == NodeType.Parameter ||
-                        enumerator.Current.Type == NodeType.Switch)
+                    if (enumerator.Current.Type == NodeType.Parameter || enumerator.Current.Type == NodeType.Switch)
                     {
                         ParameterName parameterName = (ParameterName)enumerator.Current;
                         Parameter[] parameters;
@@ -100,12 +93,13 @@ namespace LBi.Cli.Arguments
                             if (!ctx.RemainingParameters.Remove(parameters[0]))
                             {
                                 // report error, multiple bindings
-                                ctx.Errors.Add(
-                                    new BindError(ErrorType.MultipleBindings,
-                                                     parameters,
-                                                     new AstNode[] { parameterName },
-                                                     String.Format(ErrorMessages.MultipleBindings,
-                                                                   parameterName.Name)));
+                                string message = String.Format(ErrorMessages.MultipleBindings,
+                                                               parameterName.Name);
+
+                                ctx.Errors.Add(new BindError(ErrorType.MultipleBindings,
+                                                             parameters,
+                                                             new AstNode[] { parameterName },
+                                                             message));
 
                                 // if the parameter was not of type Switch, skip next node
                                 if (parameters[0].Property.PropertyType != typeof(Switch))
@@ -134,11 +128,12 @@ namespace LBi.Cli.Arguments
                             // advance to value 
                             if (!enumerator.MoveNext())
                             {
+                                string message = string.Format(ErrorMessages.MissingValue, parameters[0].Name);
+
                                 ctx.Errors.Add(new BindError(ErrorType.MissingValue,
-                                                             new[] {parameters[0]},
-                                                             new[] {parameterName},
-                                                             string.Format(ErrorMessages.MissingValue,
-                                                                           parameters[0].Name)));
+                                                             new[] { parameters[0] },
+                                                             new[] { parameterName },
+                                                             message));
                                 break;
                             }
 
@@ -148,23 +143,24 @@ namespace LBi.Cli.Arguments
                         else if (parameters != null && parameters.Length > 1)
                         {
                             // report error, ambigious name
-                            ctx.Errors.Add(
-                                new BindError(ErrorType.AmbigiousName,
-                                                 parameters,
-                                                 new AstNode[] { parameterName },
-                                                 String.Format(ErrorMessages.AmbigiousName,
-                                                               parameterName.Name,
-                                                               string.Join(", ", parameters.Select(p => p.Name)))));
+                            string message = String.Format(ErrorMessages.AmbigiousName,
+                                                           parameterName.Name,
+                                                           string.Join(", ", parameters.Select(p => p.Name)));
+
+                            ctx.Errors.Add(new BindError(ErrorType.AmbigiousName,
+                                                         parameters,
+                                                         new AstNode[] { parameterName },
+                                                         message));
                         }
                         else
                         {
                             // report error, parameter not found
-                            ctx.Errors.Add(
-                                new BindError(ErrorType.ArgumentNameMismatch,
-                                                 Enumerable.Empty<Parameter>(),
-                                                 new AstNode[] { parameterName },
-                                                 string.Format(ErrorMessages.ArgumentNameMismatch,
-                                                               parameterName.Name)));
+                            string message = string.Format(ErrorMessages.ArgumentNameMismatch, parameterName.Name);
+
+                            ctx.Errors.Add(new BindError(ErrorType.ArgumentNameMismatch,
+                                                         Enumerable.Empty<Parameter>(),
+                                                         new AstNode[] { parameterName },
+                                                         message));
                         }
                     }
                     else
@@ -175,12 +171,13 @@ namespace LBi.Cli.Arguments
                         if (positionalParam == null)
                         {
                             // report error, there are no positional parameters
+                            string message = string.Format(ErrorMessages.ArgumentPositionMismatch,
+                                                           ctx.Sequence.GetInputString(enumerator.Current.SourceInfo));
+
                             ctx.Errors.Add(new BindError(ErrorType.ArgumentPositionMismatch,
-                                                            Enumerable.Empty<Parameter>(),
-                                                            new[] { enumerator.Current },
-                                                            string.Format(
-                                                                ErrorMessages.ArgumentPositionMismatch,
-                                                                ctx.Sequence.GetInputString(enumerator.Current.SourceInfo))));
+                                                         Enumerable.Empty<Parameter>(),
+                                                         new[] { enumerator.Current },
+                                                         message));
                         }
                         else
                         {
@@ -193,12 +190,12 @@ namespace LBi.Cli.Arguments
 
             foreach (Parameter missingParameter in requiredParameters)
             {
+                string message = string.Format(ErrorMessages.MissingRequiredParameter, missingParameter.Name);
+
                 ctx.Errors.Add(new BindError(ErrorType.MissingRequiredParameter,
                                              new[] { missingParameter },
                                              null,
-                                             string.Format(
-                                                 ErrorMessages.MissingRequiredParameter,
-                                                 missingParameter.Name)));
+                                             message));
             }
 
             return new ParameterSetResult(sequence, ctx.ParameterSet, ctx.Instance, ctx.Errors);
@@ -230,11 +227,11 @@ namespace LBi.Cli.Arguments
                             }
                             else
                             {
-                                throw new ParameterDefinitionException(parameter.Property,
-                                                                       string.Format(
-                                                                           Exceptions.FailedToParseDefaultValue,
-                                                                           strVal,
-                                                                           parameter.Property.PropertyType.FullName));
+                                string message = string.Format(Exceptions.FailedToParseDefaultValue,
+                                                               strVal,
+                                                               parameter.Property.PropertyType.FullName);
+
+                                throw new ParameterDefinitionException(parameter.Property, message);
                             }
                         }
                     }
@@ -254,12 +251,11 @@ namespace LBi.Cli.Arguments
                         }
                         else
                         {
-                            throw new ParameterDefinitionException(parameter.Property,
-                                                                   string.Format(
-                                                                       Exceptions.FailedToConvertDefaultValue,
-                                                                       "NULL",
-                                                                       "",
-                                                                       parameter.Property.PropertyType.FullName));
+                            string message = string.Format(Exceptions.FailedToConvertDefaultValue,
+                                                           "NULL",
+                                                           "",
+                                                           parameter.Property.PropertyType.FullName);
+                            throw new ParameterDefinitionException(parameter.Property, message);
                         }
                     }
                     else
@@ -271,12 +267,12 @@ namespace LBi.Cli.Arguments
                         }
                         else
                         {
-                            throw new ParameterDefinitionException(parameter.Property,
-                                                                   string.Format(
-                                                                       Exceptions.FailedToConvertDefaultValue,
-                                                                       value,
-                                                                       value.GetType().FullName,
-                                                                       parameter.Property.PropertyType.FullName));
+                            string message = string.Format(Exceptions.FailedToConvertDefaultValue,
+                                                           value,
+                                                           value.GetType().FullName,
+                                                           parameter.Property.PropertyType.FullName);
+
+                            throw new ParameterDefinitionException(parameter.Property, message);
                         }
                     }
                 }
@@ -299,54 +295,50 @@ namespace LBi.Cli.Arguments
                         TypeError typeError = valueError as TypeError;
                         if (typeError != null)
                         {
-                            ctx.Errors.Add(
-                                new BindError(ErrorType.IncompatibleType,
-                                                 new[] { parameter },
-                                                 new[] { astNode },
-                                                 String.Format(ErrorMessages.IncompatibleType,
-                                                               ctx.Sequence.GetInputString(
-                                                                   typeError.AstNode.SourceInfo),
-                                                               parameter.Name)));
+                            string message = String.Format(ErrorMessages.IncompatibleType,
+                                                           ctx.Sequence.GetInputString(typeError.AstNode.SourceInfo),
+                                                           parameter.Name);
+
+                            ctx.Errors.Add(new BindError(ErrorType.IncompatibleType,
+                                                         new[] { parameter },
+                                                         new[] { astNode },
+                                                         message));
                         }
 
                         AddError addError = valueError as AddError;
 
                         if (addError != null)
                         {
+                            string message = String.Format(ErrorMessages.MethodInvocationFailed,
+                                                           ctx.Sequence.GetInputString(addError.AstNodes.Select(ast => ast.SourceInfo)),
+                                                           parameter.Name,
+                                                           addError.Method.ReflectedType.Name,
+                                                           addError.Method.Name,
+                                                           addError.Exception.GetType().Name,
+                                                           addError.Exception.Message);
 
-                            ctx.Errors.Add(
-                                new BindError(ErrorType.IncompatibleType,
-                                              new[] {parameter},
-                                              new[] {astNode},
-                                              String.Format(
-                                                  ErrorMessages.MethodInvocationFailed,
-                                                  ctx.Sequence.GetInputString(
-                                                      addError.AstNodes.Select(
-                                                          ast => ast.SourceInfo)),
-                                                  parameter.Name,
-                                                  addError.Method.ReflectedType.Name,
-                                                  addError.Method.Name,
-                                                  addError.Exception.GetType().Name,
-                                                  addError.Exception.Message)));
-                        } else
+                            ctx.Errors.Add(new BindError(ErrorType.IncompatibleType,
+                                                         new[] { parameter },
+                                                         new[] { astNode },
+                                                         message));
+                        }
+                        else
                         {
                             ActivationError activationError = valueError as ActivationError;
 
                             if (activationError != null)
                             {
-                                ctx.Errors.Add(
-                                    new BindError(ErrorType.IncompatibleType,
-                                                  new[] {parameter},
-                                                  new[] {astNode},
-                                                  String.Format(
-                                                      ErrorMessages.ObjectInitializationFailed,
-                                                      ctx.Sequence.GetInputString(
-                                                          addError.AstNodes.Select(
-                                                              ast => ast.SourceInfo)),
-                                                      parameter.Name,
-                                                      activationError.Constructor.ReflectedType.Name,
-                                                      activationError.Exception.GetType().Name,
-                                                      activationError.Exception.Message)));
+                                string message = String.Format(ErrorMessages.ObjectInitializationFailed,
+                                                               ctx.Sequence.GetInputString(addError.AstNodes.Select(ast => ast.SourceInfo)),
+                                                               parameter.Name,
+                                                               activationError.Constructor.ReflectedType.Name,
+                                                               activationError.Exception.GetType().Name,
+                                                               activationError.Exception.Message);
+
+                                ctx.Errors.Add(new BindError(ErrorType.IncompatibleType,
+                                                             new[] { parameter },
+                                                             new[] { astNode },
+                                                             message));
                             }
                         }
 

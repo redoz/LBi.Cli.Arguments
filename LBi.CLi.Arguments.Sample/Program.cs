@@ -44,7 +44,7 @@ namespace LBi.CLi.Arguments.Sample
 
 
     [ParameterSet("Name", HelpMessage = "Executes command given a name.")]
-    [Example("With parameters", HelpMessage ="This is an example of how to call a command with a parameter dictionary.")]
+    [Example("With parameters", HelpMessage = "This is an example of how to call a command with a parameter dictionary.")]
     public class ExecuteCommandUsingName : ExecuteCommandBase
     {
         [Parameter(HelpMessage = "Name"), Required]
@@ -112,8 +112,9 @@ namespace LBi.CLi.Arguments.Sample
 
             // resolve parameter set against the parsed node set
             ResolveResult result = sets.Resolve(new ParameterSetBinder(),
+                                                new DefaultActivator(),
                                                 new IntransigentTypeConverter(),
-                                                CultureInfo.InvariantCulture, 
+                                                CultureInfo.InvariantCulture,
                                                 nodes);
             if (result.IsMatch)
             {
