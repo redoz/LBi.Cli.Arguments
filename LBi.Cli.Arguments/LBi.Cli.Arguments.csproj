@@ -60,6 +60,7 @@
     <Compile Include="ArgumentParserSettings.cs" />
     <Compile Include="Binding\ActivationError.cs" />
     <Compile Include="Binding\CustomBooleanConverter.cs" />
+    <Compile Include="Binding\DelegateActivator.cs" />
     <Compile Include="Binding\ErrorCollector.cs" />
     <Compile Include="Binding\ErrorEventArg.cs" />
     <Compile Include="Binding\InterfaceResolutionException.cs" />
