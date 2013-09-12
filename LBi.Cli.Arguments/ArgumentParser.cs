@@ -15,6 +15,7 @@
  */
 
 using System;
+using System.ComponentModel.DataAnnotations;
 using LBi.Cli.Arguments.Output;
 using LBi.Cli.Arguments.Parsing;
 
@@ -27,6 +28,45 @@ namespace LBi.Cli.Arguments
     /// <typeparam name="TParamSetBase">Base type for all parameter sets, supports <see cref="System.Runtime.Serialization.KnownTypeAttribute"/>.</typeparam>
     public class ArgumentParser<TParamSetBase>
     {
+        // TODO put this in resource file
+        [ParameterSet("Help", HelpMessage = "Show help")]
+        protected class HelpCommand
+        {
+            [Parameter(HelpMessage = "Show help"), Required]
+            public Switch Help { get; set; }
+
+            [Parameter(HelpMessage = "Show all help")]
+            public Switch Full { get; set; }
+
+            [Parameter(HelpMessage = "Show detailed help")]
+            public Switch Detailed { get; set; }
+
+            [Parameter(HelpMessage = "Show parameter information")]
+            public Switch Parameters { get; set; }
+
+            [Parameter(HelpMessage = "Show examples")]
+            public Switch Examples { get; set; }
+
+            public HelpLevel ToHelpLevel()
+            {
+                HelpLevel ret = HelpLevel.Syntax;
+
+                if (this.Full)
+                    ret = HelpLevel.Full;
+
+                if (this.Examples)
+                    ret |= HelpLevel.Examples;
+
+                if (this.Detailed)
+                    ret |= HelpLevel.Detailed;
+
+                if (this.Parameters)
+                    ret |= HelpLevel.Parameters;
+
+                return ret;
+            }
+        }
+
         protected readonly ParameterSetCollection ParameterSets;
 
         public ArgumentParser(ArgumentParserSettings settings, params Type[] types)
