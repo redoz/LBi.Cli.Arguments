@@ -24,16 +24,30 @@ namespace LBi.Cli.Arguments.Output
     {
         private readonly StringBuilder _buffer;
         private readonly TextWriter _writer;
+        private readonly bool _hasConsole;
 
         public ConsoleWriter(TextWriter writer)
         {
             this._writer = writer;
             this._buffer = new StringBuilder();
+
+            try
+            {
+                this._hasConsole = Console.BufferWidth > 0;
+            }
+            catch (IOException)
+            {
+                this._hasConsole = false;
+            }
         }
 
         public override void Write(char value)
         {
-            if (char.IsWhiteSpace(value))
+            if (!this._hasConsole)
+            {
+                this._writer.Write(value);
+            }
+            else if (char.IsWhiteSpace(value))
             {
                 if (Console.BufferWidth > Console.CursorLeft + this._buffer.Length)
                 {
@@ -68,7 +82,7 @@ namespace LBi.Cli.Arguments.Output
                 {
                     this._buffer.Append(value);
                 }
-                
+
             }
         }
 
