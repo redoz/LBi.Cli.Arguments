@@ -87,16 +87,16 @@ namespace LBi.Cli.Arguments
 
         }
 
-        public virtual bool TryParse(string[] args, out TParamSetBase paramSet)
+        public virtual bool TryParse(string args, out TParamSetBase paramSet)
         {
             bool success;
             // parse the command line arguments
             Parser parser = new Parser();
-            string joinedArgs = string.Join(" ", args);
-            if (string.IsNullOrWhiteSpace(joinedArgs))
-                joinedArgs = "-Help";
 
-            NodeSequence nodes = parser.Parse(joinedArgs);
+            if (string.IsNullOrWhiteSpace(args))
+                args = "-Help";
+
+            NodeSequence nodes = parser.Parse(args);
 
             // resolve parameter set against the parsed node set
             ResolveResult result = this.ParameterSets.Resolve(this.Settings.ParameterSetBinder,

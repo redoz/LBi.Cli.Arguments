@@ -72,6 +72,7 @@
     <Compile Include="Binding\DefaultActivator.cs" />
     <Compile Include="Binding\ResolveTypeArgs.cs" />
     <Compile Include="Binding\SwitchTypeConverter.cs" />
+    <Compile Include="CommandLine.cs" />
     <Compile Include="ErrorType.cs" />
     <Compile Include="Example.cs" />
     <Compile Include="ExampleValueAttribute.cs" />

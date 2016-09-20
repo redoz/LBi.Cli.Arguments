@@ -57,7 +57,7 @@ public class ExecuteCommandUsingPath : ExecuteCommandBase
 // set up argument parser
 ArgumentParser<ExecuteCommandBase> argParser = new ArgumentParser<ExecuteCommandBase>(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
 ExecuteCommandBase paramSet;
-if (argParser.TryParse(args, out paramSet))
+if (argParser.TryParse(CommandLine.Arguments, out paramSet))
 {
     paramSet.Execute();
 }
@@ -71,7 +71,7 @@ ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCom
 
 // parse the command line arguments
 Parser parser = new Parser();
-NodeSequence nodes = parser.Parse(string.Join(" ", args));
+NodeSequence nodes = parser.Parse(CommandLine.Arguments);
 
 // resolve parameter set against the parsed node set
 ResolveResult result = sets.Resolve(new ParameterSetBuilder(),

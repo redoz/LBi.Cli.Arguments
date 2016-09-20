@@ -1,5 +1,6 @@
 ﻿/*
  * Copyright 2012 LBi Netherlands B.V.
+ *           2016 Patrik Husfloen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +93,7 @@ namespace LBi.CLi.Arguments.Sample
             // set up argument parser
             ArgumentParser<ExecuteCommandBase> argParser = new ArgumentParser<ExecuteCommandBase>(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
             ExecuteCommandBase paramSet;
-            if (argParser.TryParse(args, out paramSet))
+            if (argParser.TryParse(CommandLine.Arguments, out paramSet))
             {
                 paramSet.Execute();
             }
@@ -108,7 +109,7 @@ namespace LBi.CLi.Arguments.Sample
 
             // parse the command line arguments
             Parser parser = new Parser();
-            NodeSequence nodes = parser.Parse(string.Join(" ", args));
+            NodeSequence nodes = parser.Parse(CommandLine.Arguments);
 
             // resolve parameter set against the parsed node set
             ResolveResult result = sets.Resolve(new ParameterSetBinder(),
