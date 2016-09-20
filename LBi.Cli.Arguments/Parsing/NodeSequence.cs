@@ -38,7 +38,10 @@ namespace LBi.Cli.Arguments.Parsing
             get { return this.Sequence[index]; }
         }
 
-        public int Count { get { return this.Sequence.Length; }}
+        public int Count
+        {
+            get { return this.Sequence.Length; }
+        }
 
         public string GetInputString(IEnumerable<ISourceInfo> sourceInfos)
         {
@@ -67,7 +70,7 @@ namespace LBi.Cli.Arguments.Parsing
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return GetEnumerator();
+            return this.GetEnumerator();
         }
 
         #endregion

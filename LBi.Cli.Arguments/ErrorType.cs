@@ -14,49 +14,47 @@
  * limitations under the License. 
  */
 
-using LBi.Cli.Arguments.Parsing;
-
 namespace LBi.Cli.Arguments
 {
     public enum ErrorType
     {
         /// <summary>
-        /// Unable to convert <see cref="ParsedArgument"/> to <see cref="Parameter"/> type.
+        ///     Unable to convert <see cref="ParsedArgument" /> to <see cref="Parameter" /> type.
         /// </summary>
         IncompatibleType,
-        
+
         /// <summary>
-        /// Required <see cref="Parameter"/> not specified.
+        ///     Required <see cref="Parameter" /> not specified.
         /// </summary>
         MissingRequiredParameter,
-        
+
         /// <summary>
-        /// <see cref="ParsedArgument"/> does not match any <see cref="Parameter"/>
+        ///     <see cref="ParsedArgument" /> does not match any <see cref="Parameter" />
         /// </summary>
         ArgumentNameMismatch,
-        
+
         /// <summary>
-        /// No matching Positional <see cref="Parameter"/>.
+        ///     No matching Positional <see cref="Parameter" />.
         /// </summary>
         ArgumentPositionMismatch,
 
         /// <summary>
-        /// More than one <see cref="Parameter"/>  matches the <see cref="ParsedArgument"/>.
+        ///     More than one <see cref="Parameter" />  matches the <see cref="ParsedArgument" />.
         /// </summary>
         AmbigiousName,
 
         /// <summary>
-        /// <see cref="Parameter"/> has already been bound.
+        ///     <see cref="Parameter" /> has already been bound.
         /// </summary>
         MultipleBindings,
 
         /// <summary>
-        /// Command missing or not matching.
+        ///     Command missing or not matching.
         /// </summary>
         MissingCommand,
 
         /// <summary>
-        /// Parameter name specified but no value is specified.
+        ///     Parameter name specified but no value is specified.
         /// </summary>
         MissingValue
     }

@@ -26,7 +26,6 @@ namespace LBi.Cli.Arguments.Parsing.Ast
 
         public ParameterName(ISourceInfo sourceInfo, string name) : this(NodeType.Parameter, sourceInfo, name)
         {
-            
         }
 
         public string Name { get; protected set; }

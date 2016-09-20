@@ -14,9 +14,6 @@
  * limitations under the License. 
  */
 
-using System.Collections.Generic;
-using System.Linq;
-using LBi.Cli.Arguments;
 using LBi.Cli.Arguments.Parsing;
 using LBi.Cli.Arguments.Parsing.Ast;
 using Xunit;
@@ -35,7 +32,7 @@ namespace LBi.CLI.Arguments.Test
             Assert.IsType<ParameterName>(parsedArgs[2]);
             Assert.IsType<Sequence>(parsedArgs[3]);
 
-            
+
             Assert.Equal(1, ((Sequence)parsedArgs[3]).Elements.Length);
             Assert.IsType<LiteralValue>(((Sequence)parsedArgs[3]).Elements[0]);
             Assert.Equal(LiteralValueType.Null, ((LiteralValue)((Sequence)parsedArgs[3]).Elements[0]).ValueType);

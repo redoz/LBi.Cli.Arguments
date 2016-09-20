@@ -17,7 +17,7 @@
 namespace LBi.Cli.Arguments
 {
     /// <summary>
-    /// Base class for all type conversion errors.
+    ///     Base class for all type conversion errors.
     /// </summary>
     public abstract class ValueError
     {

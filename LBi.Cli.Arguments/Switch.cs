@@ -15,12 +15,7 @@
  */
 
 
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using LBi.Cli.Arguments.Binding;
 
 namespace LBi.Cli.Arguments
@@ -29,7 +24,7 @@ namespace LBi.Cli.Arguments
     public struct Switch
     {
         /// <summary>
-        /// Static representing a present <see cref="Switch"/>.
+        ///     Static representing a present <see cref="Switch" />.
         /// </summary>
         public static readonly Switch Present = new Switch(true);
 

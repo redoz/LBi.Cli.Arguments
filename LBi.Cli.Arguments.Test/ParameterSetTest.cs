@@ -28,7 +28,6 @@ namespace LBi.CLI.Arguments.Test
 {
     public class ParameterSetTest
     {
-
         [ParameterSet("Template", Command = "Template", HelpMessage = "Apply template to a set of ldoc files to generate output.")]
         public class TemplateCommand
         {
@@ -95,7 +94,6 @@ namespace LBi.CLI.Arguments.Test
         }
 
 
-
         [Fact]
         public void BuildParameterSet()
         {
@@ -117,10 +115,11 @@ namespace LBi.CLI.Arguments.Test
             ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
             NodeSequence args = this.Parse("-Action Execute -Name 'a b c'");
             ResolveResult result = sets.Resolve(new ParameterSetBinder(),
-                                                DefaultActivator.Instance, 
+                                                DefaultActivator.Instance,
                                                 new IntransigentTypeConverter(),
-                                                CultureInfo.InvariantCulture, args);
-            
+                                                CultureInfo.InvariantCulture,
+                                                args);
+
             var selectedSet = result.Single(r => r.Errors.Length == 0);
             ExecuteCommandUsingName cmd = selectedSet.Object as ExecuteCommandUsingName;
             Assert.NotNull(cmd);
@@ -136,14 +135,16 @@ namespace LBi.CLI.Arguments.Test
         [Fact]
         public void ResolveParameterSetWithCommand()
         {
-            ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath), typeof(ParameterSetWithCommand));
+            ParameterSetCollection sets = ParameterSetCollection.FromTypes(typeof(ExecuteCommandUsingName),
+                                                                           typeof(ExecuteCommandUsingPath),
+                                                                           typeof(ParameterSetWithCommand));
             NodeSequence args = this.Parse("Test -Action Execute");
             ResolveResult result = sets.Resolve(new ParameterSetBinder(),
                                                 DefaultActivator.Instance,
                                                 new IntransigentTypeConverter(),
                                                 CultureInfo.InvariantCulture,
                                                 args);
-            
+
             var selectedSet = result.Single(r => r.Errors.Length == 0);
             ParameterSetWithCommand cmd = selectedSet.Object as ParameterSetWithCommand;
             Assert.NotNull(cmd);
@@ -159,7 +160,7 @@ namespace LBi.CLI.Arguments.Test
                                                 new IntransigentTypeConverter(),
                                                 CultureInfo.InvariantCulture,
                                                 args);
-    
+
             var selectedSet = result.Single(r => r.Errors.Length == 0);
             ExecuteCommandUsingName cmd = selectedSet.Object as ExecuteCommandUsingName;
             Assert.NotNull(cmd);
@@ -261,6 +262,7 @@ namespace LBi.CLI.Arguments.Test
             Assert.Equal("Execute", cmd.Action);
             Assert.True(cmd.Verbose.IsPresent);
         }
+
         [Fact]
         public void ResolveParameterSet_Template_WithParameters()
         {

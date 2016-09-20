@@ -14,9 +14,7 @@
  * limitations under the License. 
  */
 
-using System;
 using System.Linq;
-using LBi.Cli.Arguments;
 using LBi.Cli.Arguments.Parsing;
 using Xunit;
 
@@ -32,11 +30,11 @@ namespace LBi.CLI.Arguments.Test
 
             Assert.Equal(tokens.Select(t => t.Type),
                          new[]
-                             {
-                                 TokenType.ParameterName,
-                                 TokenType.StringValue,
-                                 TokenType.EndOfString, 
-                             });
+                         {
+                             TokenType.ParameterName,
+                             TokenType.StringValue,
+                             TokenType.EndOfString,
+                         });
         }
 
         [Fact]
@@ -44,22 +42,22 @@ namespace LBi.CLI.Arguments.Test
         {
             Tokenizer tokenizer = new Tokenizer();
             var tokens = tokenizer.Tokenize("-myparam test -my2ndparam $true -dictp @{} -arrayp @()").ToArray();
-            
+
             Assert.Equal(tokens.Select(t => t.Type),
                          new[]
-                             {
-                                 TokenType.ParameterName,
-                                 TokenType.StringValue,
-                                 TokenType.ParameterName,
-                                 TokenType.BoolValue,
-                                 TokenType.ParameterName,
-                                 TokenType.DictionaryStart,
-                                 TokenType.DictionaryEnd,
-                                 TokenType.ParameterName,
-                                 TokenType.ListStart,
-                                 TokenType.ListEnd,
-                                 TokenType.EndOfString
-                             });
+                         {
+                             TokenType.ParameterName,
+                             TokenType.StringValue,
+                             TokenType.ParameterName,
+                             TokenType.BoolValue,
+                             TokenType.ParameterName,
+                             TokenType.DictionaryStart,
+                             TokenType.DictionaryEnd,
+                             TokenType.ParameterName,
+                             TokenType.ListStart,
+                             TokenType.ListEnd,
+                             TokenType.EndOfString
+                         });
         }
 
         [Fact]
@@ -69,15 +67,15 @@ namespace LBi.CLI.Arguments.Test
             var tokens = tokenizer.Tokenize("test $true @{} @()").ToArray();
             Assert.Equal(tokens.Select(t => t.Type),
                          new[]
-                             {
-                                 TokenType.StringValue, 
-                                 TokenType.BoolValue, 
-                                 TokenType.DictionaryStart,
-                                 TokenType.DictionaryEnd, 
-                                 TokenType.ListStart,
-                                 TokenType.ListEnd,
-                                 TokenType.EndOfString, 
-                             });
+                         {
+                             TokenType.StringValue,
+                             TokenType.BoolValue,
+                             TokenType.DictionaryStart,
+                             TokenType.DictionaryEnd,
+                             TokenType.ListStart,
+                             TokenType.ListEnd,
+                             TokenType.EndOfString,
+                         });
         }
 
         [Fact]
@@ -151,7 +149,7 @@ namespace LBi.CLI.Arguments.Test
             Tokenizer tokenizer = new Tokenizer();
             var tokens = tokenizer.Tokenize("1,2,3,4,5").ToArray();
             Assert.Equal(10, tokens.Length);
-            for (int i = 0; i < (tokens.Length- 1) / 2; i++)
+            for (int i = 0; i < (tokens.Length - 1) / 2; i++)
             {
                 Assert.Equal(TokenType.ListValueSeperator, tokens[i * 2 + 1].Type);
             }
@@ -336,20 +334,20 @@ namespace LBi.CLI.Arguments.Test
             var tokens = tokenizer.Tokenize("@($null, $true ,  $false, '1234', 1234 )").ToArray();
             Assert.Equal(tokens.Select(t => t.Type),
                          new[]
-                             {
-                                 TokenType.ListStart,
-                                 TokenType.NullValue,
-                                 //TokenType.ListValueSeperator,
-                                 TokenType.BoolValue,
-                                 //TokenType.ListValueSeperator,
-                                 TokenType.BoolValue,
-                                 //TokenType.ListValueSeperator,
-                                 TokenType.StringValue,
-                                 //TokenType.ListValueSeperator,
-                                 TokenType.NumericValue,
-                                 TokenType.ListEnd,
-                                 TokenType.EndOfString, 
-                             });
+                         {
+                             TokenType.ListStart,
+                             TokenType.NullValue,
+                             //TokenType.ListValueSeperator,
+                             TokenType.BoolValue,
+                             //TokenType.ListValueSeperator,
+                             TokenType.BoolValue,
+                             //TokenType.ListValueSeperator,
+                             TokenType.StringValue,
+                             //TokenType.ListValueSeperator,
+                             TokenType.NumericValue,
+                             TokenType.ListEnd,
+                             TokenType.EndOfString,
+                         });
         }
 
         [Fact]
@@ -358,30 +356,26 @@ namespace LBi.CLI.Arguments.Test
             Tokenizer tokenizer = new Tokenizer();
 
             Token[] tokens = tokenizer.Tokenize("@($null, @() ,  @('ab', @('cd')))").ToArray();
-            
+
             Assert.Equal(tokens.Select(t => t.Type),
                          new[]
-                             {
-                                 TokenType.ListStart,
-                                 TokenType.NullValue,
-                                 //TokenType.ListValueSeperator,
-                                 TokenType.ListStart,
-                                 TokenType.ListEnd,
-                                 //TokenType.ListValueSeperator,
-                                 TokenType.ListStart,
-                                 TokenType.StringValue,
-                                 //TokenType.ListValueSeperator,
-                                 TokenType.ListStart,
-                                 TokenType.StringValue,
-                                 TokenType.ListEnd,
-                                 TokenType.ListEnd,
-                                 TokenType.ListEnd,
-                                 TokenType.EndOfString, 
-                             });
-
-
-
-
+                         {
+                             TokenType.ListStart,
+                             TokenType.NullValue,
+                             //TokenType.ListValueSeperator,
+                             TokenType.ListStart,
+                             TokenType.ListEnd,
+                             //TokenType.ListValueSeperator,
+                             TokenType.ListStart,
+                             TokenType.StringValue,
+                             //TokenType.ListValueSeperator,
+                             TokenType.ListStart,
+                             TokenType.StringValue,
+                             TokenType.ListEnd,
+                             TokenType.ListEnd,
+                             TokenType.ListEnd,
+                             TokenType.EndOfString,
+                         });
         }
 
 
@@ -413,15 +407,14 @@ namespace LBi.CLI.Arguments.Test
 
             Assert.Equal(tokens.Select(t => t.Type),
                          new[]
-                             {
-                                 TokenType.DictionaryStart,
-                                 TokenType.StringValue,
-                                 //TokenType.DictionaryValueSeperator,
-                                 TokenType.StringValue,
-                                 TokenType.DictionaryEnd,
-                                 TokenType.EndOfString, 
-                             });
-
+                         {
+                             TokenType.DictionaryStart,
+                             TokenType.StringValue,
+                             //TokenType.DictionaryValueSeperator,
+                             TokenType.StringValue,
+                             TokenType.DictionaryEnd,
+                             TokenType.EndOfString,
+                         });
         }
 
 
@@ -433,26 +426,26 @@ namespace LBi.CLI.Arguments.Test
 
             Assert.Equal(tokens.Select(t => t.Type),
                          new[]
-                             {
-                                 TokenType.DictionaryStart, 
-                                 TokenType.StringValue, 
-                                 //TokenType.DictionaryValueSeperator,
-                                 TokenType.DictionaryStart, 
-                                 TokenType.StringValue,
-                                 //TokenType.DictionaryValueSeperator, 
-                                 TokenType.StringValue, 
-                                 TokenType.DictionaryEnd,
-                                 //TokenType.DictionaryKeySeperator,
-                                 TokenType.DictionaryStart, 
-                                 TokenType.StringValue, 
-                                 //TokenType.DictionaryValueSeperator,
-                                 TokenType.StringValue, 
-                                 TokenType.DictionaryEnd,
-                                 //TokenType.DictionaryValueSeperator, 
-                                 TokenType.StringValue, 
-                                 TokenType.DictionaryEnd,
-                                 TokenType.EndOfString, 
-                             });
+                         {
+                             TokenType.DictionaryStart,
+                             TokenType.StringValue,
+                             //TokenType.DictionaryValueSeperator,
+                             TokenType.DictionaryStart,
+                             TokenType.StringValue,
+                             //TokenType.DictionaryValueSeperator, 
+                             TokenType.StringValue,
+                             TokenType.DictionaryEnd,
+                             //TokenType.DictionaryKeySeperator,
+                             TokenType.DictionaryStart,
+                             TokenType.StringValue,
+                             //TokenType.DictionaryValueSeperator,
+                             TokenType.StringValue,
+                             TokenType.DictionaryEnd,
+                             //TokenType.DictionaryValueSeperator, 
+                             TokenType.StringValue,
+                             TokenType.DictionaryEnd,
+                             TokenType.EndOfString,
+                         });
         }
     }
 }

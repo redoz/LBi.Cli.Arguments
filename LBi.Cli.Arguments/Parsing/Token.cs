@@ -14,8 +14,6 @@
  * limitations under the License. 
  */
 
-using LBi.Cli.Arguments.Parsing.Ast;
-
 namespace LBi.Cli.Arguments.Parsing
 {
     public class Token : ISourceInfo
@@ -42,9 +40,8 @@ namespace LBi.Cli.Arguments.Parsing
                                  "{{Type: {0}, Pos: {1}, Len: {2}, Value: '{3}'}}",
                                  this.Type,
                                  this.Position,
-                                 this.Length, 
+                                 this.Length,
                                  this.Value);
         }
-
     }
 }

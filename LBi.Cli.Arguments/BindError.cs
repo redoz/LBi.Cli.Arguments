@@ -21,16 +21,16 @@ using LBi.Cli.Arguments.Parsing.Ast;
 namespace LBi.Cli.Arguments
 {
     /// <summary>
-    /// Represents a failure to bind a property, created by <see cref="IParameterSetBinder"/>
+    ///     Represents a failure to bind a property, created by <see cref="IParameterSetBinder" />
     /// </summary>
     public class BindError
     {
         /// <summary>
-        /// Initilized a new instance of <see cref="BindError"/>.
+        ///     Initilized a new instance of <see cref="BindError" />.
         /// </summary>
         /// <param name="type">The type of error.</param>
-        /// <param name="parameter">Which <see cref="Parameter"/> does this relate to.</param>
-        /// <param name="nodes">Which <see cref="AstNode"/> does this relate to.</param>
+        /// <param name="parameter">Which <see cref="Parameter" /> does this relate to.</param>
+        /// <param name="nodes">Which <see cref="AstNode" /> does this relate to.</param>
         /// <param name="message">Error message that will be shown to the end-user.</param>
         public BindError(ErrorType type, IEnumerable<Parameter> parameter, AstNode[] nodes, string message)
         {
@@ -39,23 +39,24 @@ namespace LBi.Cli.Arguments
             this.Argument = nodes;
             this.Message = message;
         }
+
         /// <summary>
-        /// The type of error.
+        ///     The type of error.
         /// </summary>
         public ErrorType Type { get; protected set; }
 
         /// <summary>
-        /// Related paramters.
+        ///     Related paramters.
         /// </summary>
         public Parameter[] Parameter { get; protected set; }
 
         /// <summary>
-        /// Related Arguments.
+        ///     Related Arguments.
         /// </summary>
         public AstNode[] Argument { get; protected set; }
 
         /// <summary>
-        /// Error message.
+        ///     Error message.
         /// </summary>
         public string Message { get; protected set; }
 

@@ -16,7 +16,6 @@
 
 using System;
 using System.Collections.Generic;
-
 using LBi.Cli.Arguments.Parsing.Ast;
 
 namespace LBi.Cli.Arguments.Parsing
@@ -29,7 +28,6 @@ namespace LBi.Cli.Arguments.Parsing
             IEnumerable<Token> tokens = tokenizer.Tokenize(args);
             return new NodeSequence(args, this.Parse(tokens));
         }
-
 
 
         protected virtual IEnumerable<AstNode> Parse(IEnumerable<Token> tokens)
@@ -65,30 +63,30 @@ namespace LBi.Cli.Arguments.Parsing
                     break;
                 case TokenType.NumericValue:
                     ret = new LiteralValue(
-                                            enumerator.Current,
-                                            LiteralValueType.Numeric,
-                                            enumerator.Current.Value);
+                                           enumerator.Current,
+                                           LiteralValueType.Numeric,
+                                           enumerator.Current.Value);
                     enumerator.MoveNext();
                     break;
                 case TokenType.StringValue:
                     ret = new LiteralValue(
-                                            enumerator.Current,
-                                            LiteralValueType.String,
-                                            enumerator.Current.Value);
+                                           enumerator.Current,
+                                           LiteralValueType.String,
+                                           enumerator.Current.Value);
                     enumerator.MoveNext();
                     break;
                 case TokenType.BoolValue:
                     ret = new LiteralValue(
-                                            enumerator.Current,
-                                            LiteralValueType.Boolean,
-                                            enumerator.Current.Value);
+                                           enumerator.Current,
+                                           LiteralValueType.Boolean,
+                                           enumerator.Current.Value);
                     enumerator.MoveNext();
                     break;
                 case TokenType.NullValue:
                     ret = new LiteralValue(
-                                            enumerator.Current,
-                                            LiteralValueType.Null,
-                                            enumerator.Current.Value);
+                                           enumerator.Current,
+                                           LiteralValueType.Null,
+                                           enumerator.Current.Value);
                     enumerator.MoveNext();
                     break;
                 case TokenType.ListStart:
@@ -115,13 +113,13 @@ namespace LBi.Cli.Arguments.Parsing
                 AstNode obj = this.GetAstNode(enumerator);
                 if (obj is Sequence)
                 {
-                    var list = new List<AstNode>(((Sequence) obj).Elements);
+                    var list = new List<AstNode>(((Sequence)obj).Elements);
                     list.Add(ret);
                     ret = new Sequence(ret.SourceInfo, list);
                 }
                 else
                 {
-                    ret = new Sequence(ret.SourceInfo, new[] {ret, obj});
+                    ret = new Sequence(ret.SourceInfo, new[] { ret, obj });
                 }
             }
 

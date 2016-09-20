@@ -25,7 +25,7 @@ namespace LBi.Cli.Arguments.Parsing.Ast
         object Visit(AssociativeArray array);
 
         object Visit(ParameterName parameterName);
-        
+
         object Visit(SwitchParameter switchParameter);
     }
 }

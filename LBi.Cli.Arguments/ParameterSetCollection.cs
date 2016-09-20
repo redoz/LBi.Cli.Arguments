@@ -17,23 +17,16 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.Serialization;
 using LBi.Cli.Arguments.Binding;
 using LBi.Cli.Arguments.Parsing;
-using LBi.Cli.Arguments.Parsing.Ast;
-using LBi.Cli.Arguments.Resources;
 
 namespace LBi.Cli.Arguments
 {
     public class ParameterSetCollection : IEnumerable<ParameterSet>
     {
-
-
         protected readonly List<ParameterSet> ParameterSets;
 
         public ParameterSetCollection()
@@ -66,7 +59,7 @@ namespace LBi.Cli.Arguments
             var attrs = Attribute.GetCustomAttributes(curType, typeof(KnownTypeAttribute), true);
             foreach (KnownTypeAttribute knownType in attrs)
             {
-                DiscoverTypes(paramSets, knownType.Type);
+                this.DiscoverTypes(paramSets, knownType.Type);
             }
         }
 
@@ -107,7 +100,11 @@ namespace LBi.Cli.Arguments
         }
 
 
-        public ResolveResult Resolve(IParameterSetBinder binder, ITypeActivator typeActivator, ITypeConverter typeConverter, CultureInfo cultureInfo, NodeSequence sequence)
+        public ResolveResult Resolve(IParameterSetBinder binder,
+                                     ITypeActivator typeActivator,
+                                     ITypeConverter typeConverter,
+                                     CultureInfo cultureInfo,
+                                     NodeSequence sequence)
         {
             List<ParameterSetResult> setResults = new List<ParameterSetResult>();
 
@@ -130,7 +127,7 @@ namespace LBi.Cli.Arguments
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return GetEnumerator();
+            return this.GetEnumerator();
         }
 
         public ParameterSet this[int index]

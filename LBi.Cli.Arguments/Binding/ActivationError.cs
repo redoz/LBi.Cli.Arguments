@@ -21,7 +21,7 @@ using LBi.Cli.Arguments.Parsing.Ast;
 namespace LBi.Cli.Arguments.Binding
 {
     /// <summary>
-    /// Represents an exception that occured while trying to create an instance of an object.
+    ///     Represents an exception that occured while trying to create an instance of an object.
     /// </summary>
     public class ActivationError : ValueError
     {

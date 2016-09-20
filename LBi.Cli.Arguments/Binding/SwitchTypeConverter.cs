@@ -23,20 +23,20 @@ namespace LBi.Cli.Arguments.Binding
 {
     public class SwitchTypeConverter : TypeConverter
     {
-        public override bool CanConvertFrom(ITypeDescriptorContext context, System.Type sourceType)
+        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
         {
             return sourceType == typeof(bool);
         }
 
-        public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
+        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
             return destinationType == typeof(bool);
         }
 
-        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, System.Type destinationType)
+        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         {
             if (value is Switch && destinationType == typeof(bool))
-                return ((Switch)value) == Switch.Present;
+                return (Switch)value == Switch.Present;
 
             throw new InvalidCastException("Cannot convert from Switch");
         }
@@ -44,10 +44,9 @@ namespace LBi.Cli.Arguments.Binding
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
             if (value is bool)
-                return (Switch) (bool) value;
+                return (Switch)(bool)value;
 
             throw new InvalidCastException("Cannot convert to Switch");
         }
-
     }
 }

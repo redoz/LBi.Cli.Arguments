@@ -31,18 +31,12 @@ namespace LBi.Cli.Arguments
 
         public ParameterSetResult this[int index]
         {
-            get
-            {
-                return this._results[index];
-            }
+            get { return this._results[index]; }
         }
 
         public int Count
         {
-            get
-            {
-                return this._results.Length;
-            }
+            get { return this._results.Length; }
         }
 
         public bool IsMatch
@@ -68,7 +62,7 @@ namespace LBi.Cli.Arguments
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return GetEnumerator();
+            return this.GetEnumerator();
         }
 
         #endregion

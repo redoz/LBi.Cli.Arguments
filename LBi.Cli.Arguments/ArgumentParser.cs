@@ -22,10 +22,15 @@ using LBi.Cli.Arguments.Parsing;
 namespace LBi.Cli.Arguments
 {
     /// <summary>
-    /// Utility class that uses <see cref="ParameterSetCollection"/> and <see cref="Parser"/> to parse arguments into one or several concrete types.
-    /// It automatically exposes as -Help command with optional -Full, -Detailed, -Parameters, and -Examples parameters that is generated using <see cref="HelpWriter"/>.
+    ///     Utility class that uses <see cref="ParameterSetCollection" /> and <see cref="Parser" /> to parse arguments into one
+    ///     or several concrete types.
+    ///     It automatically exposes as -Help command with optional -Full, -Detailed, -Parameters, and -Examples parameters
+    ///     that is generated using <see cref="HelpWriter" />.
     /// </summary>
-    /// <typeparam name="TParamSetBase">Base type for all parameter sets, supports <see cref="System.Runtime.Serialization.KnownTypeAttribute"/>.</typeparam>
+    /// <typeparam name="TParamSetBase">
+    ///     Base type for all parameter sets, supports
+    ///     <see cref="System.Runtime.Serialization.KnownTypeAttribute" />.
+    /// </typeparam>
     public class ArgumentParser<TParamSetBase>
     {
         // TODO put this in resource file
@@ -84,7 +89,6 @@ namespace LBi.Cli.Arguments
         public ArgumentParser(params Type[] types)
             : this(ArgumentParserSettings.Default, types)
         {
-
         }
 
         public virtual bool TryParse(string args, out TParamSetBase paramSet)
@@ -131,6 +135,5 @@ namespace LBi.Cli.Arguments
 
             return success;
         }
-
     }
 }

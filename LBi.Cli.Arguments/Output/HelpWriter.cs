@@ -82,28 +82,34 @@ namespace LBi.Cli.Arguments.Output
             if (entryAsm != null)
                 fileName = Path.GetFileName(Assembly.GetEntryAssembly().Location);
 
-            WriteSyntax(writer,
-                        parameterSets,
-                        indent,
-                        fileName,
-                        true,
-                        p => true,
-                        p =>
-                        {
-                            if (p.Property.PropertyType == typeof(Switch))
-                                return "";
+            this.WriteSyntax(writer,
+                             parameterSets,
+                             indent,
+                             fileName,
+                             true,
+                             p => true,
+                             p =>
+                             {
+                                 if (p.Property.PropertyType == typeof(Switch))
+                                     return "";
 
-                            if (p.Property.PropertyType == typeof(Switch))
-                                return "";
+                                 if (p.Property.PropertyType == typeof(Switch))
+                                     return "";
 
-                            if (level.HasFlag(HelpLevel.Detailed))
-                                return string.Format("<{0}>", p.Property.PropertyType.FullName);
+                                 if (level.HasFlag(HelpLevel.Detailed))
+                                     return string.Format("<{0}>", p.Property.PropertyType.FullName);
 
-                            return string.Format("<{0}>", GetHumanReadableTypeName(p.Property.PropertyType));
-                        });
+                                 return string.Format("<{0}>", this.GetHumanReadableTypeName(p.Property.PropertyType));
+                             });
         }
 
-        protected virtual void WriteSyntax(TextWriter writer, IEnumerable<ParameterSet> parameterSets, string indent, string fileName, bool includeOptionalMarkers, Func<Parameter, bool> shouldWrite, Func<Parameter, string> valueWriter)
+        protected virtual void WriteSyntax(TextWriter writer,
+                                           IEnumerable<ParameterSet> parameterSets,
+                                           string indent,
+                                           string fileName,
+                                           bool includeOptionalMarkers,
+                                           Func<Parameter, bool> shouldWrite,
+                                           Func<Parameter, string> valueWriter)
         {
             foreach (ParameterSet set in parameterSets)
             {
@@ -206,25 +212,24 @@ namespace LBi.Cli.Arguments.Output
         public virtual void Write(TextWriter writer, ParameterSet set, HelpLevel level)
         {
             var tmp = new ParameterSetCollection(new[] { set });
-            Write(writer, tmp, level);
+            this.Write(writer, tmp, level);
         }
 
         public virtual void Write(TextWriter writer, ParameterSetCollection sets, HelpLevel level)
         {
-
             if (level.HasFlag(HelpLevel.Syntax))
             {
-                WriteSyntax(writer, sets, level);
+                this.WriteSyntax(writer, sets, level);
             }
 
             if (level.HasFlag(HelpLevel.Examples))
             {
-                WriteExample(writer, sets, level);
+                this.WriteExample(writer, sets, level);
             }
 
             if (level.HasFlag(HelpLevel.Parameters))
             {
-                WriteParameters(writer, sets, level);
+                this.WriteParameters(writer, sets, level);
             }
         }
 
@@ -246,7 +251,7 @@ namespace LBi.Cli.Arguments.Output
         {
             const string indent = "   ";
             writer.WriteLine("EXAMPLES");
-            
+
             var entryAsm = Assembly.GetEntryAssembly();
             string fileName = "";
             if (entryAsm != null)
@@ -265,38 +270,34 @@ namespace LBi.Cli.Arguments.Output
                 foreach (IGrouping<string, Tuple<Parameter, ExampleValueAttribute>> group in examples)
                 {
                     var attrDict = group.ToDictionary(t => t.Item1, t => t.Item2);
-                    WriteSyntax(writer,
-                                new[] { set },
-                                indent,
-                                fileName,
-                                false,
-                                p =>
-                                {
-                                    ExampleValueAttribute attr;
-                                    if (attrDict.TryGetValue(p, out attr))
-                                        return true;
-                                    return p.GetAttribute<RequiredAttribute>() != null;
-                                },
-                                p =>
-                                {
-                                    ExampleValueAttribute attr;
-                                    if (attrDict.TryGetValue(p, out attr))
-                                        return attr.Value;
+                    this.WriteSyntax(writer,
+                                     new[] { set },
+                                     indent,
+                                     fileName,
+                                     false,
+                                     p =>
+                                     {
+                                         ExampleValueAttribute attr;
+                                         if (attrDict.TryGetValue(p, out attr))
+                                             return true;
+                                         return p.GetAttribute<RequiredAttribute>() != null;
+                                     },
+                                     p =>
+                                     {
+                                         ExampleValueAttribute attr;
+                                         if (attrDict.TryGetValue(p, out attr))
+                                             return attr.Value;
 
-                                    if (p.Property.PropertyType == typeof(Switch))
-                                        return "";
+                                         if (p.Property.PropertyType == typeof(Switch))
+                                             return "";
 
-                                    if (level.HasFlag(HelpLevel.Detailed))
-                                        return string.Format("<{0}>", p.Property.PropertyType.FullName);
+                                         if (level.HasFlag(HelpLevel.Detailed))
+                                             return string.Format("<{0}>", p.Property.PropertyType.FullName);
 
-                                    return string.Format("<{0}>", GetHumanReadableTypeName(p.Property.PropertyType));
-                                });
+                                         return string.Format("<{0}>", this.GetHumanReadableTypeName(p.Property.PropertyType));
+                                     });
                 }
-
-
             }
-
-
         }
 
         private string GetHumanReadableTypeName(Type type)

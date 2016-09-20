@@ -13,7 +13,7 @@ namespace LBi.Cli.Arguments.Binding
         {
             this._errors = new List<ValueError>();
             this._valueBuilder = builder;
-            this._valueBuilder.Error += ValueBuilderErrorHandler;
+            this._valueBuilder.Error += this.ValueBuilderErrorHandler;
         }
 
         private void ValueBuilderErrorHandler(object sender, ErrorEventArg args)
@@ -28,7 +28,7 @@ namespace LBi.Cli.Arguments.Binding
 
         public void Dispose()
         {
-            this._valueBuilder.Error -= ValueBuilderErrorHandler;
+            this._valueBuilder.Error -= this.ValueBuilderErrorHandler;
         }
 
         public IEnumerator<ValueError> GetEnumerator()
@@ -38,7 +38,7 @@ namespace LBi.Cli.Arguments.Binding
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return GetEnumerator();
+            return this.GetEnumerator();
         }
     }
 }

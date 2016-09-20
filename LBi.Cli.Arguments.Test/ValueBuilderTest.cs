@@ -18,9 +18,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using LBi.Cli.Arguments;
 using LBi.Cli.Arguments.Binding;
 using LBi.Cli.Arguments.Parsing;
 using LBi.Cli.Arguments.Parsing.Ast;
@@ -85,7 +83,7 @@ namespace LBi.CLI.Arguments.Test
                                           new LiteralValue(SourceInfo.Empty, LiteralValueType.String, "255"),
                                           out value));
                 Assert.IsType<string[]>(value);
-                Assert.Equal(new[]{"255"}, value);
+                Assert.Equal(new[] { "255" }, value);
                 Assert.Empty(builder.Errors);
             }
         }
@@ -104,7 +102,6 @@ namespace LBi.CLI.Arguments.Test
                 Assert.Empty(builder.Errors);
             }
         }
-
 
 
         [Fact]
@@ -185,7 +182,8 @@ namespace LBi.CLI.Arguments.Test
             {
                 object value;
                 Assert.True(builder.Build(typeof(DateTime),
-                                          new LiteralValue(SourceInfo.Empty, LiteralValueType.String,
+                                          new LiteralValue(SourceInfo.Empty,
+                                                           LiteralValueType.String,
                                                            "2001-02-03 04:05:06"),
                                           out value));
                 Assert.Equal(new DateTime(2001, 02, 03, 04, 05, 06), (DateTime)value);
@@ -284,7 +282,8 @@ namespace LBi.CLI.Arguments.Test
             using (ValueBuilder builder = new ValueBuilder())
             {
                 object value;
-                Assert.True(builder.Build(typeof(bool), new LiteralValue(SourceInfo.Empty, LiteralValueType.String, ""),
+                Assert.True(builder.Build(typeof(bool),
+                                          new LiteralValue(SourceInfo.Empty, LiteralValueType.String, ""),
                                           out value));
                 Assert.False((bool)value);
                 Assert.Empty(builder.Errors);
@@ -327,7 +326,8 @@ namespace LBi.CLI.Arguments.Test
             {
                 object value;
                 Assert.True(builder.Build(typeof(IEnumerable<object>),
-                                          new Sequence(SourceInfo.Empty, Enumerable.Empty<AstNode>()), out value));
+                                          new Sequence(SourceInfo.Empty, Enumerable.Empty<AstNode>()),
+                                          out value));
                 Assert.Empty((IEnumerable)value);
                 Assert.Empty(builder.Errors);
             }
@@ -342,20 +342,26 @@ namespace LBi.CLI.Arguments.Test
                 Assert.True(builder.Build(typeof(IEnumerable<bool>),
                                           new Sequence(SourceInfo.Empty,
                                                        new[]
-                                                           {
-                                                               new LiteralValue(SourceInfo.Empty,
-                                                                                LiteralValueType.Boolean, "$true"),
-                                                               new LiteralValue(SourceInfo.Empty,
-                                                                                LiteralValueType.Boolean, "$false"),
-                                                               new LiteralValue(SourceInfo.Empty,
-                                                                                LiteralValueType.Numeric, "1"),
-                                                               new LiteralValue(SourceInfo.Empty,
-                                                                                LiteralValueType.Numeric, "0"),
-                                                               new LiteralValue(SourceInfo.Empty,
-                                                                                LiteralValueType.String, "Any"),
-                                                               new LiteralValue(SourceInfo.Empty,
-                                                                                LiteralValueType.String, "")
-                                                           }),
+                                                       {
+                                                           new LiteralValue(SourceInfo.Empty,
+                                                                            LiteralValueType.Boolean,
+                                                                            "$true"),
+                                                           new LiteralValue(SourceInfo.Empty,
+                                                                            LiteralValueType.Boolean,
+                                                                            "$false"),
+                                                           new LiteralValue(SourceInfo.Empty,
+                                                                            LiteralValueType.Numeric,
+                                                                            "1"),
+                                                           new LiteralValue(SourceInfo.Empty,
+                                                                            LiteralValueType.Numeric,
+                                                                            "0"),
+                                                           new LiteralValue(SourceInfo.Empty,
+                                                                            LiteralValueType.String,
+                                                                            "Any"),
+                                                           new LiteralValue(SourceInfo.Empty,
+                                                                            LiteralValueType.String,
+                                                                            "")
+                                                       }),
                                           out value));
 
                 Assert.Equal(new[] { true, false, true, false, true, false }, ((IEnumerable<bool>)value).ToArray());
@@ -374,20 +380,26 @@ namespace LBi.CLI.Arguments.Test
                 Assert.True(builder.Build(typeof(bool[]),
                                           new Sequence(SourceInfo.Empty,
                                                        new[]
-                                                           {
-                                                               new LiteralValue(SourceInfo.Empty,
-                                                                                LiteralValueType.Boolean, "$true"),
-                                                               new LiteralValue(SourceInfo.Empty,
-                                                                                LiteralValueType.Boolean, "$false"),
-                                                               new LiteralValue(SourceInfo.Empty,
-                                                                                LiteralValueType.Numeric, "1"),
-                                                               new LiteralValue(SourceInfo.Empty,
-                                                                                LiteralValueType.Numeric, "0"),
-                                                               new LiteralValue(SourceInfo.Empty,
-                                                                                LiteralValueType.String, "Any"),
-                                                               new LiteralValue(SourceInfo.Empty,
-                                                                                LiteralValueType.String, "")
-                                                           }),
+                                                       {
+                                                           new LiteralValue(SourceInfo.Empty,
+                                                                            LiteralValueType.Boolean,
+                                                                            "$true"),
+                                                           new LiteralValue(SourceInfo.Empty,
+                                                                            LiteralValueType.Boolean,
+                                                                            "$false"),
+                                                           new LiteralValue(SourceInfo.Empty,
+                                                                            LiteralValueType.Numeric,
+                                                                            "1"),
+                                                           new LiteralValue(SourceInfo.Empty,
+                                                                            LiteralValueType.Numeric,
+                                                                            "0"),
+                                                           new LiteralValue(SourceInfo.Empty,
+                                                                            LiteralValueType.String,
+                                                                            "Any"),
+                                                           new LiteralValue(SourceInfo.Empty,
+                                                                            LiteralValueType.String,
+                                                                            "")
+                                                       }),
                                           out value));
 
                 Assert.True(new[] { true, false, true, false, true, false }.SequenceEqual((IEnumerable<bool>)value));
@@ -406,12 +418,14 @@ namespace LBi.CLI.Arguments.Test
                 Assert.True(builder.Build(typeof(decimal[]),
                                           new Sequence(SourceInfo.Empty,
                                                        new[]
-                                                           {
-                                                               new LiteralValue(SourceInfo.Empty,
-                                                                                LiteralValueType.Numeric, "1"),
-                                                               new LiteralValue(SourceInfo.Empty,
-                                                                                LiteralValueType.String, "2")
-                                                           }),
+                                                       {
+                                                           new LiteralValue(SourceInfo.Empty,
+                                                                            LiteralValueType.Numeric,
+                                                                            "1"),
+                                                           new LiteralValue(SourceInfo.Empty,
+                                                                            LiteralValueType.String,
+                                                                            "2")
+                                                       }),
                                           out value));
 
                 Assert.Equal(new[] { 1m, 2m }, (decimal[])value);
@@ -468,24 +482,24 @@ namespace LBi.CLI.Arguments.Test
                 object value;
                 Assert.True(builder.Build(targetType,
                                           new AssociativeArray(
-                                              SourceInfo.Empty,
-                                              new[]
-                                                  {
-                                                      new KeyValuePair<AstNode, AstNode>(
-                                                          new LiteralValue(SourceInfo.Empty,
-                                                                           LiteralValueType.Numeric,
-                                                                           "1"),
-                                                          new LiteralValue(SourceInfo.Empty,
-                                                                           LiteralValueType.String, 
-                                                                           "2")),
-                                                      new KeyValuePair<AstNode, AstNode>(
-                                                          new LiteralValue(SourceInfo.Empty,
-                                                                           LiteralValueType.Numeric,
-                                                                           "3"),
-                                                          new LiteralValue(SourceInfo.Empty,
-                                                                           LiteralValueType.String, 
-                                                                           "4"))
-                                                  }),
+                                                               SourceInfo.Empty,
+                                                               new[]
+                                                               {
+                                                                   new KeyValuePair<AstNode, AstNode>(
+                                                                                                      new LiteralValue(SourceInfo.Empty,
+                                                                                                                       LiteralValueType.Numeric,
+                                                                                                                       "1"),
+                                                                                                      new LiteralValue(SourceInfo.Empty,
+                                                                                                                       LiteralValueType.String,
+                                                                                                                       "2")),
+                                                                   new KeyValuePair<AstNode, AstNode>(
+                                                                                                      new LiteralValue(SourceInfo.Empty,
+                                                                                                                       LiteralValueType.Numeric,
+                                                                                                                       "3"),
+                                                                                                      new LiteralValue(SourceInfo.Empty,
+                                                                                                                       LiteralValueType.String,
+                                                                                                                       "4"))
+                                                               }),
                                           out value));
 
                 Assert.IsAssignableFrom(targetType, value);
@@ -495,7 +509,7 @@ namespace LBi.CLI.Arguments.Test
                 Assert.Equal(2, ((IEnumerable)value).Cast<object>().Count());
 
                 int i = 0;
-                foreach (object kvp in ((IEnumerable)value))
+                foreach (object kvp in (IEnumerable)value)
                 {
                     object keyValue = kvp.GetType().GetProperty(keyName).GetValue(kvp, null);
                     object valueValue = kvp.GetType().GetProperty(valueName).GetValue(kvp, null);
@@ -531,24 +545,24 @@ namespace LBi.CLI.Arguments.Test
                 object value;
                 Assert.True(builder.Build(targetType,
                                           new AssociativeArray(
-                                              SourceInfo.Empty,
-                                              new[]
-                                                  {
-                                                      new KeyValuePair<AstNode, AstNode>(
-                                                          new LiteralValue(SourceInfo.Empty,
-                                                                           LiteralValueType.Numeric,
-                                                                           "1"),
-                                                          new LiteralValue(SourceInfo.Empty,
-                                                                           LiteralValueType.String, 
-                                                                           "2")),
-                                                      new KeyValuePair<AstNode, AstNode>(
-                                                          new LiteralValue(SourceInfo.Empty,
-                                                                           LiteralValueType.Numeric,
-                                                                           "1"),
-                                                          new LiteralValue(SourceInfo.Empty,
-                                                                           LiteralValueType.String, 
-                                                                           "4"))
-                                                  }),
+                                                               SourceInfo.Empty,
+                                                               new[]
+                                                               {
+                                                                   new KeyValuePair<AstNode, AstNode>(
+                                                                                                      new LiteralValue(SourceInfo.Empty,
+                                                                                                                       LiteralValueType.Numeric,
+                                                                                                                       "1"),
+                                                                                                      new LiteralValue(SourceInfo.Empty,
+                                                                                                                       LiteralValueType.String,
+                                                                                                                       "2")),
+                                                                   new KeyValuePair<AstNode, AstNode>(
+                                                                                                      new LiteralValue(SourceInfo.Empty,
+                                                                                                                       LiteralValueType.Numeric,
+                                                                                                                       "1"),
+                                                                                                      new LiteralValue(SourceInfo.Empty,
+                                                                                                                       LiteralValueType.String,
+                                                                                                                       "4"))
+                                                               }),
                                           out value));
 
                 Assert.IsAssignableFrom(targetType, value);
@@ -557,11 +571,11 @@ namespace LBi.CLI.Arguments.Test
 
                 Assert.Equal(1, ((IEnumerable)value).Cast<object>().Count());
 
-                object group = ((IEnumerable) value).Cast<object>().Single();
+                object group = ((IEnumerable)value).Cast<object>().Single();
 
                 Assert.Equal("1", group.GetType().GetProperty("Key").GetValue(group, null).ToString());
 
-                object[] values = ((IEnumerable) group).Cast<object>().ToArray();
+                object[] values = ((IEnumerable)group).Cast<object>().ToArray();
 
                 Assert.Equal(2, values.Length);
 
@@ -572,9 +586,7 @@ namespace LBi.CLI.Arguments.Test
                 Assert.Empty(builder.Errors);
             }
         }
-
-
-
     }
+
     // ReSharper restore InconsistentNaming
 }

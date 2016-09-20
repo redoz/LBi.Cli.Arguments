@@ -221,6 +221,5 @@ namespace LBi.Cli.Arguments.Parsing
 
             return this._buffer.ToString();
         }
-
     }
 }

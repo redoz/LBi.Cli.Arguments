@@ -24,11 +24,11 @@ using System.Reflection;
 namespace LBi.Cli.Arguments.Binding
 {
     /// <summary>
-    /// <see cref="ITypeConverter"/> that uses a combinaition of <see cref="TypeConverter"/> and Reflection to try to convert the value.
+    ///     <see cref="ITypeConverter" /> that uses a combinaition of <see cref="TypeConverter" /> and Reflection to try to
+    ///     convert the value.
     /// </summary>
     public class IntransigentTypeConverter : ITypeConverter
     {
-
         public IntransigentTypeConverter()
         {
         }
@@ -115,7 +115,6 @@ namespace LBi.Cli.Arguments.Binding
 
             if (!success && value != null)
             {
-
                 // check for ctor with single param
                 IEnumerable<ConstructorInfo> ctors = targetType.GetConstructors(BindingFlags.Instance | BindingFlags.Public);
                 ctors = ctors.Where(ct => ct.GetParameters().Length == 1);
@@ -129,7 +128,7 @@ namespace LBi.Cli.Arguments.Binding
                     {
                         try
                         {
-                            ret = ct.Invoke(new[] {ret});
+                            ret = ct.Invoke(new[] { ret });
                             success = true;
                             break;
                         }
@@ -174,7 +173,6 @@ namespace LBi.Cli.Arguments.Binding
                         outErrors.Add(ex);
                     }
                 }
-
             }
 
             errors = outErrors;

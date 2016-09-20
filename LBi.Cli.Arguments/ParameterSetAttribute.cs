@@ -15,7 +15,6 @@
  */
 
 using System;
-using System.Globalization;
 using LBi.Cli.Arguments.Globalization;
 
 namespace LBi.Cli.Arguments
@@ -29,7 +28,7 @@ namespace LBi.Cli.Arguments
         }
 
         public string Name { get; protected set; }
-        
+
         public string Command { get; set; }
 
         public string HelpMessage { get; set; }

@@ -19,7 +19,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace LBi.Cli.Arguments.Parsing
@@ -40,21 +39,21 @@ namespace LBi.Cli.Arguments.Parsing
         {
             TokenWriter tokenWriter = new TokenWriter();
             Task.Factory.StartNew(() =>
+                                  {
+                                      try
                                       {
-                                          try
+                                          using (StringReader reader = new StringReader(string.Join(" ", args)))
+                                          using (BasicReader basicReader = new BasicReader(reader, StringComparer.Ordinal))
                                           {
-                                              using (StringReader reader = new StringReader(string.Join(" ", args)))
-                                              using (BasicReader basicReader = new BasicReader(reader, StringComparer.Ordinal))
-                                              {
-                                                  this.Parse(tokenWriter, basicReader);
-                                                  tokenWriter.Close();
-                                              }
+                                              this.Parse(tokenWriter, basicReader);
+                                              tokenWriter.Close();
                                           }
-                                          catch (Exception ex)
-                                          {
-                                              tokenWriter.Abort(ex);
-                                          }
-                                      });
+                                      }
+                                      catch (Exception ex)
+                                      {
+                                          tokenWriter.Abort(ex);
+                                      }
+                                  });
             return tokenWriter.GetConsumingEnumerable();
         }
 
@@ -93,7 +92,7 @@ namespace LBi.Cli.Arguments.Parsing
             else if (reader.StartsWith("$"))
             {
                 TokenType type;
-                char[] endChar = new char[] {' ', '\t', '\r', '\n', ',', '}', ')', '=', ';' };
+                char[] endChar = new char[] { ' ', '\t', '\r', '\n', ',', '}', ')', '=', ';' };
 
                 string val = reader.ReadUntil(endChar.Contains);
                 switch (val)
@@ -110,7 +109,6 @@ namespace LBi.Cli.Arguments.Parsing
                 }
 
                 tokenWriter.Add(new Token(type, val, startPos, reader.Position - startPos));
-
             }
             else if (reader.StartsWith(DictionaryStart))
             {
@@ -132,15 +130,12 @@ namespace LBi.Cli.Arguments.Parsing
                 if (val.Skip(skipSign).Count(char.IsDigit) + (decimalSep ? 1 : 0) == val.Length - skipSign)
                 {
                     reader.Skip(val.Length);
-                    
-                    tokenWriter.Add(new Token(TokenType.NumericValue, val, startPos, reader.Position - startPos));
 
+                    tokenWriter.Add(new Token(TokenType.NumericValue, val, startPos, reader.Position - startPos));
                 }
                 else
                     this.ParseUnquotedString(tokenWriter, reader);
             }
-
-
         }
 
         protected virtual void ParseList(TokenWriter tokenWriter, BasicReader reader)
@@ -150,7 +145,7 @@ namespace LBi.Cli.Arguments.Parsing
 
 
             tokenWriter.Add(new Token(TokenType.ListStart, ListStart, reader.Position, ListStart.Length));
-            
+
             // skip it
             reader.Skip(ListStart.Length);
 
@@ -189,11 +184,10 @@ namespace LBi.Cli.Arguments.Parsing
             }
 
 
-
             if (reader.StartsWith(ListEnd))
             {
                 tokenWriter.Add(new Token(TokenType.ListEnd, ListEnd, reader.Position, ListEnd.Length));
-                    
+
                 reader.Skip(ListEnd.Length);
             }
             else
@@ -207,7 +201,7 @@ namespace LBi.Cli.Arguments.Parsing
             if (!reader.StartsWith(DictionaryStart))
                 throw new InvalidOperationException(String.Format("Cannot parse dictionary, expected {0}.", DictionaryStart));
 
-            tokenWriter.Add(new Token(TokenType.DictionaryStart, DictionaryStart, reader.Position, DictionaryStart.Length));                    
+            tokenWriter.Add(new Token(TokenType.DictionaryStart, DictionaryStart, reader.Position, DictionaryStart.Length));
 
             // skip
             reader.Skip(DictionaryStart.Length);
@@ -272,7 +266,7 @@ namespace LBi.Cli.Arguments.Parsing
             if (!reader.Eof && reader.StartsWith(DictionaryEnd))
             {
                 tokenWriter.Add(new Token(TokenType.DictionaryEnd, DictionaryEnd, reader.Position, DictionaryEnd.Length));
-                                    
+
                 reader.Skip(DictionaryEnd.Length);
             }
             else
@@ -344,8 +338,7 @@ namespace LBi.Cli.Arguments.Parsing
                 {
                     throw new Exception("Premature end of stream");
                 }
-            }
-            while (!reader.Eof);
+            } while (!reader.Eof);
 
             // skip trailing quote
             reader.Skip(1);
@@ -384,8 +377,7 @@ namespace LBi.Cli.Arguments.Parsing
                         break; // exit
                     }
                 }
-            }
-            while (!reader.Eof);
+            } while (!reader.Eof);
 
             tokenWriter.Add(new Token(TokenType.StringValue, val.ToString(), pos, reader.Position - pos));
         }

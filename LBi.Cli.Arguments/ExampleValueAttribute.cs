@@ -26,6 +26,7 @@ namespace LBi.Cli.Arguments
             this.Set = exampleSet;
             this.Value = exampleValue;
         }
+
         public string Value { get; protected set; }
         public string Set { get; protected set; }
     }

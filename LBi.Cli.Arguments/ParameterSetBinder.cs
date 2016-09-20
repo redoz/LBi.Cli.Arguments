@@ -51,7 +51,11 @@ namespace LBi.Cli.Arguments
             public object Instance { get; protected set; }
         }
 
-        public virtual ParameterSetResult Build(ITypeActivator typeActivator, ITypeConverter typeConverter, CultureInfo cultureInfo, NodeSequence sequence, ParameterSet paramSet)
+        public virtual ParameterSetResult Build(ITypeActivator typeActivator,
+                                                ITypeConverter typeConverter,
+                                                CultureInfo cultureInfo,
+                                                NodeSequence sequence,
+                                                ParameterSet paramSet)
         {
             BuildContext ctx = new BuildContext(sequence,
                                                 paramSet,
@@ -341,7 +345,6 @@ namespace LBi.Cli.Arguments
                                                              message));
                             }
                         }
-
                     }
                 }
             }

@@ -35,7 +35,7 @@ namespace LBi.Cli.Arguments.Parsing.Ast
 
         public override string ToString()
         {
-            return "[" + string.Join(", ", Elements.Select(a => a.ToString())) + "]";
+            return "[" + string.Join(", ", this.Elements.Select(a => a.ToString())) + "]";
         }
     }
 }

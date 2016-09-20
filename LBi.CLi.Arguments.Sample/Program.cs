@@ -27,7 +27,6 @@ using LBi.Cli.Arguments.Parsing;
 
 namespace LBi.CLi.Arguments.Sample
 {
-
     public abstract class ExecuteCommandBase
     {
         [Parameter(HelpMessage = "Optional parameter dictionary")]
@@ -41,7 +40,6 @@ namespace LBi.CLi.Arguments.Sample
 
         public abstract void Execute();
     }
-
 
 
     [ParameterSet("Name", HelpMessage = "Executes command given a name.")]
@@ -91,7 +89,8 @@ namespace LBi.CLi.Arguments.Sample
              */
 
             // set up argument parser
-            ArgumentParser<ExecuteCommandBase> argParser = new ArgumentParser<ExecuteCommandBase>(typeof(ExecuteCommandUsingName), typeof(ExecuteCommandUsingPath));
+            ArgumentParser<ExecuteCommandBase> argParser = new ArgumentParser<ExecuteCommandBase>(typeof(ExecuteCommandUsingName),
+                                                                                                  typeof(ExecuteCommandUsingPath));
             ExecuteCommandBase paramSet;
             if (argParser.TryParse(CommandLine.Arguments, out paramSet))
             {

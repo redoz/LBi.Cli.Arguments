@@ -30,12 +30,12 @@ namespace LBi.Cli.Arguments
     {
         public static ParameterSet FromType(Type type)
         {
-            ParameterSetAttribute setAttr = (ParameterSetAttribute) Attribute.GetCustomAttribute(type, typeof(ParameterSetAttribute), true);
+            ParameterSetAttribute setAttr = (ParameterSetAttribute)Attribute.GetCustomAttribute(type, typeof(ParameterSetAttribute), true);
 
             PropertyInfo[] publicProps = type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
 
             List<Parameter> allParams = new List<Parameter>();
-            
+
             Func<string> helpMessage;
             string name;
 
@@ -60,7 +60,7 @@ namespace LBi.Cli.Arguments
 
                 var validators = Attribute.GetCustomAttributes(propInfo, true).OfType<ValidationAttribute>();
 
-                allParams.Add(new Parameter(propInfo, name,attr.Position, helpMessage, validators));
+                allParams.Add(new Parameter(propInfo, name, attr.Position, helpMessage, validators));
             }
 
             // sanity check input parameters
@@ -86,8 +86,10 @@ namespace LBi.Cli.Arguments
             for (int i = 0; i < positionalParams.Length; i++)
             {
                 if (i != positionalParams[i].Position.Value)
-                    throw new ParameterSetDefinitionException(type, positionalParams, "Missing parameter position: " +
-                                                                                i.ToString(CultureInfo.InvariantCulture));
+                    throw new ParameterSetDefinitionException(type,
+                                                              positionalParams,
+                                                              "Missing parameter position: " +
+                                                              i.ToString(CultureInfo.InvariantCulture));
             }
             try
             {
@@ -133,16 +135,17 @@ namespace LBi.Cli.Arguments
             return (T)Attribute.GetCustomAttribute(this.UnderlyingType, typeof(T), inherit);
         }
 
-        public int Count { get { return this.Parameters.Length; } }
+        public int Count
+        {
+            get { return this.Parameters.Length; }
+        }
 
         /// <summary>
-        /// Returns an ordered list of positional parameters.
+        ///     Returns an ordered list of positional parameters.
         /// </summary>
         public IEnumerable<Parameter> PositionalParameters
         {
-            get {
-                return this.Parameters.Where(p => p.Position.HasValue).OrderBy(p => p.Position.Value);
-            }
+            get { return this.Parameters.Where(p => p.Position.HasValue).OrderBy(p => p.Position.Value); }
         }
 
         public Parameter this[int index]
@@ -171,7 +174,7 @@ namespace LBi.Cli.Arguments
                     if (StringComparer.InvariantCultureIgnoreCase.Equals(name, namePrefix))
                         if (ret == null)
                             ret = curParam;
-                        else 
+                        else
                             throw new AmbiguousMatchException("More than one match.");
                 }
                 return ret;
@@ -185,7 +188,7 @@ namespace LBi.Cli.Arguments
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return GetEnumerator();
+            return this.GetEnumerator();
         }
 
         public bool TryGetParameter(string name, out Parameter[] parameters)

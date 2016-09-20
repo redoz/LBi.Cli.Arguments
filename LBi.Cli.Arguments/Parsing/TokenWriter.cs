@@ -23,7 +23,7 @@ using System.Threading;
 namespace LBi.Cli.Arguments.Parsing
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable",
-        Justification = "TokenWriter.Enumerable disposes the disposable members of the TokenWriter class.")]
+         Justification = "TokenWriter.Enumerable disposes the disposable members of the TokenWriter class.")]
     public class TokenWriter
     {
         protected readonly ConcurrentQueue<Token> Queue;
@@ -127,7 +127,7 @@ namespace LBi.Cli.Arguments.Parsing
 
             object IEnumerator.Current
             {
-                get { return Current; }
+                get { return this.Current; }
             }
         }
     }

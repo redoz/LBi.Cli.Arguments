@@ -32,10 +32,7 @@ namespace LBi.Cli.Arguments.Binding
 
         internal event EventHandler<ErrorEventArg> Error
         {
-            add
-            {
-                this._errorHandlers.Push(value);
-            }
+            add { this._errorHandlers.Push(value); }
             remove
             {
                 if (this._errorHandlers.Count == 0 ||
@@ -51,7 +48,7 @@ namespace LBi.Cli.Arguments.Binding
         protected void RaiseError(IEnumerable<ValueError> errors)
         {
             foreach (var error in errors)
-                RaiseError(error);
+                this.RaiseError(error);
         }
 
         protected void RaiseError(ValueError error)
@@ -112,12 +109,13 @@ namespace LBi.Cli.Arguments.Binding
         }
 
         #region Interface registration/lookup
+
         public event EventHandler<ResolveTypeArgs> ResolveInterfaceType;
 
         protected Type OnResolveInterfaceType(Type interfaceType)
         {
             ResolveTypeArgs args = new ResolveTypeArgs(interfaceType);
-            EventHandler<ResolveTypeArgs> handler = ResolveInterfaceType;
+            EventHandler<ResolveTypeArgs> handler = this.ResolveInterfaceType;
             if (handler != null)
             {
                 foreach (EventHandler<ResolveTypeArgs> eventHandler in handler.GetInvocationList())
@@ -127,17 +125,16 @@ namespace LBi.Cli.Arguments.Binding
             if (args.RealType == null)
             {
                 throw new InterfaceResolutionException(
-                    string.Format(
-                        Resources.Exceptions.FailedToResolveInterfaceType,
-                        interfaceType.FullName),
-                    interfaceType);
+                                                       string.Format(
+                                                                     Resources.Exceptions.FailedToResolveInterfaceType,
+                                                                     interfaceType.FullName),
+                                                       interfaceType);
             }
 
             return args.RealType;
         }
+
         #endregion
-
-
 
         public IEnumerable<ValueError> Errors
         {
@@ -168,13 +165,11 @@ namespace LBi.Cli.Arguments.Binding
             return this._errorCollector.Count == 0;
         }
 
-
-
         #region Implementation of IAstVisitor
 
         object IAstVisitor.Visit(LiteralValue literalValue)
         {
-            return Visit(literalValue);
+            return this.Visit(literalValue);
         }
 
         protected virtual object Visit(LiteralValue literalValue)
@@ -183,63 +178,65 @@ namespace LBi.Cli.Arguments.Binding
             switch (literalValue.ValueType)
             {
                 case LiteralValueType.Numeric:
+                {
+                    sbyte signedByte;
+                    byte usignedByte;
+                    short signedShort;
+                    ushort unsignedShort;
+                    int signedInt;
+                    uint unsignedInt;
+                    long signedLong;
+                    ulong unsignedLong;
+                    Single single;
+                    Double dble;
+                    Decimal dec;
+                    BigInteger bigInt;
+
+                    if (byte.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out usignedByte))
+                        ret = usignedByte;
+                    else if (sbyte.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out signedByte))
+                        ret = signedByte;
+                    else if (short.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out signedShort))
+                        ret = signedShort;
+                    else if (ushort.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out unsignedShort))
+                        ret = unsignedShort;
+                    else if (int.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out signedInt))
+                        ret = signedInt;
+                    else if (uint.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out unsignedInt))
+                        ret = unsignedInt;
+                    else if (long.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out signedLong))
+                        ret = signedLong;
+                    else if (ulong.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out unsignedLong))
+                        ret = unsignedLong;
+                    else if (Single.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out single))
+                        ret = single;
+                    else if (Double.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out dble))
+                        ret = dble;
+                    else if (Decimal.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out dec))
+                        ret = dec;
+                    else if (BigInteger.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out bigInt))
+                        ret = bigInt;
+                    else
+                        ret = literalValue.Value;
+
+                    IEnumerable<Exception> exceptions;
+                    if (!this._typeConverter.TryConvertType(this._culture, this._targetType.Peek(), ref ret, out exceptions))
                     {
-                        sbyte signedByte;
-                        byte usignedByte;
-                        short signedShort;
-                        ushort unsignedShort;
-                        int signedInt;
-                        uint unsignedInt;
-                        long signedLong;
-                        ulong unsignedLong;
-                        Single single;
-                        Double dble;
-                        Decimal dec;
-                        BigInteger bigInt;
-
-                        if (byte.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out usignedByte))
-                            ret = usignedByte;
-                        else if (sbyte.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out signedByte))
-                            ret = signedByte;
-                        else if (short.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out signedShort))
-                            ret = signedShort;
-                        else if (ushort.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out unsignedShort))
-                            ret = unsignedShort;
-                        else if (int.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out signedInt))
-                            ret = signedInt;
-                        else if (uint.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out unsignedInt))
-                            ret = unsignedInt;
-                        else if (long.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out signedLong))
-                            ret = signedLong;
-                        else if (ulong.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out unsignedLong))
-                            ret = unsignedLong;
-                        else if (Single.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out single))
-                            ret = single;
-                        else if (Double.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out dble))
-                            ret = dble;
-                        else if (Decimal.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out dec))
-                            ret = dec;
-                        else if (BigInteger.TryParse(literalValue.Value, NumberStyles.Any, this._culture, out bigInt))
-                            ret = bigInt;
-                        else
-                            ret = literalValue.Value;
-
-                        IEnumerable<Exception> exceptions;
-                        if (!this._typeConverter.TryConvertType(this._culture, this._targetType.Peek(), ref ret, out exceptions))
-                        {
-                            this.RaiseError(new TypeError(this._targetType.Peek(), ret, literalValue, exceptions));
-                        }
+                        this.RaiseError(new TypeError(this._targetType.Peek(), ret, literalValue, exceptions));
                     }
+                }
 
                     break;
                 case LiteralValueType.String:
                     ret = literalValue.Value;
-                    if (this._targetType.Peek() != typeof (string))
+                    if (this._targetType.Peek() != typeof(string))
                     {
                         IEnumerable<Exception> exceptions;
                         if (!this._typeConverter.TryConvertType(this._culture, this._targetType.Peek(), ref ret, out exceptions))
                         {
-                            this.RaiseError(new TypeError(this._targetType.Peek(), literalValue.Value, literalValue,
+                            this.RaiseError(new TypeError(this._targetType.Peek(),
+                                                          literalValue.Value,
+                                                          literalValue,
                                                           exceptions));
                         }
                     }
@@ -249,12 +246,14 @@ namespace LBi.Cli.Arguments.Binding
                     break;
                 case LiteralValueType.Boolean:
                     ret = StringComparer.InvariantCultureIgnoreCase.Equals(literalValue.Value, "$true");
-                    if (this._targetType.Peek() != typeof (bool))
+                    if (this._targetType.Peek() != typeof(bool))
                     {
                         IEnumerable<Exception> exceptions;
                         if (!this._typeConverter.TryConvertType(this._culture, this._targetType.Peek(), ref ret, out exceptions))
                         {
-                            this.RaiseError(new TypeError(this._targetType.Peek(), ret, literalValue,
+                            this.RaiseError(new TypeError(this._targetType.Peek(),
+                                                          ret,
+                                                          literalValue,
                                                           exceptions));
                         }
                     }
@@ -269,7 +268,7 @@ namespace LBi.Cli.Arguments.Binding
 
         object IAstVisitor.Visit(Sequence sequence)
         {
-            return Visit(sequence);
+            return this.Visit(sequence);
         }
 
         protected virtual object Visit(Sequence sequence)
@@ -306,7 +305,7 @@ namespace LBi.Cli.Arguments.Binding
             {
                 Type realType;
                 if (targetType.IsInterface)
-                    realType = OnResolveInterfaceType(targetType);
+                    realType = this.OnResolveInterfaceType(targetType);
                 else
                     realType = targetType;
 
@@ -338,15 +337,15 @@ namespace LBi.Cli.Arguments.Binding
                             {
                                 try
                                 {
-                                    addMethods[addNum].Invoke(ret, new[] {value});
+                                    addMethods[addNum].Invoke(ret, new[] { value });
                                     success = true;
                                     break;
                                 }
                                 catch (Exception ex)
                                 {
                                     this.RaiseError(new AddError(addMethods[addNum],
-                                                                 new[] {value},
-                                                                 new[] {sequence.Elements[elemNum]},
+                                                                 new[] { value },
+                                                                 new[] { sequence.Elements[elemNum] },
                                                                  ex));
                                 }
                             }
@@ -368,7 +367,7 @@ namespace LBi.Cli.Arguments.Binding
 
         object IAstVisitor.Visit(ParameterName parameterName)
         {
-            return Visit(parameterName);
+            return this.Visit(parameterName);
         }
 
         protected virtual object Visit(ParameterName switchParameter)
@@ -378,7 +377,7 @@ namespace LBi.Cli.Arguments.Binding
 
         object IAstVisitor.Visit(SwitchParameter switchParameter)
         {
-            return Visit(switchParameter);
+            return this.Visit(switchParameter);
         }
 
         protected virtual object Visit(SwitchParameter switchParameter)
@@ -388,7 +387,7 @@ namespace LBi.Cli.Arguments.Binding
 
         object IAstVisitor.Visit(AssociativeArray array)
         {
-            return Visit(array);
+            return this.Visit(array);
         }
 
         protected virtual object Visit(AssociativeArray array)
@@ -418,15 +417,15 @@ namespace LBi.Cli.Arguments.Binding
             catch (MissingMethodException)
             {
                 throw new NotSupportedException(
-                    string.Format(Resources.Exceptions.UnsupportedParameterTypeNoDefaultConstructor,
-                                  targetType.FullName));
+                                                string.Format(Resources.Exceptions.UnsupportedParameterTypeNoDefaultConstructor,
+                                                              targetType.FullName));
             }
             catch (MissingMemberException)
             {
                 // portable class library
                 throw new NotSupportedException(
-                    string.Format(Resources.Exceptions.UnsupportedParameterTypeNoDefaultConstructor,
-                                  targetType.FullName));
+                                                string.Format(Resources.Exceptions.UnsupportedParameterTypeNoDefaultConstructor,
+                                                              targetType.FullName));
             }
 
 
@@ -472,8 +471,8 @@ namespace LBi.Cli.Arguments.Binding
                             catch (TargetInvocationException ex)
                             {
                                 this.RaiseError(new AddError(addWithTwoArgs[addNum],
-                                                             new[] {keyValue, valueValue},
-                                                             new[] {keyNode, valueNode},
+                                                             new[] { keyValue, valueValue },
+                                                             new[] { keyNode, valueNode },
                                                              ex.InnerException));
                             }
                         }
@@ -531,22 +530,21 @@ namespace LBi.Cli.Arguments.Binding
                                         catch (Exception ex)
                                         {
                                             this.RaiseError(new AddError(addWithOneArgs[addNum],
-                                                                            new[] { elementObj },
-                                                                            new[] { keyNode, valueNode },
-                                                                            ex));
+                                                                         new[] { elementObj },
+                                                                         new[] { keyNode, valueNode },
+                                                                         ex));
                                         }
                                     }
                                     catch (Exception ex)
                                     {
                                         this.RaiseError(new ActivationError(paramTypeCtors[ctorNum],
-                                                                            new[] {keyValue, valueValue},
-                                                                            new[] {keyNode, valueNode},
+                                                                            new[] { keyValue, valueValue },
+                                                                            new[] { keyNode, valueNode },
                                                                             ex));
                                     }
 
                                     if (success)
                                         break;
-
                                 }
                             }
                         }
@@ -563,7 +561,7 @@ namespace LBi.Cli.Arguments.Binding
         private object HandleInterfaceBasedAssocArray(AssociativeArray array, Type targetType)
         {
             Type realType = this.OnResolveInterfaceType(targetType);
-            return HandleMethodBasedAssocArray(array, realType);
+            return this.HandleMethodBasedAssocArray(array, realType);
         }
 
         private object HandleArrayBasedAssocArray(AssociativeArray array, Type arrayType)
@@ -610,14 +608,14 @@ namespace LBi.Cli.Arguments.Binding
             else if (matches.Length == 0)
             {
                 throw new NotSupportedException(
-                    string.Format(Resources.Exceptions.UnsupportedAssocParameterArrayTypeNoConstructor,
-                                  elementType.FullName));
+                                                string.Format(Resources.Exceptions.UnsupportedAssocParameterArrayTypeNoConstructor,
+                                                              elementType.FullName));
             }
             else
             {
                 throw new NotSupportedException(
-                    string.Format(Resources.Exceptions.UnsupportedAssocParameterArrayTypeAmbiguousConstructor,
-                                  elementType.FullName));
+                                                string.Format(Resources.Exceptions.UnsupportedAssocParameterArrayTypeAmbiguousConstructor,
+                                                              elementType.FullName));
             }
 
             return ret;

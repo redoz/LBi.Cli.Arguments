@@ -24,7 +24,7 @@ namespace LBi.Cli.Arguments.Binding
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
             if (value is string)
-                return (string) value != string.Empty;
+                return (string)value != string.Empty;
 
             return base.ConvertFrom(context, culture, value);
         }

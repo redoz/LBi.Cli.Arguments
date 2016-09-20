@@ -82,7 +82,6 @@ namespace LBi.Cli.Arguments.Output
                 {
                     this._buffer.Append(value);
                 }
-
             }
         }
 

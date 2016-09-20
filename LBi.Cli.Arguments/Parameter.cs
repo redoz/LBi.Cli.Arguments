@@ -19,13 +19,16 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
-using LBi.Cli.Arguments.Globalization;
 
 namespace LBi.Cli.Arguments
 {
     public class Parameter
     {
-        public Parameter(PropertyInfo property, string name, int? position, Func<string> helpMessageProvider, IEnumerable<ValidationAttribute> validators)
+        public Parameter(PropertyInfo property,
+                         string name,
+                         int? position,
+                         Func<string> helpMessageProvider,
+                         IEnumerable<ValidationAttribute> validators)
         {
             this.Property = property;
             this.Name = name;
@@ -45,7 +48,7 @@ namespace LBi.Cli.Arguments
             get { return this.Property.PropertyType; }
         }
 
-        public T GetAttribute<T>(bool inherit = true) where T: Attribute
+        public T GetAttribute<T>(bool inherit = true) where T : Attribute
         {
             return (T)Attribute.GetCustomAttribute(this.Property, typeof(T), inherit);
         }

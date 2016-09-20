@@ -23,7 +23,7 @@ namespace LBi.Cli.Arguments.Output
     {
         Syntax = 1,
         Parameters = 2,
-        Detailed = 4,        
+        Detailed = 4,
         Examples = 8,
         Full = Syntax | Examples | Parameters,
     }

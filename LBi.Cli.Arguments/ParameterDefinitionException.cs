@@ -52,7 +52,5 @@ namespace LBi.Cli.Arguments
         }
 
         public PropertyInfo ParameterProperty { get; protected set; }
-
-
     }
 }

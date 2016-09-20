@@ -26,7 +26,6 @@ namespace LBi.Cli.Arguments
         public TypeError(Type targetType, object value, AstNode astNode, IEnumerable<Exception> exceptions)
             : this(targetType, value, astNode, exceptions.ToArray())
         {
-            
         }
 
         public TypeError(Type targetType, object value, AstNode astNode, params Exception[] exceptions)
@@ -42,7 +41,7 @@ namespace LBi.Cli.Arguments
         public object Value { get; protected set; }
 
         /// <summary>
-        /// The <see cref="AstNode"/> representing the value.
+        ///     The <see cref="AstNode" /> representing the value.
         /// </summary>
         /// <remarks>Can be null.</remarks>
         public AstNode AstNode { get; protected set; }

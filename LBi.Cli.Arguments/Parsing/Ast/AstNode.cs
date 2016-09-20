@@ -24,7 +24,7 @@ namespace LBi.Cli.Arguments.Parsing.Ast
         {
             if (sourceInfo == null)
                 throw new ArgumentNullException("sourceInfo");
-            
+
             this.Type = nodeType;
 
             // this is cloned so that we don't end up holding on to the ISourceInfo instance

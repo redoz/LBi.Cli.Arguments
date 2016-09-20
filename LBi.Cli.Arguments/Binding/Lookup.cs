@@ -48,7 +48,7 @@ namespace LBi.Cli.Arguments.Binding
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return GetEnumerator();
+            return this.GetEnumerator();
         }
 
         public bool Contains(TKey key)
