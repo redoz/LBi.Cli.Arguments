@@ -112,7 +112,7 @@ namespace LBi.CLi.Arguments.Sample
 
             // resolve parameter set against the parsed node set
             ResolveResult result = sets.Resolve(new ParameterSetBinder(),
-                                                DefaultActivator.Instance,
+                                                DefaultActivator.Instance, // entry point for DI, see ITypeActivator or DelegateActivator
                                                 new IntransigentTypeConverter(),
                                                 CultureInfo.InvariantCulture,
                                                 nodes);

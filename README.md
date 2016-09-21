@@ -82,9 +82,10 @@ Parser parser = new Parser();
 NodeSequence nodes = parser.Parse(CommandLine.Arguments);
 
 // resolve parameter set against the parsed node set
-ResolveResult result = sets.Resolve(new ParameterSetBuilder(),
+ResolveResult result = sets.Resolve(new ParameterSetBinder(),
+                                    DefaultActivator.Instance, // entry point for DI, see ITypeActivator or DelegateActivator
                                     new IntransigentTypeConverter(),
-                                    CultureInfo.InvariantCulture, 
+                                    CultureInfo.InvariantCulture,
                                     nodes);
 if (result.IsMatch)
 {
