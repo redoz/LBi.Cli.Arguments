@@ -141,7 +141,7 @@ namespace LBi.Cli.Arguments.Parsing
         protected virtual void ParseList(TokenWriter tokenWriter, BasicReader reader)
         {
             if (!reader.StartsWith(ListStart))
-                throw new InvalidOperationException(String.Format("Cannot parse list, expected {0}.", ListStart));
+                throw new InvalidOperationException($"Cannot parse list, expected {ListStart}.");
 
 
             tokenWriter.Add(new Token(TokenType.ListStart, ListStart, reader.Position, ListStart.Length));

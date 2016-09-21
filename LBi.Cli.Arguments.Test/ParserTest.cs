@@ -84,12 +84,10 @@ namespace LBi.CLI.Arguments.Test
         }
 
 
-        private NodeSequence Parse(params string[] arg)
+        private NodeSequence Parse(string arg)
         {
-            //Tokenizer tok = new Tokenizer()
-            //Token[] tokens = tok.Tokenize(arg).ToArray();
             Parser parser = new Parser();
-            return parser.Parse(string.Join(" ", arg));
+            return parser.Parse(arg);
         }
     }
 }

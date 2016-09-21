@@ -120,15 +120,9 @@ namespace LBi.Cli.Arguments.Parsing
                 this._enumerator.Reset();
             }
 
-            public Token Current
-            {
-                get { return this._enumerator.Current; }
-            }
+            public Token Current => this._enumerator.Current;
 
-            object IEnumerator.Current
-            {
-                get { return this.Current; }
-            }
+            object IEnumerator.Current => this.Current;
         }
     }
 }

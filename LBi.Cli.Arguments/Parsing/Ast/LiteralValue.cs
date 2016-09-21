@@ -36,7 +36,7 @@ namespace LBi.Cli.Arguments.Parsing.Ast
 
         public override string ToString()
         {
-            return string.Format("{0} ({1})", this.Value, this.ValueType);
+            return $"{this.Value} ({this.ValueType})";
         }
     }
 }

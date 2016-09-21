@@ -73,10 +73,7 @@ namespace LBi.Cli.Arguments
             return this.ParameterSets.Any(s => s.UnderlyingType == type);
         }
 
-        public int Count
-        {
-            get { return this.ParameterSets.Count; }
-        }
+        public int Count => this.ParameterSets.Count;
 
         public void Add(ParameterSet set)
         {
@@ -130,9 +127,6 @@ namespace LBi.Cli.Arguments
             return this.GetEnumerator();
         }
 
-        public ParameterSet this[int index]
-        {
-            get { return this.ParameterSets[index]; }
-        }
+        public ParameterSet this[int index] => this.ParameterSets[index];
     }
 }

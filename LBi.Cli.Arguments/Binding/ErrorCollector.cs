@@ -21,10 +21,7 @@ namespace LBi.Cli.Arguments.Binding
             this._errors.Add(args.Error);
         }
 
-        public int Count
-        {
-            get { return this._errors.Count; }
-        }
+        public int Count => this._errors.Count;
 
         public void Dispose()
         {

@@ -62,29 +62,25 @@ namespace LBi.Cli.Arguments.Parsing
                                               this.GetAstNode(enumerator));
                     break;
                 case TokenType.NumericValue:
-                    ret = new LiteralValue(
-                                           enumerator.Current,
+                    ret = new LiteralValue(enumerator.Current,
                                            LiteralValueType.Numeric,
                                            enumerator.Current.Value);
                     enumerator.MoveNext();
                     break;
                 case TokenType.StringValue:
-                    ret = new LiteralValue(
-                                           enumerator.Current,
+                    ret = new LiteralValue(enumerator.Current,
                                            LiteralValueType.String,
                                            enumerator.Current.Value);
                     enumerator.MoveNext();
                     break;
                 case TokenType.BoolValue:
-                    ret = new LiteralValue(
-                                           enumerator.Current,
+                    ret = new LiteralValue(enumerator.Current,
                                            LiteralValueType.Boolean,
                                            enumerator.Current.Value);
                     enumerator.MoveNext();
                     break;
                 case TokenType.NullValue:
-                    ret = new LiteralValue(
-                                           enumerator.Current,
+                    ret = new LiteralValue(enumerator.Current,
                                            LiteralValueType.Null,
                                            enumerator.Current.Value);
                     enumerator.MoveNext();
@@ -95,10 +91,7 @@ namespace LBi.Cli.Arguments.Parsing
                 case TokenType.DictionaryStart:
                     ret = this.GetAssocArray(enumerator);
                     break;
-                //case TokenType.DictionaryValueSeperator:
-                //case TokenType.DictionaryKeySeperator:
                 case TokenType.DictionaryEnd:
-                //case TokenType.ListValueSeperator:
                 case TokenType.ListEnd:
                     throw new Exception("Invalid token sequence.");
 

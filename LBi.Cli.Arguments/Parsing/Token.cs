@@ -36,12 +36,7 @@ namespace LBi.Cli.Arguments.Parsing
 
         public override string ToString()
         {
-            return string.Format(
-                                 "{{Type: {0}, Pos: {1}, Len: {2}, Value: '{3}'}}",
-                                 this.Type,
-                                 this.Position,
-                                 this.Length,
-                                 this.Value);
+            return $"{{Type: {this.Type}, Pos: {this.Position}, Len: {this.Length}, Value: '{this.Value}'}}";
         }
     }
 }

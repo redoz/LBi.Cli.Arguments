@@ -37,15 +37,9 @@ namespace LBi.Cli.Arguments.Parsing
             this._disposeReader = disposeReader;
         }
 
-        public bool Eof
-        {
-            get { return this._buffer.Length == 0 && this._reader.Peek() == -1; }
-        }
+        public bool Eof => this._buffer.Length == 0 && this._reader.Peek() == -1;
 
-        public int Position
-        {
-            get { return this._position; }
-        }
+        public int Position => this._position;
 
         #region IDisposable Members
 

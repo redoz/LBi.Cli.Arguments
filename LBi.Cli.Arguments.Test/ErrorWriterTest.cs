@@ -61,10 +61,10 @@ namespace LBi.Cli.Arguments.Test
             }
         }
 
-        private NodeSequence Parse(params string[] arg)
+        private NodeSequence Parse(string arg)
         {
             Parser parser = new Parser();
-            return parser.Parse(string.Join(" ", arg));
+            return parser.Parse(arg);
         }
     }
 }

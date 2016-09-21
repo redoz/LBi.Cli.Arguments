@@ -27,9 +27,6 @@ namespace LBi.Cli.Arguments.Parsing
         ListValueSeperator,
         ListEnd,
         DictionaryStart,
-        //DictionaryKey,
-        //DictionaryValueSeperator,
-        //DictionaryKeySeperator,
         DictionaryEnd,
         EndOfString,
         SwitchParameter

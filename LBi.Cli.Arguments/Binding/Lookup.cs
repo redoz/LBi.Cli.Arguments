@@ -58,9 +58,6 @@ namespace LBi.Cli.Arguments.Binding
 
         public int Count { get; private set; }
 
-        public IEnumerable<TValue> this[TKey key]
-        {
-            get { return this._lookup[key].AsEnumerable(); }
-        }
+        public IEnumerable<TValue> this[TKey key] => this._lookup[key].AsEnumerable();
     }
 }

@@ -23,7 +23,7 @@ namespace LBi.Cli.Arguments.Parsing.Ast
         protected AstNode(NodeType nodeType, ISourceInfo sourceInfo)
         {
             if (sourceInfo == null)
-                throw new ArgumentNullException("sourceInfo");
+                throw new ArgumentNullException(nameof(sourceInfo));
 
             this.Type = nodeType;
 
@@ -44,7 +44,7 @@ namespace LBi.Cli.Arguments.Parsing.Ast
             public SourceInfoImpl(ISourceInfo cloneFrom)
             {
                 if (cloneFrom == null)
-                    throw new ArgumentNullException("cloneFrom");
+                    throw new ArgumentNullException(nameof(cloneFrom));
 
                 this.Position = cloneFrom.Position;
                 this.Length = cloneFrom.Length;
@@ -52,9 +52,9 @@ namespace LBi.Cli.Arguments.Parsing.Ast
 
             #region ISourceInfo Members
 
-            public int Position { get; private set; }
+            public int Position { get; }
 
-            public int Length { get; private set; }
+            public int Length { get; }
 
             #endregion
         }

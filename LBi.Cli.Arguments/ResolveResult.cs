@@ -29,15 +29,9 @@ namespace LBi.Cli.Arguments
             this._results = results.ToArray();
         }
 
-        public ParameterSetResult this[int index]
-        {
-            get { return this._results[index]; }
-        }
+        public ParameterSetResult this[int index] => this._results[index];
 
-        public int Count
-        {
-            get { return this._results.Length; }
-        }
+        public int Count => this._results.Length;
 
         public bool IsMatch
         {

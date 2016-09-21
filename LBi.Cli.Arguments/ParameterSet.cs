@@ -135,10 +135,7 @@ namespace LBi.Cli.Arguments
             return (T)Attribute.GetCustomAttribute(this.UnderlyingType, typeof(T), inherit);
         }
 
-        public int Count
-        {
-            get { return this.Parameters.Length; }
-        }
+        public int Count => this.Parameters.Length;
 
         /// <summary>
         ///     Returns an ordered list of positional parameters.

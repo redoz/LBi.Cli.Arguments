@@ -43,10 +43,7 @@ namespace LBi.Cli.Arguments
         public ValidationAttribute[] Validators { get; protected set; }
         public PropertyInfo Property { get; protected set; }
 
-        public Type Type
-        {
-            get { return this.Property.PropertyType; }
-        }
+        public Type Type => this.Property.PropertyType;
 
         public T GetAttribute<T>(bool inherit = true) where T : Attribute
         {
