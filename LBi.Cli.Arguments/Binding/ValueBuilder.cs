@@ -78,7 +78,7 @@ namespace LBi.Cli.Arguments.Binding
         {
             // register custom BooleanTypeConverter, this might be a bad idea.
             TypeConverterAttribute converterAttribute = new TypeConverterAttribute(typeof(CustomBooleanConverter));
-            _typeDescriptorProvider = TypeDescriptor.AddAttributes(typeof(Boolean), converterAttribute);
+            _typeDescriptorProvider = TypeDescriptor.AddAttributes(typeof(bool), converterAttribute);
 
             this._typeConverter = typeConverter;
             this._culture = cultureInfo;
@@ -645,8 +645,8 @@ namespace LBi.Cli.Arguments.Binding
                 if (this._errorCollector != null)
                     this._errorCollector.Dispose();
 
-                TypeDescriptor.RemoveProvider(_typeDescriptorProvider, typeof(Boolean));
-                TypeDescriptor.Refresh(typeof(Boolean));
+                TypeDescriptor.RemoveProvider(_typeDescriptorProvider, typeof(bool));
+                TypeDescriptor.Refresh(typeof(bool));
             }
         }
 

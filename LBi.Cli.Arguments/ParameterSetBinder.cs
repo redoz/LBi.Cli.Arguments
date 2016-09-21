@@ -80,7 +80,7 @@ namespace LBi.Cli.Arguments
                             ctx.Errors.Add(new BindError(ErrorType.MissingCommand,
                                                          Enumerable.Empty<Parameter>(),
                                                          new AstNode[] { literal },
-                                                         String.Format(ErrorMessages.MissingCommand, ctx.ParameterSet.Command)));
+                                                         string.Format(ErrorMessages.MissingCommand, ctx.ParameterSet.Command)));
                         }
                         if (!enumerator.MoveNext())
                             break;
@@ -97,7 +97,7 @@ namespace LBi.Cli.Arguments
                             if (!ctx.RemainingParameters.Remove(parameters[0]))
                             {
                                 // report error, multiple bindings
-                                string message = String.Format(ErrorMessages.MultipleBindings,
+                                string message = string.Format(ErrorMessages.MultipleBindings,
                                                                parameterName.Name);
 
                                 ctx.Errors.Add(new BindError(ErrorType.MultipleBindings,
@@ -147,7 +147,7 @@ namespace LBi.Cli.Arguments
                         else if (parameters != null && parameters.Length > 1)
                         {
                             // report error, ambigious name
-                            string message = String.Format(ErrorMessages.AmbigiousName,
+                            string message = string.Format(ErrorMessages.AmbigiousName,
                                                            parameterName.Name,
                                                            string.Join(", ", parameters.Select(p => p.Name)));
 
@@ -299,7 +299,7 @@ namespace LBi.Cli.Arguments
                         TypeError typeError = valueError as TypeError;
                         if (typeError != null)
                         {
-                            string message = String.Format(ErrorMessages.IncompatibleType,
+                            string message = string.Format(ErrorMessages.IncompatibleType,
                                                            ctx.Sequence.GetInputString(typeError.AstNode.SourceInfo),
                                                            parameter.Name);
 
@@ -313,7 +313,7 @@ namespace LBi.Cli.Arguments
 
                         if (addError != null)
                         {
-                            string message = String.Format(ErrorMessages.MethodInvocationFailed,
+                            string message = string.Format(ErrorMessages.MethodInvocationFailed,
                                                            ctx.Sequence.GetInputString(addError.AstNodes.Select(ast => ast.SourceInfo)),
                                                            parameter.Name,
                                                            addError.Method.ReflectedType.Name,
@@ -332,8 +332,8 @@ namespace LBi.Cli.Arguments
 
                             if (activationError != null)
                             {
-                                string message = String.Format(ErrorMessages.ObjectInitializationFailed,
-                                                               ctx.Sequence.GetInputString(addError.AstNodes.Select(ast => ast.SourceInfo)),
+                                string message = string.Format(ErrorMessages.ObjectInitializationFailed,
+                                                               ctx.Sequence.GetInputString(activationError.AstNodes.Select(ast => ast.SourceInfo)),
                                                                parameter.Name,
                                                                activationError.Constructor.ReflectedType.Name,
                                                                activationError.Exception.GetType().Name,

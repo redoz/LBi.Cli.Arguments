@@ -191,15 +191,13 @@ namespace LBi.Cli.Arguments.Parsing
                 reader.Skip(ListEnd.Length);
             }
             else
-            {
                 throw new Exception("Expected end of list");
-            }
         }
 
         protected virtual void ParseDictionary(TokenWriter tokenWriter, BasicReader reader)
         {
             if (!reader.StartsWith(DictionaryStart))
-                throw new InvalidOperationException(String.Format("Cannot parse dictionary, expected {0}.", DictionaryStart));
+                throw new InvalidOperationException($"Cannot parse dictionary, expected {DictionaryStart}.");
 
             tokenWriter.Add(new Token(TokenType.DictionaryStart, DictionaryStart, reader.Position, DictionaryStart.Length));
 
@@ -219,22 +217,9 @@ namespace LBi.Cli.Arguments.Parsing
 
                 // read seperator
                 if (reader.StartsWith(DictionaryValueSeperator))
-                {
-                    // we no longer emit these tokens
-                    ////tokenWriter.Add(new Token
-                    ////                    {
-                    ////                        Position = reader.Position,
-                    ////                        Length = DictionaryValueSeperator.Length,
-                    ////                        Type = TokenType.DictionaryValueSeperator,
-                    ////                        Value = DictionaryValueSeperator
-                    ////                    });
-
                     reader.Skip(DictionaryValueSeperator.Length);
-                }
                 else
-                {
                     throw new Exception("Expected key seperator");
-                }
 
                 // trim ws
                 reader.AdvanceWhitespace();
@@ -247,18 +232,7 @@ namespace LBi.Cli.Arguments.Parsing
 
                 // read seperator
                 if (reader.StartsWith(DictionaryKeySeperator))
-                {
-                    // we no longer emit these tokens
-                    ////tokenWriter.Add(new Token
-                    ////                    {
-                    ////                        Position = reader.Position,
-                    ////                        Length = DictionaryKeySeperator.Length,
-                    ////                        Type = TokenType.DictionaryKeySeperator,
-                    ////                        Value = DictionaryKeySeperator
-                    ////                    });
-
                     reader.Skip(DictionaryKeySeperator.Length);
-                }
                 else
                     break;
             }
@@ -270,15 +244,13 @@ namespace LBi.Cli.Arguments.Parsing
                 reader.Skip(DictionaryEnd.Length);
             }
             else
-            {
                 throw new Exception("Expected end of dictionary");
-            }
         }
 
         protected virtual void ParseParameter(TokenWriter tokenWriter, BasicReader reader)
         {
             if (!reader.StartsWith(ParameterIndicator))
-                throw new InvalidOperationException(String.Format("Cannot parse paramer, expected {0}.", ParameterIndicator));
+                throw new InvalidOperationException($"Cannot parse paramer, expected {ParameterIndicator}.");
 
             reader.Skip(1);
 

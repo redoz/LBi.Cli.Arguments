@@ -226,10 +226,10 @@ namespace LBi.CLI.Arguments.Test
             using (ValueBuilder builder = new ValueBuilder())
             {
                 object value;
-                Assert.True(builder.Build(typeof(Single),
+                Assert.True(builder.Build(typeof(float),
                                           new LiteralValue(SourceInfo.Empty, LiteralValueType.Numeric, "2"),
                                           out value));
-                Assert.Equal(2f, (Single)value);
+                Assert.Equal(2f, (float)value);
                 Assert.Empty(builder.Errors);
             }
         }

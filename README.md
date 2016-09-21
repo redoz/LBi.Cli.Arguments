@@ -12,7 +12,7 @@ public abstract class ExecuteCommandBase
 {
     [Parameter(HelpMessage = "Optional parameter dictionary")]
     [DefaultValue("@{}")]
-    public IDictionary<string, object> Paremters { get; set; }
+    public IDictionary<string, object> Parameters { get; set; }
 
     [Parameter(HelpMessage = "If set, no action is taken.")]
     public Switch WhatIf { get; set; }
@@ -38,7 +38,7 @@ public class ExecuteCommandUsingName : ExecuteCommandBase
 [ParameterSet("Path", HelpMessage = "Executes command given a path.")]
 public class ExecuteCommandUsingPath : ExecuteCommandBase
 {
-    [Parameter(HelpMessage = "The path."), Required]
+    [Parameter(HelpMessage = "The path"), Required]
     public string Path { get; set; }
 
     public override void Execute()
@@ -48,6 +48,14 @@ public class ExecuteCommandUsingPath : ExecuteCommandBase
         else
             Console.WriteLine("Executing using path: {0}", this.Path);
     }
+}
+
+// Also supports command style interfaces (e.g. 'app.exe Test -Duration 10')
+[ParameterSet("WithCommand", Command = "Test", HelpMessage = "Executes test with duration.")]
+public class ParameterSetWithCommand : ExecuteCommandBase
+{
+    [Parameter(HelpMessage = "Test duration")]
+    public int? Duration { get; set; }
 }
 ```
 
