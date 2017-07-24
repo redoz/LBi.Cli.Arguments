@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
+    <metadata>
+        <id>UA.Cli.Arguments</id>
+        <version>0.1.0</version>
+        <title>UA.Cli.Arguments</title>
+        <authors></authors>
+        <owners></owners>
+        <licenseUrl>https://raw.github.com/redoz/UA.Cli.Arguments/master/LICENSE.txt</licenseUrl>
+        <projectUrl>https://github.com/redoz/UA.Cli.Arguments</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>This is a command line argument parser that attempts to mimic the syntax and capabilities of PowerShell.</description>
+        <copyright>2012-2014 © LBi Netherlands, 2016-2017 © United Apes</copyright>
+        <tags>CLI arguments powershell</tags>
+    </metadata>
+    <files>
+        <file src="..\Input\v45\UA.Cli.Arguments.dll" target="lib\net45\UA.Cli.Arguments.dll" />
+        <file src="..\Input\v45\UA.Cli.Arguments.pdb" target="lib\net45\UA.Cli.Arguments.pdb" />
+        <file src="..\Input\v40\UA.Cli.Arguments.dll" target="lib\net40\UA.Cli.Arguments.dll" />
+        <file src="..\Input\v40\UA.Cli.Arguments.pdb" target="lib\net40\UA.Cli.Arguments.pdb" />
+    </files>
+</package>

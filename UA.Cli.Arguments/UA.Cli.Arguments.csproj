@@ -1,0 +1,158 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{2BE05D66-7F62-4F89-876F-9A415444F9AB}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>UA.Cli.Arguments</RootNamespace>
+    <AssemblyName>UA.Cli.Arguments</AssemblyName>
+    <TargetFrameworkVersion Condition="'$(TargetFrameworkVersion)' == ''">v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <DocumentationFile>bin\Debug\UA.Cli.Arguments.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>full</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <DebugSymbols>true</DebugSymbols>
+    <DocumentationFile>bin\Release\UA.Cli.Arguments.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile Condition="'$(AssemblyOriginatorKeyFile)' == ''">..\Build\UnofficialBuild.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.JScript" />
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ArgumentParser.cs" />
+    <Compile Include="ArgumentParserSettings.cs" />
+    <Compile Include="Binding\ActivationError.cs" />
+    <Compile Include="Binding\CustomBooleanConverter.cs" />
+    <Compile Include="Binding\DelegateActivator.cs" />
+    <Compile Include="Binding\ErrorCollector.cs" />
+    <Compile Include="Binding\ErrorEventArg.cs" />
+    <Compile Include="Binding\InterfaceResolutionException.cs" />
+    <Compile Include="Binding\IntransigentTypeConverter.cs" />
+    <Compile Include="Binding\AddError.cs" />
+    <Compile Include="Binding\ITypeConverter.cs" />
+    <Compile Include="Binding\Lookup.cs" />
+    <Compile Include="Binding\Reflection.cs" />
+    <Compile Include="Binding\DefaultActivator.cs" />
+    <Compile Include="Binding\ResolveTypeArgs.cs" />
+    <Compile Include="Binding\SwitchTypeConverter.cs" />
+    <Compile Include="CommandLine.cs" />
+    <Compile Include="ErrorType.cs" />
+    <Compile Include="Example.cs" />
+    <Compile Include="ExampleValueAttribute.cs" />
+    <Compile Include="Globalization\HelpMessageExtensions.cs" />
+    <Compile Include="Globalization\IResourceProvider.cs" />
+    <Compile Include="Globalization\IHelpMessage.cs" />
+    <Compile Include="IParameterSetBinder.cs" />
+    <Compile Include="Binding\ITypeActivator.cs" />
+    <Compile Include="Output\ErrorWriter.cs" />
+    <Compile Include="Output\HelpLevel.cs" />
+    <Compile Include="Output\HelpWriter.cs" />
+    <Compile Include="Output\ConsoleWriter.cs" />
+    <Compile Include="Output\IErrorWriter.cs" />
+    <Compile Include="Output\IHelpWriter.cs" />
+    <Compile Include="Parameter.cs" />
+    <Compile Include="ParameterDefinitionException.cs" />
+    <Compile Include="ParameterSet.cs" />
+    <Compile Include="ParameterSetBinder.cs" />
+    <Compile Include="ParameterSetCollection.cs" />
+    <Compile Include="ParameterSetDefinitionException.cs" />
+    <Compile Include="ParameterSetResult.cs" />
+    <Compile Include="Parsing\Ast\NodeType.cs" />
+    <Compile Include="Parsing\Ast\SwitchParameter.cs" />
+    <Compile Include="Parsing\NodeSequence.cs" />
+    <Compile Include="Parsing\Ast\AssociativeArray.cs" />
+    <Compile Include="Parsing\Ast\IAstVisitor.cs" />
+    <Compile Include="Parsing\Ast\AstNode.cs" />
+    <Compile Include="Parsing\Ast\LiteralValueType.cs" />
+    <Compile Include="Parsing\Ast\ParameterName.cs" />
+    <Compile Include="Parsing\ISourceInfo.cs" />
+    <Compile Include="Parsing\Ast\LiteralValue.cs" />
+    <Compile Include="Parsing\Ast\Sequence.cs" />
+    <Compile Include="Parsing\Parser.cs" />
+    <Compile Include="Parsing\Tokenizer.cs" />
+    <Compile Include="Parsing\BasicReader.cs" />
+    <Compile Include="ParameterAttribute.cs" />
+    <Compile Include="ParameterSetAttribute.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Parsing\Token.cs" />
+    <Compile Include="Parsing\TokenType.cs" />
+    <Compile Include="Parsing\TokenWriter.cs" />
+    <Compile Include="Globalization\ResourceProvider.cs" />
+    <Compile Include="BindError.cs" />
+    <Compile Include="ResolveResult.cs" />
+    <Compile Include="Resources\ErrorMessages.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ErrorMessages.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Resources\Exceptions.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Exceptions.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Switch.cs" />
+    <Compile Include="TypeError.cs" />
+    <Compile Include="Binding\ValueBuilder.cs" />
+    <Compile Include="ValueError.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\ErrorMessages.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ErrorMessages.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Exceptions.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Exceptions.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Build\UnofficialBuild.snk">
+      <Link>UnofficialBuild.snk</Link>
+    </None>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
