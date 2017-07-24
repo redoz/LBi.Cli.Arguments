@@ -13,7 +13,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Resources", "Resources", "{
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
 		todo.txt = todo.txt
-		Build\UnofficialBuild.snk = Build\UnofficialBuild.snk
 	EndProjectSection
 EndProject
 Global
@@ -39,4 +38,3 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal
-

@@ -37,7 +37,7 @@
     <DocumentationFile>bin\Release\UA.Cli.Arguments.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile Condition="'$(AssemblyOriginatorKeyFile)' == ''">..\Build\UnofficialBuild.snk</AssemblyOriginatorKeyFile>
@@ -141,11 +141,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Exceptions.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\Build\UnofficialBuild.snk">
-      <Link>UnofficialBuild.snk</Link>
-    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
