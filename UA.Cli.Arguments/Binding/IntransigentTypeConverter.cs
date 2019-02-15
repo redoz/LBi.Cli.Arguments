@@ -124,11 +124,12 @@ namespace UA.Cli.Arguments.Binding
                     var ctorParams = ct.GetParameters();
 
                     IEnumerable<Exception> exceptions;
-                    if (this.TryConvertType(culture, ctorParams[0].ParameterType, ref ret, out exceptions))
+                    var paramValue = value;
+                    if (this.TryConvertType(culture, ctorParams[0].ParameterType, ref paramValue, out exceptions))
                     {
                         try
                         {
-                            ret = ct.Invoke(new[] { ret });
+                            ret = ct.Invoke(new[] { paramValue });
                             success = true;
                             break;
                         }
@@ -142,35 +143,39 @@ namespace UA.Cli.Arguments.Binding
                         outErrors.AddRange(exceptions);
                     }
                 }
-                // check for static "Parse" method 
 
-                object[] args = new[] { ret };
-                MethodInfo parseMethod = targetType.GetMethod("Parse",
-                                                              BindingFlags.Public | BindingFlags.Static,
-                                                              null,
-                                                              new[] { ret.GetType() },
-                                                              null);
-
-                if (parseMethod == null)
+                if (!success)
                 {
-                    args[0] = ret.ToString();
-                    parseMethod = targetType.GetMethod("Parse",
-                                                       BindingFlags.Public | BindingFlags.Static,
-                                                       null,
-                                                       new[] { typeof(string) },
-                                                       null);
-                }
+                    // check for static "Parse" method
 
-                if (parseMethod != null)
-                {
-                    try
+                    object[] args = new[] { value };
+                    MethodInfo parseMethod = targetType.GetMethod("Parse",
+                        BindingFlags.Public | BindingFlags.Static,
+                        null,
+                        new[] { value.GetType() },
+                        null);
+
+                    if (parseMethod == null)
                     {
-                        ret = parseMethod.Invoke(null, args);
-                        success = true;
+                        args[0] = value.ToString();
+                        parseMethod = targetType.GetMethod("Parse",
+                            BindingFlags.Public | BindingFlags.Static,
+                            null,
+                            new[] { typeof(string) },
+                            null);
                     }
-                    catch (Exception ex)
+
+                    if (parseMethod != null)
                     {
-                        outErrors.Add(ex);
+                        try
+                        {
+                            ret = parseMethod.Invoke(null, args);
+                            success = true;
+                        }
+                        catch (Exception ex)
+                        {
+                            outErrors.Add(ex);
+                        }
                     }
                 }
             }
@@ -181,4 +186,3 @@ namespace UA.Cli.Arguments.Binding
         }
     }
 }
-
